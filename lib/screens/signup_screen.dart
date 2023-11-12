@@ -1,19 +1,29 @@
-import 'package:applogin/reusable_widgets/reusable_widget.dart';
+import 'package:applogin/reusable_/reusable_widget.dart';
 import 'package:applogin/screens/home_screen.dart';
+import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/utils/color_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key});
-
+  
   @override
   State<SignUpScreen> createState() => _MyWidgetState();
 }
+final List<Widget> _pages = [
+    SignInScreen(),
+    
+  ];
 
 class _MyWidgetState extends State<SignUpScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController usernameController = TextEditingController();
+  String? _usernameController;
   TextEditingController emailController = TextEditingController();
+  String? _emailController;
   TextEditingController passwordController = TextEditingController();
+  String? _passwordController;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +33,7 @@ class _MyWidgetState extends State<SignUpScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
-          "Sign Up",
+          "SIGN UP",
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
@@ -44,19 +54,119 @@ class _MyWidgetState extends State<SignUpScreen> {
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
-            child: Column(
-              children: <Widget>[
-                SizedBox(height: 30),
-                reusableTextField("Enter your username", Icons.person_outline, false, usernameController),
-                SizedBox(height: 30),
-                reusableTextField("Enter your email", Icons.email_outlined, false, emailController),
-                SizedBox(height: 30),
-                reusableTextField("Enter your password", Icons.lock_outline, true, passwordController),
-                SizedBox(height: 30),
-                signInSignUpButton(context, false, () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
-                }),
-              ],
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: <Widget>[
+                  SizedBox(height: 30),
+                  TextFormField(
+                    controller: usernameController,
+                    decoration: InputDecoration(
+                      labelText: 'Username',
+                      labelStyle: TextStyle(
+                        color: Color.fromARGB(255, 0, 0, 0),
+
+                      ),
+                    ),
+                    onSaved: (value) {
+                      setState(() {
+                        _usernameController = value;
+                      });
+                    },
+                  ),
+                  SizedBox(height: 30),
+                  TextFormField(
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      labelStyle: TextStyle(
+                        color: Color.fromARGB(255, 0, 0, 0),
+
+                      ),
+                    ),
+                    onSaved: (value) {
+                      setState(() {
+                        _emailController = value;
+                      });
+                    },
+                  ),
+                  SizedBox(height: 30),
+                  TextFormField(
+                    controller: passwordController,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      labelStyle: TextStyle(
+                        color: Color.fromARGB(255, 0, 0, 0),
+
+                      ),
+                    ),
+                    onSaved: (value) {
+                      setState(() {
+                        _passwordController = value;
+                      });
+                    },
+                    obscureText: true,
+                  ),
+                  SizedBox(height: 16),
+                  Center(
+                    child: Column(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
+                              _formKey.currentState!.save();
+
+                              final Map<String, String> userData = {
+                                'username': _usernameController ?? "",
+                                'email': _emailController ?? "",
+                                'password': _passwordController ?? "",
+                              };
+
+                              final response = await http.post(
+                                Uri.parse('http://localhost:9090/auth/signup/'),
+                                body: userData,
+                              );
+
+                              if (response.statusCode == 201) {
+                                print('Usuario creado con éxito.');
+
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text('Éxito'),
+                                      content: Text('Usuario creado con éxito'),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          child: Text('Aceptar'),
+                                          onPressed: () {
+                                            // Cierra el diálogo
+                                            Navigator.of(context).pop();
+                                            Navigator.push(context, MaterialPageRoute(builder: (context) => SignInScreen()));
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              } else {
+                                print('Error al crear el usuario. Código de estado: ${response.statusCode}');
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            primary: Color.fromARGB(255, 255, 255, 255),
+                          ),
+                          child: Text(
+                            'SIGN UP',
+                            style: TextStyle(color: Color.fromARGB(255, 0, 0, 0),),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

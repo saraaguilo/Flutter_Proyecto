@@ -1,8 +1,16 @@
-import 'package:applogin/reusable_widgets/reusable_widget.dart';
+/*
+import 'package:applogin/reusable_/reusable_widget.dart';
+import 'package:applogin/reusable_/reusable_widget.dart';
+import 'package:applogin/screens/events.dart';
 import 'package:applogin/screens/home_screen.dart';
 import 'package:applogin/screens/signup_screen.dart';
 import 'package:applogin/utils/color_utils.dart';
 import 'package:flutter/material.dart';
+import 'dart:html';
+import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'dart:convert';
+
 
 
 class SignInScreen extends StatefulWidget {
@@ -11,12 +19,19 @@ class SignInScreen extends StatefulWidget {
   @override
   State<SignInScreen> createState() => _MyWidgetState();
 }
+final List<Widget> _pages = [
+    EventsScreen(),
+    
+  ];
 
 class _MyWidgetState extends State<SignInScreen> {
-  // Puedes crear controladores para los campos de texto si es necesario
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController usernameController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  TextEditingController usernameController = TextEditingController();
+  String? _usernameController;
+  TextEditingController emailController = TextEditingController();
+  String? _emailController;
+  TextEditingController passwordController = TextEditingController();
+  String? _passwordController;
 
   @override
   Widget build(BuildContext context) {
@@ -110,3 +125,193 @@ class _MyWidgetState extends State<SignInScreen> {
     );
   }
 }
+*/
+import 'package:applogin/reusable_/reusable_widget.dart';
+import 'package:applogin/screens/events.dart';
+import 'package:applogin/screens/home_screen.dart';
+import 'package:applogin/screens/signin_screen.dart';
+import 'package:applogin/screens/signup_screen.dart';
+import 'package:applogin/utils/color_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+class SignInScreen extends StatefulWidget {
+  const SignInScreen({Key? key});
+
+  @override
+  State<SignInScreen> createState() => _MyWidgetState();
+}
+
+final List<Widget> _pages = [
+  EventsScreen(),
+  SignUpScreen(),
+];
+
+class _MyWidgetState extends State<SignInScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  TextEditingController emailController = TextEditingController();
+  String? _emailController;
+  TextEditingController passwordController = TextEditingController();
+  String? _passwordController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          "LOG IN",
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+      ),
+      body: Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              hexStringToColor("FFB74D"), // Naranja claro
+              hexStringToColor("FF9800"), // Naranja medio
+              hexStringToColor("E65100"), // Naranja oscuro
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: <Widget>[
+                  SizedBox(height: 30),
+                  logoWidget("images/music.jpg"),
+                  SizedBox(height: 50, width: double.infinity), // Ajuste en el tamaño del SizedBox
+                  TextFormField(
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      labelStyle: TextStyle(
+                        color: Color.fromARGB(255, 0, 0, 0),
+                      ),
+                    ),
+                    onSaved: (value) {
+                      setState(() {
+                        _emailController = value;
+                      });
+                    },
+                  ),
+                  SizedBox(height: 30),
+                  TextFormField(
+                    controller: passwordController,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      labelStyle: TextStyle(
+                        color: Color.fromARGB(255, 0, 0, 0),
+                      ),
+                    ),
+                    onSaved: (value) {
+                      setState(() {
+                        _passwordController = value;
+                      });
+                    },
+                    obscureText: true,
+                  ),
+                  SizedBox(height: 16),
+                  Center(
+                    child: Column(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
+                              _formKey.currentState!.save();
+
+                              final Map<String, String> userData = {
+                                'Enter your email': _emailController ?? "",
+                                'Enter your password': _passwordController ?? "",
+                              };
+
+                              final response = await http.post(
+                                Uri.parse('http://localhost:9090/auth/signin/'),
+                                body: userData,
+                              );
+
+                              if (response.statusCode == 201) {
+                                print('Usuario creado con éxito.');
+
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text('Éxito'),
+                                      content: Text('Usuario creado con éxito'),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          child: Text('Aceptar'),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => SignInScreen()),
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              } else {
+                                print('Error al crear el usuario. Código de estado: ${response.statusCode}');
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            primary: Color.fromARGB(255, 255, 255, 255),
+                          ),
+                          child: Text(
+                            'LOG IN',
+                            style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  signUpOption(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Row signUpOption() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          "Don't have an account?",
+          style: TextStyle(color: Colors.white70),
+        ),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SignUpScreen()),
+            );
+          },
+          child: const Text(
+            " Sign Up",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+        )
+      ],
+    );
+  }
+}
+

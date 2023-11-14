@@ -139,20 +139,13 @@ class SignInScreen extends StatefulWidget {
   const SignInScreen({Key? key});
 
   @override
-  State<SignInScreen> createState() => _MyWidgetState();
+  State<SignInScreen> createState() => _SignInScreenState();
 }
 
-final List<Widget> _pages = [
-  EventsScreen(),
-  SignUpScreen(),
-];
-
-class _MyWidgetState extends State<SignInScreen> {
+class _SignInScreenState extends State<SignInScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
-  String? _emailController;
   TextEditingController passwordController = TextEditingController();
-  String? _passwordController;
 
   @override
   Widget build(BuildContext context) {
@@ -189,7 +182,7 @@ class _MyWidgetState extends State<SignInScreen> {
                 children: <Widget>[
                   SizedBox(height: 30),
                   logoWidget("images/music.jpg"),
-                  SizedBox(height: 50, width: double.infinity), // Ajuste en el tamaño del SizedBox
+                  SizedBox(height: 50, width: double.infinity),
                   TextFormField(
                     controller: emailController,
                     decoration: InputDecoration(
@@ -200,7 +193,7 @@ class _MyWidgetState extends State<SignInScreen> {
                     ),
                     onSaved: (value) {
                       setState(() {
-                        _emailController = value;
+                        // Guarda el valor en una variable cuando el formulario se guarda
                       });
                     },
                   ),
@@ -215,7 +208,7 @@ class _MyWidgetState extends State<SignInScreen> {
                     ),
                     onSaved: (value) {
                       setState(() {
-                        _passwordController = value;
+                        // Guarda el valor en una variable cuando el formulario se guarda
                       });
                     },
                     obscureText: true,
@@ -230,24 +223,24 @@ class _MyWidgetState extends State<SignInScreen> {
                               _formKey.currentState!.save();
 
                               final Map<String, String> userData = {
-                                'Enter your email': _emailController ?? "",
-                                'Enter your password': _passwordController ?? "",
+                                'email': emailController.text,
+                                'password': passwordController.text,
                               };
 
                               final response = await http.post(
-                                Uri.parse('http://localhost:9090/auth/signin/'),
+                                Uri.parse('http://localhost:9090/auth/signin'),
                                 body: userData,
                               );
 
-                              if (response.statusCode == 201) {
-                                print('Usuario creado con éxito.');
+                              if (response.statusCode == 200) {
+                                print('Usuario loggeado con éxito.');
 
                                 showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
                                     return AlertDialog(
                                       title: Text('Éxito'),
-                                      content: Text('Usuario creado con éxito'),
+                                      content: Text('Usuario loggeado con éxito'),
                                       actions: <Widget>[
                                         TextButton(
                                           child: Text('Aceptar'),
@@ -255,7 +248,7 @@ class _MyWidgetState extends State<SignInScreen> {
                                             Navigator.of(context).pop();
                                             Navigator.push(
                                               context,
-                                              MaterialPageRoute(builder: (context) => SignInScreen()),
+                                              MaterialPageRoute(builder: (context) => EventsScreen()),
                                             );
                                           },
                                         ),
@@ -264,7 +257,7 @@ class _MyWidgetState extends State<SignInScreen> {
                                   },
                                 );
                               } else {
-                                print('Error al crear el usuario. Código de estado: ${response.statusCode}');
+                                print('Error al loggear el usuario. Código de estado: ${response.statusCode}');
                               }
                             }
                           },
@@ -314,4 +307,3 @@ class _MyWidgetState extends State<SignInScreen> {
     );
   }
 }
-

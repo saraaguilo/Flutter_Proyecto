@@ -117,17 +117,17 @@ class _MyWidgetState extends State<SignUpScreen> {
                               _formKey.currentState!.save();
 
                               final Map<String, String> userData = {
-                                'username': _usernameController ?? "",
+                                'userName': _usernameController ?? "",
                                 'email': _emailController ?? "",
                                 'password': _passwordController ?? "",
                               };
 
                               final response = await http.post(
-                                Uri.parse('http://localhost:9090/auth/signup/'),
+                                Uri.parse('http://localhost:9090/auth/signup'),
                                 body: userData,
                               );
 
-                              if (response.statusCode == 201) {
+                              if (response.statusCode == 200) {
                                 print('Usuario creado con éxito.');
 
                                 showDialog(

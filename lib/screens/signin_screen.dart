@@ -262,11 +262,11 @@ class _SignInScreenState extends State<SignInScreen> {
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            primary: Color.fromARGB(255, 255, 255, 255),
+                            primary: Colors.orange,
                           ),
                           child: Text(
                             'LOG IN',
-                            style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                            style: TextStyle(color: Color.fromARGB(255, 244, 244, 244)),
                           ),
                         ),
                       ],

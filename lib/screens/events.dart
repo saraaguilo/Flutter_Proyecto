@@ -1,4 +1,6 @@
 import 'package:applogin/reusable_/reusable_widget.dart';
+import 'package:applogin/screens/buscadoreventos.dart';
+import 'package:applogin/screens/buscarunevento.dart';
 import 'package:applogin/screens/home_screen.dart';
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/utils/color_utils.dart';
@@ -38,17 +40,37 @@ class _MyWidgetState extends State<EventsScreen> {
             children: <Widget>[
               logoWidget("images/music.jpg"),
               SizedBox(height: 50),
-              reusableTextField("SEARCH FOR EVENTS", Icons.person_outline, false, usernameController),
+              
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.orange,
+                ),
+                child: Text("Search one event"),
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => BuscadorUnEventoScreen()));
+                },
+              ),
               SizedBox(height: 20),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  primary: const Color.fromARGB(179, 254, 254, 254), // Cambia el color a gris
+                  primary: Colors.orange, // Cambia el color a naranja
+                ),
+                child: Text("Show all events"),
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => BuscadorScreen()));
+                },
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.orange, // Cambia el color a naranja
                 ),
                 child: Text("Logout"),
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => SignInScreen()));
                 },
               ),
+              
             ],
           ),
         ),

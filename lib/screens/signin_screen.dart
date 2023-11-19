@@ -156,22 +156,18 @@ class _SignInScreenState extends State<SignInScreen> {
         elevation: 0,
         title: const Text(
           "LOG IN",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
       ),
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              hexStringToColor("FFB74D"), // Naranja claro
-              hexStringToColor("FF9800"), // Naranja medio
-              hexStringToColor("E65100"), // Naranja oscuro
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
+          gradient: gradientBackground(),
         ),
         child: SingleChildScrollView(
           child: Padding(
@@ -181,15 +177,25 @@ class _SignInScreenState extends State<SignInScreen> {
               child: Column(
                 children: <Widget>[
                   SizedBox(height: 30),
-                  logoWidget("images/music.jpg"),
-                  SizedBox(height: 50, width: double.infinity),
+                  logoWidget("images/logoOrange.png"),
+                  SizedBox(height: 20, width: double.infinity),
+                  //EMAIL TEXT FIELD
                   TextFormField(
                     controller: emailController,
                     decoration: InputDecoration(
                       labelText: 'Email',
                       labelStyle: TextStyle(
-                        color: Color.fromARGB(255, 0, 0, 0),
+                        color: Color.fromARGB(255, 255, 255, 255),
                       ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                    ),
+                    style: TextStyle(
+                      color: Colors.white,
                     ),
                     onSaved: (value) {
                       setState(() {
@@ -198,13 +204,23 @@ class _SignInScreenState extends State<SignInScreen> {
                     },
                   ),
                   SizedBox(height: 30),
+                  //PASSWORD TEXT FIELD
                   TextFormField(
                     controller: passwordController,
                     decoration: InputDecoration(
                       labelText: 'Password',
                       labelStyle: TextStyle(
-                        color: Color.fromARGB(255, 0, 0, 0),
+                        color: Color.fromARGB(255, 255, 255, 255),
                       ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                    ),
+                    style: TextStyle(
+                      color: Colors.white,
                     ),
                     onSaved: (value) {
                       setState(() {
@@ -214,64 +230,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     obscureText: true,
                   ),
                   SizedBox(height: 16),
-                  Center(
-                    child: Column(
-                      children: [
-                        ElevatedButton(
-                          onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              _formKey.currentState!.save();
-
-                              final Map<String, String> userData = {
-                                'email': emailController.text,
-                                'password': passwordController.text,
-                              };
-
-                              final response = await http.post(
-                                Uri.parse('http://localhost:9090/auth/signin'),
-                                body: userData,
-                              );
-
-                              if (response.statusCode == 200) {
-                                print('Usuario loggeado con éxito.');
-
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: Text('Éxito'),
-                                      content: Text('Usuario loggeado con éxito'),
-                                      actions: <Widget>[
-                                        TextButton(
-                                          child: Text('Aceptar'),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(builder: (context) => EventsScreen()),
-                                            );
-                                          },
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              } else {
-                                print('Error al loggear el usuario. Código de estado: ${response.statusCode}');
-                              }
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.orange,
-                          ),
-                          child: Text(
-                            'LOG IN',
-                            style: TextStyle(color: Color.fromARGB(255, 244, 244, 244)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  signInButton(),
                   SizedBox(height: 20),
                   signUpOption(),
                 ],
@@ -279,6 +238,52 @@ class _SignInScreenState extends State<SignInScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  ElevatedButton signInButton() {
+    return ElevatedButton(
+      onPressed: () async {
+        if (_formKey.currentState!.validate()) {
+          _formKey.currentState!.save();
+
+          final Map<String, String> userData = {
+            'email': emailController.text,
+            'password': passwordController.text,
+          };
+
+          //PETICIÓN HTTP
+          final response = await http.post(
+            Uri.parse('http://localhost:9090/auth/signin'),
+            body: userData,
+          );
+
+          if (response.statusCode == 200) {
+            print('Usuario loggeado con éxito.');
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => EventsScreen()),
+            );
+          } else {
+            print(
+                'Error al loggear el usuario. Código de estado: ${response.statusCode}');
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return alert(context, 'Error',
+                    'Incorrect email or password, please try again', null);
+              },
+            );
+          }
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        primary: Color.fromARGB(255, 255, 255, 255),
+      ),
+      child: Text(
+        'LOG IN',
+        style: TextStyle(color: Color.fromARGB(255, 255, 102, 0)),
       ),
     );
   }

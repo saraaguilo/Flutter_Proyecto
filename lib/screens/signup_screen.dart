@@ -7,14 +7,14 @@ import 'package:http/http.dart' as http;
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key});
-  
+
   @override
   State<SignUpScreen> createState() => _MyWidgetState();
 }
+
 final List<Widget> _pages = [
-    SignInScreen(),
-    
-  ];
+  SignInScreen(),
+];
 
 class _MyWidgetState extends State<SignUpScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -24,6 +24,8 @@ class _MyWidgetState extends State<SignUpScreen> {
   String? _emailController;
   TextEditingController passwordController = TextEditingController();
   String? _passwordController;
+  TextEditingController passwordController2 = TextEditingController();
+  String? _passwordController2;
 
   @override
   Widget build(BuildContext context) {
@@ -32,24 +34,19 @@ class _MyWidgetState extends State<SignUpScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme:
+            IconThemeData(color: const Color.fromARGB(255, 255, 255, 255)),
         title: const Text(
           "SIGN UP",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              hexStringToColor("FFB74D"), // Naranja claro
-              hexStringToColor("FF9800"), // Naranja medio
-              hexStringToColor("E65100"), // Naranja oscuro
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
+          gradient: gradientBackground(),
         ),
         child: SingleChildScrollView(
           child: Padding(
@@ -64,9 +61,17 @@ class _MyWidgetState extends State<SignUpScreen> {
                     decoration: InputDecoration(
                       labelText: 'Username',
                       labelStyle: TextStyle(
-                        color: Color.fromARGB(255, 0, 0, 0),
-
+                        color: Color.fromARGB(255, 255, 255, 255),
                       ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                    ),
+                    style: TextStyle(
+                      color: Colors.white,
                     ),
                     onSaved: (value) {
                       setState(() {
@@ -80,9 +85,17 @@ class _MyWidgetState extends State<SignUpScreen> {
                     decoration: InputDecoration(
                       labelText: 'Email',
                       labelStyle: TextStyle(
-                        color: Color.fromARGB(255, 0, 0, 0),
-
+                        color: Color.fromARGB(255, 255, 255, 255),
                       ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                    ),
+                    style: TextStyle(
+                      color: Colors.white,
                     ),
                     onSaved: (value) {
                       setState(() {
@@ -96,13 +109,46 @@ class _MyWidgetState extends State<SignUpScreen> {
                     decoration: InputDecoration(
                       labelText: 'Password',
                       labelStyle: TextStyle(
-                        color: Color.fromARGB(255, 0, 0, 0),
-
+                        color: Color.fromARGB(255, 255, 255, 255),
                       ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                    ),
+                    style: TextStyle(
+                      color: Colors.white,
                     ),
                     onSaved: (value) {
                       setState(() {
                         _passwordController = value;
+                      });
+                    },
+                    obscureText: true,
+                  ),
+                  SizedBox(height: 30),
+                  TextFormField(
+                    controller: passwordController2,
+                    decoration: InputDecoration(
+                      labelText: 'Introduce your password again',
+                      labelStyle: TextStyle(
+                        color: Color.fromARGB(255, 255, 255, 255),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                    ),
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                    onSaved: (value) {
+                      setState(() {
+                        _passwordController2 = value;
                       });
                     },
                     obscureText: true,
@@ -113,45 +159,79 @@ class _MyWidgetState extends State<SignUpScreen> {
                       children: [
                         ElevatedButton(
                           onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              _formKey.currentState!.save();
+                            if (passwordController.text
+                                    .compareTo(passwordController2.text) ==
+                                0) {
+                              print('Contraseñas coinciden');
+                              if (_formKey.currentState!.validate()) {
+                                _formKey.currentState!.save();
 
-                              final Map<String, String> userData = {
-                                'userName': _usernameController ?? "",
-                                'email': _emailController ?? "",
-                                'password': _passwordController ?? "",
-                              };
-
-                              final response = await http.post(
-                                Uri.parse('http://localhost:9090/auth/signup'),
-                                body: userData,
-                              );
-
-                              if (response.statusCode == 200) {
-                                print('Usuario creado con éxito.');
-
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: Text('Éxito'),
-                                      content: Text('Usuario creado con éxito'),
-                                      actions: <Widget>[
-                                        TextButton(
-                                          child: Text('Aceptar'),
-                                          onPressed: () {
-                                            // Cierra el diálogo
-                                            Navigator.of(context).pop();
-                                            Navigator.push(context, MaterialPageRoute(builder: (context) => SignInScreen()));
-                                          },
-                                        ),
-                                      ],
-                                    );
-                                  },
+                                final Map<String, String> userData = {
+                                  'userName': _usernameController ?? "",
+                                  'email': _emailController ?? "",
+                                  'password': _passwordController ?? "",
+                                };
+                                print(userData);
+                                final response = await http.post(
+                                  Uri.parse(
+                                      'http://localhost:9090/auth/signup'),
+                                  body: userData,
                                 );
-                              } else {
-                                print('Error al crear el usuario. Código de estado: ${response.statusCode}');
+
+                                if (response.statusCode == 200) {
+                                  print('Usuario creado con éxito.');
+
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return alert(
+                                          context,
+                                          'Success',
+                                          'User created successfully!',
+                                          SignInScreen());
+                                    },
+                                  );
+                                } else {
+                                  print(
+                                      'Error al crear el usuario. Código de estado: ${response.statusCode}');
+
+                                  if (response.statusCode == 404) {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return alert(
+                                            context,
+                                            'Error',
+                                            'This email is already used!',
+                                            null);
+                                      },
+                                    );
+                                  }
+                                  if (response.statusCode == 405) {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return alert(
+                                            context,
+                                            'Error',
+                                            'This username is already used!',
+                                            null);
+                                      },
+                                    );
+                                  }
+                                }
                               }
+                            } else {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return alert(
+                                      context,
+                                      'Error',
+                                      'Try introducing your password again',
+                                      null);
+                                },
+                              );
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -159,7 +239,9 @@ class _MyWidgetState extends State<SignUpScreen> {
                           ),
                           child: Text(
                             'SIGN UP',
-                            style: TextStyle(color: Color.fromARGB(255, 0, 0, 0),),
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 255, 102, 0),
+                            ),
                           ),
                         ),
                       ],

@@ -263,7 +263,7 @@ class _SignInScreenState extends State<SignInScreen> {
             print('Usuario loggeado con éxito.');
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => EventsScreen()),
+              MaterialPageRoute(builder: (context) => HomeScreen()),
             );
           } else {
             print(

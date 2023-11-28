@@ -27,11 +27,11 @@ class _MyWidgetState extends State<HomeScreen> {
 */
 import 'package:applogin/screens/events.dart';
 import 'package:flutter/material.dart';
+import 'package:applogin/screens/buscadoreventos.dart';
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/screens/signup_screen.dart';
 
 //import 'create_event_page.dart';
-
 
 void main() {
   runApp(HomeScreen());
@@ -47,7 +47,9 @@ class _MyAppState extends State<HomeScreen> {
 
   final List<Widget> _pages = [
     EventsScreen(),
-    
+    BuscadorScreen(),
+    //profile screen
+    //chat screen
   ];
 
   void _onItemTapped(int index) {
@@ -63,20 +65,16 @@ class _MyAppState extends State<HomeScreen> {
         body: _pages[_selectedIndex],
         bottomNavigationBar: BottomNavigationBar(
           unselectedItemColor: Color.fromARGB(255, 183, 181, 181),
-          backgroundColor: Color.fromARGB(255, 255, 145, 0),
-          selectedItemColor: Color(0xFFFFFCEA),
+          backgroundColor: Color.fromARGB(255, 255, 255, 255),
+          selectedItemColor: Color.fromARGB(255, 255, 123, 0),
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
-              label: 'Home',
+              label: 'Events',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.list),
-              label: 'Users',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Profile',
+              icon: Icon(Icons.home),
+              label: 'Events list',
             ),
           ],
           currentIndex: _selectedIndex,
@@ -84,7 +82,7 @@ class _MyAppState extends State<HomeScreen> {
         ),
       ),
       //routes: {
-        //'/create_event': (context) => CreateEventPage(),
+      //'/create_event': (context) => CreateEventPage(),
       //},
     );
   }

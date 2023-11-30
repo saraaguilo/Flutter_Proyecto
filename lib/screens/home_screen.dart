@@ -28,10 +28,9 @@ class _MyWidgetState extends State<HomeScreen> {
 import 'package:applogin/screens/events.dart';
 import 'package:flutter/material.dart';
 import 'package:applogin/screens/buscadoreventos.dart';
+import 'package:applogin/screens/buscarunevento.dart';
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/screens/signup_screen.dart';
-
-//import 'create_event_page.dart';
 
 void main() {
   runApp(HomeScreen());
@@ -47,9 +46,9 @@ class _MyAppState extends State<HomeScreen> {
 
   final List<Widget> _pages = [
     EventsScreen(),
+    BuscadorUnEventoScreen(),
     BuscadorScreen(),
-    //profile screen
-    //chat screen
+    // Aquí podemos agregar otras pantallas si es necesario
   ];
 
   void _onItemTapped(int index) {
@@ -73,7 +72,11 @@ class _MyAppState extends State<HomeScreen> {
               label: 'Events',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.home),
+              icon: Icon(Icons.search), 
+              label: 'Search one event',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.list),
               label: 'Events list',
             ),
           ],
@@ -81,9 +84,6 @@ class _MyAppState extends State<HomeScreen> {
           onTap: _onItemTapped,
         ),
       ),
-      //routes: {
-      //'/create_event': (context) => CreateEventPage(),
-      //},
     );
   }
 }

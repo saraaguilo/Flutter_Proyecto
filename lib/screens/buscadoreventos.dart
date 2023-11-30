@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:applogin/screens/crearevento.dart'; 
 
 class BuscadorScreen extends StatefulWidget {
   const BuscadorScreen({Key? key});
@@ -50,7 +51,7 @@ class _MyWidgetState extends State<BuscadorScreen> {
           itemBuilder: (context, index) {
             return Card(
               margin: EdgeInsets.symmetric(vertical: 8.0),
-              color: Colors.grey[200], // Puedes ajustar el color de fondo según tus preferencias
+              color: Colors.grey[200],
               child: ListTile(
                 title: Text('Event Name: ${events[index].eventName}'),
                 subtitle: Column(
@@ -66,6 +67,21 @@ class _MyWidgetState extends State<BuscadorScreen> {
           },
         ),
       ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 50.0, right: 10.0), // posicion del boton
+        child: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => CrearEventoScreen()),
+            );
+          },
+          label: Text('Crear Evento'),
+          icon: Icon(Icons.add),
+          backgroundColor: Colors.orange,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked, // posicion del boton
     );
   }
 }
@@ -85,7 +101,7 @@ class Event {
 
   factory Event.fromJson(Map<String, dynamic> json) {
     return Event(
-      coordinates: (json['coordinates'] as List<dynamic>).join(', '), // Convertir la lista de coordenadas a una cadena
+      coordinates: (json['coordinates'] as List<dynamic>).join(', '),
       date: DateTime.parse(json['date'] ?? ''),
       eventName: json['eventName'] ?? '',
       description: json['description'] ?? '',

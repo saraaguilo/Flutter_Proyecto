@@ -20,7 +20,6 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
   Future<void> saveEvent() async {
     var url = Uri.parse('http://localhost:9090/events');
     try {
-    // Suponiendo que las coordenadas se ingresan en el formato "lat, long"
     List<String> coordinatesArray = _eventLocationController.text.split(',').map((s) => s.trim()).toList();
 
     var response = await http.post(
@@ -30,7 +29,7 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
         'eventName': _eventNameController.text,
         'description': _eventDescriptionController.text,
         //'category': _selectedCategory,
-        'coordinates': coordinatesArray, // Enviando como array
+        'coordinates': coordinatesArray,
         'date': _selectedDate.toIso8601String(),
         }),
       );

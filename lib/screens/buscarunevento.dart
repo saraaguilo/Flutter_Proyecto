@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:applogin/screens/eventodetalles.dart';
+import 'package:applogin/screens/buscadoreventos.dart';
 
 class BuscadorUnEventoScreen extends StatefulWidget {
   const BuscadorUnEventoScreen({Key? key});
@@ -24,7 +26,6 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Campo de búsqueda y botón
             Row(
               children: [
                 Expanded(
@@ -36,31 +37,36 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                  searchEvent();
-                },
+                  onPressed: searchEvent,
                   style: ElevatedButton.styleFrom(
-                  primary: Colors.orange, // Establece el color naranja
+                    primary: Colors.orange,
                   ),
-                child: Text('Search'),
+                  child: Text('Search'),
                 ),
               ],
             ),
             SizedBox(height: 20),
-            // Mostrar el evento encontrado
             if (foundEvent != null)
-              Card(
-                margin: EdgeInsets.symmetric(vertical: 8.0),
-                color: Colors.grey[200],
-                child: ListTile(
-                  title: Text('Event Name: ${foundEvent!.eventName}'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Coordinates: ${foundEvent!.coordinates}'),
-                      Text('Date: ${foundEvent!.date}'),
-                      Text('Description: ${foundEvent!.description}'),
-                    ],
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => EventoDetailScreen(event: foundEvent!)),
+                  );
+                },
+                child: Card(
+                  margin: EdgeInsets.symmetric(vertical: 8.0),
+                  color: Colors.grey[200],
+                  child: ListTile(
+                    title: Text('Event Name: ${foundEvent!.eventName}'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Coordinates: ${foundEvent!.coordinates}'),
+                        Text('Date: ${foundEvent!.date}'),
+                        Text('Description: ${foundEvent!.description}'),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -77,10 +83,9 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
 
-        // Buscar el evento por eventName
         final List<Event> matchingEvents = data
             .map((item) => Event.fromJson(item))
-            .where((event) => event.eventName == searchController.text)
+            .where((event) => event.eventName.toLowerCase() == searchController.text.toLowerCase())
             .toList();
 
         if (matchingEvents.isNotEmpty) {
@@ -99,28 +104,5 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
     } catch (error) {
       print('Error de red al cargar eventos: $error');
     }
-  }
-}
-
-class Event {
-  final String coordinates;
-  final DateTime date;
-  final String eventName;
-  final String description;
-
-  Event({
-    required this.coordinates,
-    required this.date,
-    required this.eventName,
-    required this.description,
-  });
-
-  factory Event.fromJson(Map<String, dynamic> json) {
-    return Event(
-      coordinates: (json['coordinates'] as List<dynamic>).join(', '),
-      date: DateTime.parse(json['date'] ?? ''),
-      eventName: json['eventName'] ?? '',
-      description: json['description'] ?? '',
-    );
   }
 }

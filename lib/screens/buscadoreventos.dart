@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:applogin/screens/crearevento.dart'; 
+import 'package:applogin/screens/crearevento.dart';
+import 'package:applogin/screens/eventodetalles.dart';
 
 class BuscadorScreen extends StatefulWidget {
   const BuscadorScreen({Key? key});
@@ -52,15 +53,23 @@ class _MyWidgetState extends State<BuscadorScreen> {
             return Card(
               margin: EdgeInsets.symmetric(vertical: 8.0),
               color: Colors.grey[200],
-              child: ListTile(
-                title: Text('Event Name: ${events[index].eventName}'),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Coordinates: ${events[index].coordinates}'),
-                    Text('Date: ${events[index].date}'),
-                    Text('Description: ${events[index].description}'),
-                  ],
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => EventoDetailScreen(event: events[index])),
+                  );
+                },
+                child: ListTile(
+                  title: Text('Event Name: ${events[index].eventName}'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Coordinates: ${events[index].coordinates}'),
+                      Text('Date: ${events[index].date}'),
+                      Text('Description: ${events[index].description}'),
+                    ],
+                  ),
                 ),
               ),
             );
@@ -68,7 +77,7 @@ class _MyWidgetState extends State<BuscadorScreen> {
         ),
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 50.0, right: 10.0), // posicion del boton
+        padding: const EdgeInsets.only(bottom: 50.0, right: 10.0),
         child: FloatingActionButton.extended(
           onPressed: () {
             Navigator.push(
@@ -81,7 +90,7 @@ class _MyWidgetState extends State<BuscadorScreen> {
           backgroundColor: Colors.orange,
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked, // posicion del boton
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
 }

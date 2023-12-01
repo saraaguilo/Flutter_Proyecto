@@ -48,7 +48,6 @@ class _MyAppState extends State<HomeScreen> {
     EventsScreen(),
     BuscadorUnEventoScreen(),
     BuscadorScreen(),
-    // Aquí podemos agregar otras pantallas si es necesario
   ];
 
   void _onItemTapped(int index) {

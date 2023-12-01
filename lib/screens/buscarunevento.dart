@@ -36,7 +36,7 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
                     ),
                   ),
                 ),
-                ElevatedButton(
+
                   onPressed: searchEvent,
                   style: ElevatedButton.styleFrom(
                     primary: Colors.orange,
@@ -78,7 +78,8 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
 
   Future<void> searchEvent() async {
     try {
-      final response = await http.get(Uri.parse('http://localhost:9090/events'));
+      final response =
+          await http.get(Uri.parse('http://147.83.7.158:9090/events'));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -99,7 +100,8 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
           print('No se encontraron eventos con el eventName especificado.');
         }
       } else {
-        print('Error al cargar eventos. Código de estado: ${response.statusCode}');
+        print(
+            'Error al cargar eventos. Código de estado: ${response.statusCode}');
       }
     } catch (error) {
       print('Error de red al cargar eventos: $error');

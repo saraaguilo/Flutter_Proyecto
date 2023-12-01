@@ -22,7 +22,8 @@ class _MyWidgetState extends State<BuscadorScreen> {
 
   Future<void> getEvents() async {
     try {
-      final response = await http.get(Uri.parse('http://localhost:9090/events'));
+      final response =
+          await http.get(Uri.parse('http://147.83.7.158:9090/events'));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -31,7 +32,8 @@ class _MyWidgetState extends State<BuscadorScreen> {
           events = data.map((item) => Event.fromJson(item)).toList();
         });
       } else {
-        print('Error al cargar eventos. Código de estado: ${response.statusCode}');
+        print(
+            'Error al cargar eventos. Código de estado: ${response.statusCode}');
       }
     } catch (error) {
       print('Error de red al cargar eventos: $error');
@@ -51,7 +53,8 @@ class _MyWidgetState extends State<BuscadorScreen> {
           itemCount: events.length,
           itemBuilder: (context, index) {
             return Card(
-              margin: EdgeInsets.symmetric(vertical: 8.0),
+
+
               color: Colors.grey[200],
               child: InkWell(
                 onTap: () {
@@ -70,6 +73,7 @@ class _MyWidgetState extends State<BuscadorScreen> {
                       Text('Description: ${events[index].description}'),
                     ],
                   ),
+
                 ),
               ),
             );

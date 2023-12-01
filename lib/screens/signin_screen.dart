@@ -255,7 +255,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
           //PETICIÓN HTTP
           final response = await http.post(
-            Uri.parse('http://localhost:9090/auth/signin'),
+            Uri.parse('http://147.83.7.158:9090/auth/signin'),
             body: userData,
           );
 

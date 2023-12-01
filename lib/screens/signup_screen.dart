@@ -174,7 +174,7 @@ class _MyWidgetState extends State<SignUpScreen> {
                                 print(userData);
                                 final response = await http.post(
                                   Uri.parse(
-                                      'http://localhost:9090/auth/signup'),
+                                      'http://147.83.7.158:9090/auth/signup'),
                                   body: userData,
                                 );
 

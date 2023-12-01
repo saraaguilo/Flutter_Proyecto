@@ -3,6 +3,7 @@ import 'package:applogin/screens/buscadoreventos.dart';
 
 class EventoDetailScreen extends StatelessWidget {
   final Event event;
+  final TextEditingController commentController = TextEditingController();
 
   EventoDetailScreen({Key? key, required this.event}) : super(key: key);
 
@@ -13,7 +14,7 @@ class EventoDetailScreen extends StatelessWidget {
         title: Text(event.eventName),
         backgroundColor: Colors.orange,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -28,11 +29,6 @@ class EventoDetailScreen extends StatelessWidget {
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 10),
-            //Text(
-            //  'Categoría Musical: ${event.category}', // Asegúrate de que Event tiene un campo 'category'
-           //   style: TextStyle(fontSize: 16),
-           // ),
-            SizedBox(height: 10),
             Text(
               'Fecha: ${event.date}',
               style: TextStyle(fontSize: 16),
@@ -41,6 +37,32 @@ class EventoDetailScreen extends StatelessWidget {
             Text(
               'Ubicación: ${event.coordinates}',
               style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 20),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                },
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.orange,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: Text(
+                  'Join Event',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            TextField(
+              controller: commentController,
+              decoration: InputDecoration(
+                labelText: 'Deja tu comentario aquí',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
             ),
           ],
         ),

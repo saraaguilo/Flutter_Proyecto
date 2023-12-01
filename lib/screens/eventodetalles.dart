@@ -1,11 +1,59 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:applogin/screens/buscadoreventos.dart'; 
+import 'package:http/http.dart' as http;
+import 'package:applogin/screens/buscadoreventos.dart';
+import 'package:applogin/screens/signin_screen.dart'; // Importa para acceder a currentUserEmail
 
 class EventoDetailScreen extends StatelessWidget {
   final Event event;
   final TextEditingController commentController = TextEditingController();
 
   EventoDetailScreen({Key? key, required this.event}) : super(key: key);
+
+  Future<String?> getCurrentUserId() async {
+    var url = Uri.parse('http://localhost:9090/users');
+    var response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      List<dynamic> users = json.decode(response.body);
+      var currentUser = users.firstWhere(
+        (user) => user['email'] == currentUserEmail, // Usa currentUserEmail aquí
+        orElse: () => null,
+      );
+      return currentUser?['_id'];
+    } else {
+      print('Error al obtener usuarios: ${response.statusCode}');
+      return null;
+    }
+  }
+
+  Future<void> postComment(String userId) async {
+    var url = Uri.parse('http://localhost:9090/comments');
+    var response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'userId': userId,
+        'text': commentController.text,
+        'date': DateTime.now().toIso8601String(),
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      print('Comentario enviado con éxito');
+    } else {
+      print('Error al enviar comentario: ${response.statusCode}');
+    }
+  }
+
+  void handlePostComment() async {
+    String? userId = await getCurrentUserId();
+    if (userId != null) {
+      await postComment(userId);
+    } else {
+      print('Error: No se pudo obtener el ID del usuario');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,8 +89,7 @@ class EventoDetailScreen extends StatelessWidget {
             SizedBox(height: 20),
             Center(
               child: ElevatedButton(
-                onPressed: () {
-                },
+                onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   primary: Colors.orange,
                   shape: RoundedRectangleBorder(
@@ -64,9 +111,36 @@ class EventoDetailScreen extends StatelessWidget {
               ),
               maxLines: 3,
             ),
+            SizedBox(height: 10),
+            Center(
+              child: ElevatedButton(
+                onPressed: handlePostComment,
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.white,
+                  onPrimary: Colors.orange,
+                  side: BorderSide(color: Colors.orange),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: Text('Dejar Comentario'),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
+}
+
+class Comment {
+  final String userId;
+  final String text;
+  final DateTime date;
+
+  Comment({
+    required this.userId,
+    required this.text,
+    required this.date,
+  });
 }

@@ -9,34 +9,47 @@ class CrearEventoScreen extends StatefulWidget {
 
 class _CrearEventoScreenState extends State<CrearEventoScreen> {
   final TextEditingController _eventNameController = TextEditingController();
-  final TextEditingController _eventDescriptionController = TextEditingController();
-  final TextEditingController _eventLocationController = TextEditingController();
+  final TextEditingController _eventDescriptionController =
+      TextEditingController();
+  final TextEditingController _eventLocationController =
+      TextEditingController();
   String _selectedCategory = 'Pop';
   DateTime _selectedDate = DateTime.now();
 
   // categorías musicales
-  final List<String> _categories = ['Pop', 'Rock', 'Rap', 'Trap', 'Jazz', 'Metal'];
+  final List<String> _categories = [
+    'Pop',
+    'Rock',
+    'Rap',
+    'Trap',
+    'Jazz',
+    'Metal'
+  ];
 
   Future<void> saveEvent() async {
-    var url = Uri.parse('http://localhost:9090/events');
+    var url = Uri.parse('http://147.83.7.158:9090/events');
     try {
-    List<String> coordinatesArray = _eventLocationController.text.split(',').map((s) => s.trim()).toList();
+      List<String> coordinatesArray = _eventLocationController.text
+          .split(',')
+          .map((s) => s.trim())
+          .toList();
 
-    var response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'eventName': _eventNameController.text,
-        'description': _eventDescriptionController.text,
-        //'category': _selectedCategory,
-        'coordinates': coordinatesArray,
-        'date': _selectedDate.toIso8601String(),
+      var response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'eventName': _eventNameController.text,
+          'description': _eventDescriptionController.text,
+          //'category': _selectedCategory,
+          'coordinates': coordinatesArray,
+          'date': _selectedDate.toIso8601String(),
         }),
       );
       if (response.statusCode == 201) {
         print('Evento guardado correctamente');
       } else {
-        print('Error al guardar el evento. Código de estado: ${response.statusCode}');
+        print(
+            'Error al guardar el evento. Código de estado: ${response.statusCode}');
       }
     } catch (error) {
       print('Error al guardar el evento: $error');

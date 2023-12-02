@@ -36,7 +36,7 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
                     ),
                   ),
                 ),
-
+                ElevatedButton(
                   onPressed: searchEvent,
                   style: ElevatedButton.styleFrom(
                     primary: Colors.orange,
@@ -51,7 +51,9 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => EventoDetailScreen(event: foundEvent!)),
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            EventoDetailScreen(event: foundEvent!)),
                   );
                 },
                 child: Card(
@@ -86,7 +88,9 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
 
         final List<Event> matchingEvents = data
             .map((item) => Event.fromJson(item))
-            .where((event) => event.eventName.toLowerCase() == searchController.text.toLowerCase())
+            .where((event) =>
+                event.eventName.toLowerCase() ==
+                searchController.text.toLowerCase())
             .toList();
 
         if (matchingEvents.isNotEmpty) {

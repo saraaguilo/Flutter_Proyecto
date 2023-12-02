@@ -25,12 +25,14 @@ class _MyWidgetState extends State<HomeScreen> {
   }
 }
 */
+
 import 'package:applogin/screens/events.dart';
 import 'package:flutter/material.dart';
 import 'package:applogin/screens/buscadoreventos.dart';
 import 'package:applogin/screens/buscarunevento.dart';
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/screens/signup_screen.dart';
+import 'package:applogin/screens/profile.dart';
 
 void main() {
   runApp(HomeScreen());
@@ -48,6 +50,7 @@ class _MyAppState extends State<HomeScreen> {
     EventsScreen(),
     BuscadorUnEventoScreen(),
     BuscadorScreen(),
+    ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -71,12 +74,16 @@ class _MyAppState extends State<HomeScreen> {
               label: 'Events',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.search), 
+              icon: Icon(Icons.search),
               label: 'Search one event',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.list),
               label: 'Events list',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
             ),
           ],
           currentIndex: _selectedIndex,

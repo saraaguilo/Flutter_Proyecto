@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/screens/buscadoreventos.dart';
-import 'package:applogin/screens/signin_screen.dart'; // Importa para acceder a currentUserEmail
+import 'package:applogin/screens/signin_screen.dart'; // importa para acceder a currentUserEmail
 
 class EventoDetailScreen extends StatelessWidget {
   final Event event;
@@ -17,7 +17,7 @@ class EventoDetailScreen extends StatelessWidget {
     if (response.statusCode == 200) {
       List<dynamic> users = json.decode(response.body);
       var currentUser = users.firstWhere(
-        (user) => user['email'] == currentUserEmail, // Usa currentUserEmail aquí
+        (user) => user['email'] == currentUserEmail, // currentUserEmail aquí
         orElse: () => null,
       );
       return currentUser?['_id'];
@@ -28,9 +28,9 @@ class EventoDetailScreen extends StatelessWidget {
   }
 
   Future<void> postComment(String userId) async {
-    var url = Uri.parse('http://localhost:9090/comments');
-    var response = await http.post(
-      url,
+    var commentUrl = Uri.parse('http://localhost:9090/comments');
+    var commentResponse = await http.post(
+      commentUrl,
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'userId': userId,
@@ -39,21 +39,53 @@ class EventoDetailScreen extends StatelessWidget {
       }),
     );
 
-    if (response.statusCode == 201) {
+    if (commentResponse.statusCode == 201) {
       print('Comentario enviado con éxito');
+      var commentData = json.decode(commentResponse.body);
+      var commentId = commentData['_id']; 
+      await addCommentToEvent(commentId);
     } else {
-      print('Error al enviar comentario: ${response.statusCode}');
+      print('Error al enviar comentario: ${commentResponse.statusCode}');
     }
   }
 
-  void handlePostComment() async {
-    String? userId = await getCurrentUserId();
-    if (userId != null) {
-      await postComment(userId);
+  Future<void> addCommentToEvent(String commentId) async {
+  var getEventUrl = Uri.parse('http://localhost:9090/events/${event.id}');
+  var getEventResponse = await http.get(getEventUrl);
+
+  if (getEventResponse.statusCode == 200) {
+    var eventData = json.decode(getEventResponse.body);
+    
+    List<dynamic> idComments = List<dynamic>.from(eventData['idComments'] ?? []);
+    idComments.add(commentId);
+
+    var updateEventUrl = Uri.parse('http://localhost:9090/events/${event.id}');
+    var updateEventResponse = await http.put(
+      updateEventUrl,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'idComments': idComments,
+      }),
+    );
+
+    if (updateEventResponse.statusCode == 200) {
+      print('Evento actualizado con éxito');
     } else {
-      print('Error: No se pudo obtener el ID del usuario');
+      print('Error al actualizar evento: ${updateEventResponse.statusCode}');
     }
+  } else {
+    print('Error al obtener detalles del evento: ${getEventResponse.statusCode}');
   }
+}
+
+void handlePostComment() async {
+  String? userId = await getCurrentUserId();
+  if (userId != null) {
+    await postComment(userId);
+  } else {
+    print('Error: No se pudo obtener el ID del usuario');
+  }
+}
 
   @override
   Widget build(BuildContext context) {

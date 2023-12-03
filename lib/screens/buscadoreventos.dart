@@ -96,12 +96,14 @@ class _MyWidgetState extends State<BuscadorScreen> {
 }
 
 class Event {
+  final String id; // Añadido el campo id
   final String coordinates;
   final DateTime date;
   final String eventName;
   final String description;
 
   Event({
+    required this.id, // Añadido id al constructor
     required this.coordinates,
     required this.date,
     required this.eventName,
@@ -110,6 +112,7 @@ class Event {
 
   factory Event.fromJson(Map<String, dynamic> json) {
     return Event(
+      id: json['_id'] ?? '', // Añadido _id al mapeo
       coordinates: (json['coordinates'] as List<dynamic>).join(', '),
       date: DateTime.parse(json['date'] ?? ''),
       eventName: json['eventName'] ?? '',

@@ -3,15 +3,53 @@ import 'package:applogin/screens/home_screen.dart';
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/utils/color_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:applogin/models/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key});
-
   @override
   State<ProfileScreen> createState() => _MyWidgetState();
 }
 
 class _MyWidgetState extends State<ProfileScreen> {
+  String userName = '';
+  String email = '';
+  String idUser = '';
+  DateTime? birthDate;
+  String password = '';
+  String avatar = '';
+  List<String> createdEventsId = [];
+  List<String> joinedEventsId = [];
+  List<String> idCategories = [];
+  String role = '';
+  String description = '';
+
+  void initState() {
+    loadData();
+    super.initState();
+  }
+
+  void loadData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      userName = prefs.getString('userName') ?? '';
+      email = prefs.getString('email') ?? '';
+      idUser = prefs.getString('idUser') ?? '';
+      String? date = prefs.getString('birthDate');
+      birthDate = DateTime.parse(date ?? '2023-12-08T12:34:56');
+      password = prefs.getString('password') ?? '';
+      avatar = prefs.getString('avatar') ?? '';
+      //String? createdEventsIdString = prefs.getString('createdEventsId');
+      //print(createdEventsIdString);
+      //createdEventsId = (prefs.getStringList('createdEventsId') ?? []);
+      //joinedEventsId = (prefs.getStringList('joinedEventsId') ?? []);
+      //idCategories = (prefs.getStringList('idCategories') ?? []);
+      role = prefs.getString('role') ?? '';
+      description = prefs.getString('description') ?? '';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,14 +80,14 @@ class _MyWidgetState extends State<ProfileScreen> {
   Widget basicInfo() => Column(
         children: [
           Text(
-            "Username del usuario",
+            userName,
             textAlign: TextAlign.center,
             style: TextStyle(
                 color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),
           ),
           const SizedBox(height: 10),
           Text(
-            "email del usuario",
+            email,
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey),
           )
@@ -67,7 +105,7 @@ class _MyWidgetState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            "User's biography",
+            description,
             style: TextStyle(fontSize: 14, height: 1.4, color: Colors.grey),
           ),
         ],

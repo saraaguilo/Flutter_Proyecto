@@ -133,7 +133,7 @@ import 'package:applogin/screens/signup_screen.dart';
 import 'package:applogin/reusable_/reusable_widget.dart';
 import 'package:applogin/utils/color_utils.dart';
 
-// Variable global para almacenar el email del usuario
+// variable global para almacenar el email del usuario
 String currentUserEmail = '';
 
 class SignInScreen extends StatefulWidget {
@@ -252,7 +252,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
           if (response.statusCode == 200) {
             print('Usuario loggeado con éxito.');
-            // Almacenar el email del usuario en la variable global
+            // almacenar el email del usuario en la variable global
             currentUserEmail = emailController.text;
             Navigator.push(
               context,

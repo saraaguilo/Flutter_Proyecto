@@ -25,7 +25,6 @@ class _MyWidgetState extends State<BuscadorScreen> {
       final response = await http.get(Uri.parse('http://localhost:9090/events'));
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        print("Datos brutos recibidos: ${response.body}");
         setState(() {
           events = data.map((item) => Event.fromJson(item)).toList();
         });
@@ -115,7 +114,7 @@ class Event {
     required this.date,
     required this.eventName,
     required this.description,
-    this.idUser, // Cambio aquí para requerir idUser.
+    this.idUser, 
     this.idComments,
   });
 
@@ -132,7 +131,7 @@ class Event {
       date: DateTime.parse(json['date'] ?? DateTime.now().toIso8601String()),
       eventName: json['eventName'] ?? '',
       description: json['description'] ?? '',
-      idUser: parsedUserId, // Asegurándose de obtener idUser.
+      idUser: parsedUserId, 
       idComments: json['idComments'] != null
           ? List<String>.from(json['idComments'])
           : null,

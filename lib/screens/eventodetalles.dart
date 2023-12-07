@@ -17,14 +17,16 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
   final TextEditingController commentController = TextEditingController();
   List<Comment> comments = [];
   bool isLoading = true;
+  String? currentUserId;
 
   @override
   void initState() {
     super.initState();
     _loadComments();
+    _getCurrentUserId();
   }
 
-  Future<String?> getCurrentUserId() async {
+  Future<String?> _getCurrentUserId() async {
     var url = Uri.parse('http://localhost:9090/users');
     var response = await http.get(url);
 
@@ -34,10 +36,73 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
         (user) => user['email'] == currentUserEmail,
         orElse: () => null,
       );
+      setState(() {
+        currentUserId = currentUser?['_id'];
+      });
       return currentUser?['_id'];
     } else {
       print('Error al obtener usuarios: ${response.statusCode}');
       return null;
+    }
+  }
+
+  Future<void> _deleteEvent() async {
+    var url = Uri.parse('http://localhost:9090/events/${widget.event.id}');
+    var response = await http.delete(url);
+
+    if (response.statusCode == 200) {
+      print('Evento eliminado con éxito');
+      Navigator.pop(context, true); // refresh de la lista en la pantalla anterior
+    } else {
+      print('Error al eliminar evento: ${response.statusCode}');
+    }
+  }
+
+  Future<void> _loadComments() async {
+  setState(() {
+    isLoading = true;
+  });
+
+  var eventUrl = Uri.parse('http://localhost:9090/events/${widget.event.id}');
+  var eventResponse = await http.get(eventUrl);
+
+  if (eventResponse.statusCode == 200) {
+    var eventData = json.decode(eventResponse.body);
+
+    List<String> commentIds = List<String>.from(eventData['idComments'] ?? []);
+
+    List<Comment> loadedComments = [];
+    for (var commentId in commentIds) {
+      var commentUrl = Uri.parse('http://localhost:9090/comments/$commentId');
+      var commentResponse = await http.get(commentUrl);
+
+      if (commentResponse.statusCode == 200) {
+        var commentData = json.decode(commentResponse.body);
+
+        loadedComments.add(Comment.fromJson(commentData));
+      } else {
+        print('Error al cargar comentario: ${commentResponse.statusCode}');
+      }
+    }
+
+    setState(() {
+      comments = loadedComments;
+      isLoading = false;
+    });
+  } else {
+    print('Error al cargar detalles del evento: ${eventResponse.statusCode}');
+    setState(() {
+      isLoading = false;
+    });
+  }
+}
+
+  void handlePostComment() async {
+    String? userId = await _getCurrentUserId();
+    if (userId != null) {
+      await postComment(userId);
+    } else {
+      print('Error: No se pudo obtener el ID del usuario');
     }
   }
 
@@ -56,7 +121,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
     if (commentResponse.statusCode == 201) {
       print('Comentario enviado con éxito');
       var commentData = json.decode(commentResponse.body);
-      var commentId = commentData['_id'];
+      var commentId = commentData['_id']; 
       await addCommentToEvent(commentId);
     } else {
       print('Error al enviar comentario: ${commentResponse.statusCode}');
@@ -83,49 +148,13 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
 
       if (updateEventResponse.statusCode == 200) {
         print('Evento actualizado con éxito');
+        _loadComments(); // recargar comentarios después de agregar uno nuevo
       } else {
         print('Error al actualizar evento: ${updateEventResponse.statusCode}');
       }
     } else {
       print('Error al obtener detalles del evento: ${getEventResponse.statusCode}');
     }
-  }
-
-  void handlePostComment() async {
-    String? userId = await getCurrentUserId();
-    if (userId != null) {
-      await postComment(userId);
-    } else {
-      print('Error: No se pudo obtener el ID del usuario');
-    }
-  }
-
-  Future<void> _loadComments() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    var eventUrl = Uri.parse('http://localhost:9090/events/${widget.event.id}');
-    var eventResponse = await http.get(eventUrl);
-    List<Comment> loadedComments = [];
-    if (eventResponse.statusCode == 200) {
-      var eventData = json.decode(eventResponse.body);
-      List<String> commentIds = List<String>.from(eventData['idComments'] ?? []);
-
-      for (var commentId in commentIds) {
-        var commentUrl = Uri.parse('http://localhost:9090/comments/$commentId');
-        var commentResponse = await http.get(commentUrl);
-        if (commentResponse.statusCode == 200) {
-          var commentData = json.decode(commentResponse.body);
-          loadedComments.add(Comment.fromJson(commentData));
-        }
-      }
-    }
-
-    setState(() {
-      comments = loadedComments;
-      isLoading = false;
-    });
   }
 
   @override
@@ -215,6 +244,20 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                 style: TextStyle(color: Colors.white),
               ),
             )).toList(),
+            if (currentUserId == widget.event.idUser)
+              Align(
+                alignment: Alignment.bottomRight,
+                child: ElevatedButton(
+                  onPressed: _deleteEvent,
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.orange,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: Text('Borrar Evento'),
+                ),
+              ),
           ],
         ),
       ),
@@ -224,22 +267,34 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
 
 class Comment {
   final String userId;
+  final String userName;
   final String text;
   final DateTime date;
 
   Comment({
     required this.userId,
+    required this.userName, 
     required this.text,
     required this.date,
   });
 
   factory Comment.fromJson(Map<String, dynamic> json) {
-  print(json); // imprimimos todo el JSON para ver su estructura
+    var user = json['userId'];
+    var userId = '';
+    var userName = '';
 
-  return Comment(
-    userId: json['userId'].toString(), // usamos toString() para asegurarte de que sea una cadena
-    text: json['text'].toString(), // same
-    date: DateTime.parse(json['date']), // aseguramos de que 'date' sea una cadena en formato de fecha
-  );
-}
+    if (user is Map) {
+      userId = user['_id'];
+      userName = user['userName'];
+    } else {
+      userId = user.toString();
+    }
+
+    return Comment(
+      userId: userId,
+      userName: userName,
+      text: json['text'],
+      date: DateTime.parse(json['date']),
+    );
+  }
 }

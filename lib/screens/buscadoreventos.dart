@@ -23,10 +23,9 @@ class _MyWidgetState extends State<BuscadorScreen> {
   Future<void> getEvents() async {
     try {
       final response = await http.get(Uri.parse('http://localhost:9090/events'));
-
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-
+        print("Datos brutos recibidos: ${response.body}");
         setState(() {
           events = data.map((item) => Event.fromJson(item)).toList();
         });
@@ -35,6 +34,17 @@ class _MyWidgetState extends State<BuscadorScreen> {
       }
     } catch (error) {
       print('Error de red al cargar eventos: $error');
+    }
+  }
+
+  void navigateToCreateEventScreen() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CrearEventoScreen()),
+    );
+
+    if (result == true) {
+      getEvents();
     }
   }
 
@@ -79,12 +89,7 @@ class _MyWidgetState extends State<BuscadorScreen> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 50.0, right: 10.0),
         child: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => CrearEventoScreen()),
-            );
-          },
+          onPressed: navigateToCreateEventScreen,
           label: Text('Crear Evento'),
           icon: Icon(Icons.add),
           backgroundColor: Colors.orange,
@@ -96,27 +101,41 @@ class _MyWidgetState extends State<BuscadorScreen> {
 }
 
 class Event {
-  final String id; // Añadido el campo id
-  final String coordinates;
+  final String id;
+  final List<dynamic> coordinates;
   final DateTime date;
   final String eventName;
   final String description;
+  final String? idUser;
+  final List<String>? idComments;
 
   Event({
-    required this.id, // Añadido id al constructor
+    required this.id,
     required this.coordinates,
     required this.date,
     required this.eventName,
     required this.description,
+    this.idUser, // Cambio aquí para requerir idUser.
+    this.idComments,
   });
 
   factory Event.fromJson(Map<String, dynamic> json) {
+    String? parsedUserId;
+    if (json['idUser'] != null) {
+      parsedUserId = json['idUser'] is String ? json['idUser'] : json['idUser']['_id'];
+    }
     return Event(
-      id: json['_id'] ?? '', // Añadido _id al mapeo
-      coordinates: (json['coordinates'] as List<dynamic>).join(', '),
-      date: DateTime.parse(json['date'] ?? ''),
+      id: json['_id'] ?? '',
+      coordinates: json['coordinates'] != null
+          ? List<dynamic>.from(json['coordinates'])
+          : [],
+      date: DateTime.parse(json['date'] ?? DateTime.now().toIso8601String()),
       eventName: json['eventName'] ?? '',
       description: json['description'] ?? '',
+      idUser: parsedUserId, // Asegurándose de obtener idUser.
+      idComments: json['idComments'] != null
+          ? List<String>.from(json['idComments'])
+          : null,
     );
   }
 }

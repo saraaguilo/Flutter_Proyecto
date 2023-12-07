@@ -2,13 +2,27 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/screens/buscadoreventos.dart';
-import 'package:applogin/screens/signin_screen.dart'; // importa para acceder a currentUserEmail
+import 'package:applogin/screens/signin_screen.dart'; // acceso currentUserEmail
 
-class EventoDetailScreen extends StatelessWidget {
+class EventoDetailScreen extends StatefulWidget {
   final Event event;
-  final TextEditingController commentController = TextEditingController();
 
   EventoDetailScreen({Key? key, required this.event}) : super(key: key);
+
+  @override
+  _EventoDetailScreenState createState() => _EventoDetailScreenState();
+}
+
+class _EventoDetailScreenState extends State<EventoDetailScreen> {
+  final TextEditingController commentController = TextEditingController();
+  List<Comment> comments = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadComments();
+  }
 
   Future<String?> getCurrentUserId() async {
     var url = Uri.parse('http://localhost:9090/users');
@@ -17,7 +31,7 @@ class EventoDetailScreen extends StatelessWidget {
     if (response.statusCode == 200) {
       List<dynamic> users = json.decode(response.body);
       var currentUser = users.firstWhere(
-        (user) => user['email'] == currentUserEmail, // currentUserEmail aquí
+        (user) => user['email'] == currentUserEmail,
         orElse: () => null,
       );
       return currentUser?['_id'];
@@ -42,7 +56,7 @@ class EventoDetailScreen extends StatelessWidget {
     if (commentResponse.statusCode == 201) {
       print('Comentario enviado con éxito');
       var commentData = json.decode(commentResponse.body);
-      var commentId = commentData['_id']; 
+      var commentId = commentData['_id'];
       await addCommentToEvent(commentId);
     } else {
       print('Error al enviar comentario: ${commentResponse.statusCode}');
@@ -50,48 +64,75 @@ class EventoDetailScreen extends StatelessWidget {
   }
 
   Future<void> addCommentToEvent(String commentId) async {
-  var getEventUrl = Uri.parse('http://localhost:9090/events/${event.id}');
-  var getEventResponse = await http.get(getEventUrl);
+    var getEventUrl = Uri.parse('http://localhost:9090/events/${widget.event.id}');
+    var getEventResponse = await http.get(getEventUrl);
 
-  if (getEventResponse.statusCode == 200) {
-    var eventData = json.decode(getEventResponse.body);
-    
-    List<dynamic> idComments = List<dynamic>.from(eventData['idComments'] ?? []);
-    idComments.add(commentId);
+    if (getEventResponse.statusCode == 200) {
+      var eventData = json.decode(getEventResponse.body);
+      List<dynamic> idComments = List<dynamic>.from(eventData['idComments'] ?? []);
+      idComments.add(commentId);
 
-    var updateEventUrl = Uri.parse('http://localhost:9090/events/${event.id}');
-    var updateEventResponse = await http.put(
-      updateEventUrl,
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'idComments': idComments,
-      }),
-    );
+      var updateEventUrl = Uri.parse('http://localhost:9090/events/${widget.event.id}');
+      var updateEventResponse = await http.put(
+        updateEventUrl,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'idComments': idComments,
+        }),
+      );
 
-    if (updateEventResponse.statusCode == 200) {
-      print('Evento actualizado con éxito');
+      if (updateEventResponse.statusCode == 200) {
+        print('Evento actualizado con éxito');
+      } else {
+        print('Error al actualizar evento: ${updateEventResponse.statusCode}');
+      }
     } else {
-      print('Error al actualizar evento: ${updateEventResponse.statusCode}');
+      print('Error al obtener detalles del evento: ${getEventResponse.statusCode}');
     }
-  } else {
-    print('Error al obtener detalles del evento: ${getEventResponse.statusCode}');
   }
-}
 
-void handlePostComment() async {
-  String? userId = await getCurrentUserId();
-  if (userId != null) {
-    await postComment(userId);
-  } else {
-    print('Error: No se pudo obtener el ID del usuario');
+  void handlePostComment() async {
+    String? userId = await getCurrentUserId();
+    if (userId != null) {
+      await postComment(userId);
+    } else {
+      print('Error: No se pudo obtener el ID del usuario');
+    }
   }
-}
+
+  Future<void> _loadComments() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    var eventUrl = Uri.parse('http://localhost:9090/events/${widget.event.id}');
+    var eventResponse = await http.get(eventUrl);
+    List<Comment> loadedComments = [];
+    if (eventResponse.statusCode == 200) {
+      var eventData = json.decode(eventResponse.body);
+      List<String> commentIds = List<String>.from(eventData['idComments'] ?? []);
+
+      for (var commentId in commentIds) {
+        var commentUrl = Uri.parse('http://localhost:9090/comments/$commentId');
+        var commentResponse = await http.get(commentUrl);
+        if (commentResponse.statusCode == 200) {
+          var commentData = json.decode(commentResponse.body);
+          loadedComments.add(Comment.fromJson(commentData));
+        }
+      }
+    }
+
+    setState(() {
+      comments = loadedComments;
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(event.eventName),
+        title: Text(widget.event.eventName),
         backgroundColor: Colors.orange,
       ),
       body: SingleChildScrollView(
@@ -100,22 +141,22 @@ void handlePostComment() async {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Nombre del Evento: ${event.eventName}',
+              'Nombre del Evento: ${widget.event.eventName}',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             ),
             SizedBox(height: 10),
             Text(
-              'Descripción: ${event.description}',
+              'Descripción: ${widget.event.description}',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 10),
             Text(
-              'Fecha: ${event.date}',
+              'Fecha: ${widget.event.date}',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 10),
             Text(
-              'Ubicación: ${event.coordinates}',
+              'Ubicación: ${widget.event.coordinates}',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 20),
@@ -158,6 +199,22 @@ void handlePostComment() async {
                 child: Text('Dejar Comentario'),
               ),
             ),
+            if (isLoading)
+              Center(child: CircularProgressIndicator()),
+            if (!isLoading && comments.isEmpty)
+              Text('No hay comentarios'),
+            ...comments.map((comment) => Container(
+              margin: EdgeInsets.only(top: 10),
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.orange,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                comment.text,
+                style: TextStyle(color: Colors.white),
+              ),
+            )).toList(),
           ],
         ),
       ),
@@ -175,4 +232,14 @@ class Comment {
     required this.text,
     required this.date,
   });
+
+  factory Comment.fromJson(Map<String, dynamic> json) {
+  print(json); // imprimimos todo el JSON para ver su estructura
+
+  return Comment(
+    userId: json['userId'].toString(), // usamos toString() para asegurarte de que sea una cadena
+    text: json['text'].toString(), // same
+    date: DateTime.parse(json['date']), // aseguramos de que 'date' sea una cadena en formato de fecha
+  );
+}
 }

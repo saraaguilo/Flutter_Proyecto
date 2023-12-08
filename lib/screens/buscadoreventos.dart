@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/screens/crearevento.dart';
 import 'package:applogin/screens/eventodetalles.dart';
+import 'package:applogin/config.dart';
+import 'package:applogin/models/event.dart';
 
 class BuscadorScreen extends StatefulWidget {
   const BuscadorScreen({Key? key});
@@ -22,8 +24,7 @@ class _MyWidgetState extends State<BuscadorScreen> {
 
   Future<void> getEvents() async {
     try {
-      final response =
-          await http.get(Uri.parse('http://147.83.7.158:9090/events'));
+      final response = await http.get(Uri.parse('$uri/events'));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -53,14 +54,14 @@ class _MyWidgetState extends State<BuscadorScreen> {
           itemCount: events.length,
           itemBuilder: (context, index) {
             return Card(
-
-
               color: Colors.grey[200],
               child: InkWell(
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => EventoDetailScreen(event: events[index])),
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            EventoDetailScreen(event: events[index])),
                   );
                 },
                 child: ListTile(
@@ -73,7 +74,6 @@ class _MyWidgetState extends State<BuscadorScreen> {
                       Text('Description: ${events[index].description}'),
                     ],
                   ),
-
                 ),
               ),
             );
@@ -95,29 +95,6 @@ class _MyWidgetState extends State<BuscadorScreen> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-    );
-  }
-}
-
-class Event {
-  final String coordinates;
-  final DateTime date;
-  final String eventName;
-  final String description;
-
-  Event({
-    required this.coordinates,
-    required this.date,
-    required this.eventName,
-    required this.description,
-  });
-
-  factory Event.fromJson(Map<String, dynamic> json) {
-    return Event(
-      coordinates: (json['coordinates'] as List<dynamic>).join(', '),
-      date: DateTime.parse(json['date'] ?? ''),
-      eventName: json['eventName'] ?? '',
-      description: json['description'] ?? '',
     );
   }
 }

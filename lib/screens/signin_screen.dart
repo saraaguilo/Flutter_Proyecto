@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:applogin/config.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({Key? key});
@@ -131,8 +132,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
           //PETICIÓN HTTP
           final response = await http.post(
-            //Uri.parse('http://147.83.7.158:9090/auth/signin'),
-            Uri.parse('http://localhost:9090/auth/signin'),
+            Uri.parse('$uri/auth/signin'),
             body: userData,
           );
 
@@ -149,7 +149,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 await SharedPreferences.getInstance();
             await prefs.setString('userName', user.userName);
             await prefs.setString('email', user.email);
-            await prefs.setString('idUser', jsonEncode(user.idUser));
+            await prefs.setString('idUser', user.idUser ?? '');
             await prefs.setString(
                 'birthDate', user.birthDate?.toString() ?? '');
             await prefs.setString('password', user.password);

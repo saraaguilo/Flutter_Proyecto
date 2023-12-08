@@ -4,6 +4,7 @@ import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:applogin/config.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key});
@@ -173,10 +174,7 @@ class _MyWidgetState extends State<SignUpScreen> {
                                 };
                                 print(userData);
                                 final response = await http.post(
-                                  //Uri.parse(
-                                  //'http://147.83.7.158:9090/auth/signup'),
-                                  Uri.parse(
-                                      'http://localhost:9090/auth/signup'),
+                                  Uri.parse('$uri/auth/signup'),
                                   body: userData,
                                 );
 

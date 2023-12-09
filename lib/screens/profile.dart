@@ -2,11 +2,13 @@ import 'dart:convert';
 import 'package:applogin/reusable_/reusable_widget.dart';
 import 'package:applogin/screens/eventodetalles.dart';
 import 'package:applogin/screens/home_screen.dart';
+import 'package:applogin/screens/profile_edit.dart';
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:applogin/models/user.dart';
 import 'package:applogin/models/event.dart';
+import 'package:applogin/services/event_services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:applogin/config.dart';
 import 'package:http/http.dart' as http;
@@ -43,11 +45,8 @@ class _MyWidgetState extends State<ProfileScreen> {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        print(data);
-
         setState(() {
           events = data.map((item) => Event.fromJson(item)).toList();
-          print(events);
         });
       } else {
         print(
@@ -63,9 +62,9 @@ class _MyWidgetState extends State<ProfileScreen> {
 
     setState(() {
       userName = prefs.getString('userName') ?? '';
+      //no fa falta
       email = prefs.getString('email') ?? '';
       idUser = prefs.getString('idUser') ?? '';
-      print(userName);
       String? date = prefs.getString('birthDate');
       birthDate = DateTime.parse(date ?? '2023-12-08T12:34:56');
       password = prefs.getString('password') ?? '';
@@ -88,32 +87,7 @@ class _MyWidgetState extends State<ProfileScreen> {
         title: Text("Profile"),
         backgroundColor: Colors.orange,
         actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'logOut') {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => SignInScreen()));
-              } else if (value == 'deleteUser') {
-                // Handle delete user action
-              }
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
-                value: 'logOut',
-                child: ListTile(
-                  leading: Icon(Icons.logout),
-                  title: Text('Log Out'),
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'deleteUser',
-                child: ListTile(
-                  leading: Icon(Icons.delete),
-                  title: Text('Delete User'),
-                ),
-              ),
-            ],
-          ),
+          popUpMenuButton(),
         ],
       ),
       body: Column(
@@ -125,23 +99,21 @@ class _MyWidgetState extends State<ProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 10),
-                // Username and email
                 basicInfo(),
               ],
             ),
           ),
           const SizedBox(height: 10),
-          // My details
           Row(
-            mainAxisAlignment:
-                MainAxisAlignment.start, // Align details() to the left
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const SizedBox(width: 16), // Add some left padding if needed
+              const SizedBox(width: 16),
               details(),
             ],
           ),
           const SizedBox(height: 10),
-          Divider(),
+          const Divider(),
+          const SizedBox(height: 10),
           Expanded(child: eventsList()),
         ],
       ),
@@ -176,7 +148,17 @@ class _MyWidgetState extends State<ProfileScreen> {
             child: const Text('Edit Profile',
                 style: TextStyle(color: Colors.white)),
             onPressed: () {
-              //Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()),);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ProfileEditScreen(
+                        userName: userName,
+                        idUser: idUser,
+                        email: email,
+                        description: description,
+                        password: password,
+                        birthDate: birthDate)),
+              );
             },
           ),
         ],
@@ -252,5 +234,32 @@ class _MyWidgetState extends State<ProfileScreen> {
             ),
           ],
         ),
+      );
+
+  Widget popUpMenuButton() => PopupMenuButton<String>(
+        onSelected: (value) {
+          if (value == 'logOut') {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => SignInScreen()));
+          } else if (value == 'deleteUser') {
+            // Handle delete user action
+          }
+        },
+        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+          const PopupMenuItem<String>(
+            value: 'logOut',
+            child: ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('Log out'),
+            ),
+          ),
+          const PopupMenuItem<String>(
+            value: 'deleteUser',
+            child: ListTile(
+              leading: Icon(Icons.delete),
+              title: Text('Delete account'),
+            ),
+          ),
+        ],
       );
 }

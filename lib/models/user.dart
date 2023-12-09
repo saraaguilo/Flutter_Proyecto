@@ -8,8 +8,8 @@ class User {
   final List<String>? createdEventsId;
   final List<String>? joinedEventsId;
   final List<String>? idCategories;
-  final String? role;
-  final String? description;
+  final String role;
+  final String description;
 
   const User({
     required this.userName,
@@ -21,8 +21,8 @@ class User {
     this.createdEventsId,
     this.joinedEventsId,
     this.idCategories,
-    this.role,
-    this.description,
+    required this.role,
+    required this.description,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {

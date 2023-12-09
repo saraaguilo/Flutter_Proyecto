@@ -160,8 +160,8 @@ class _SignInScreenState extends State<SignInScreen> {
                 'joinedEventsId', jsonEncode(user.joinedEventsId));
             await prefs.setString(
                 'idCategories', jsonEncode(user.idCategories));
-            await prefs.setString('role', jsonEncode(user.role));
-            await prefs.setString('description', jsonEncode(user.description));
+            await prefs.setString('role', user.role);
+            await prefs.setString('description', user.description);
 
             print('Usuario loggeado con éxito.');
 

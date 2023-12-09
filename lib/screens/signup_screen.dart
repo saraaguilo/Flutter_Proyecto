@@ -27,6 +27,7 @@ class _MyWidgetState extends State<SignUpScreen> {
   String? _passwordController;
   TextEditingController passwordController2 = TextEditingController();
   String? _passwordController2;
+  DateTime _selectedDate = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +155,40 @@ class _MyWidgetState extends State<SignUpScreen> {
                     },
                     obscureText: true,
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: 30),
+                  GestureDetector(
+                    onTap: () async {
+                      final DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate: _selectedDate,
+                        firstDate: DateTime(1930),
+                        lastDate: DateTime.now(),
+                      );
+                      if (picked != null && picked != _selectedDate) {
+                        setState(() {
+                          _selectedDate = picked;
+                        });
+                      }
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Text('Select your birthdate: ',
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 16)),
+                        SizedBox(width: 15),
+                        Icon(Icons.calendar_today,
+                            color: Colors.white), // Set icon color to white
+                        SizedBox(width: 10),
+                        Text(
+                          '${_selectedDate.toLocal()}'.split(' ')[0],
+                          style: TextStyle(
+                              color: Colors.white), // Set text color to white
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 30),
                   Center(
                     child: Column(
                       children: [
@@ -171,6 +205,9 @@ class _MyWidgetState extends State<SignUpScreen> {
                                   'userName': _usernameController ?? "",
                                   'email': _emailController ?? "",
                                   'password': _passwordController ?? "",
+                                  'birthDate': _selectedDate != null
+                                      ? _selectedDate.toString()
+                                      : "",
                                 };
                                 print(userData);
                                 final response = await http.post(

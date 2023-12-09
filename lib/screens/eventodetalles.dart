@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/screens/buscadoreventos.dart';
 import 'package:applogin/screens/signin_screen.dart'; // acceso currentUserEmail
+import 'package:applogin/screens/eventoeditar.dart';
 
 class EventoDetailScreen extends StatefulWidget {
   final Event event;
@@ -52,36 +53,31 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
 
     if (response.statusCode == 200) {
       print('Evento eliminado con éxito');
-      Navigator.pop(context, true); // refresh de la lista en la pantalla anterior
+      Navigator.pop(context, true); // true para refrescar la lista en la pantalla anterior
     } else {
       print('Error al eliminar evento: ${response.statusCode}');
     }
   }
 
   Future<void> _loadComments() async {
-  setState(() {
-    isLoading = true;
-  });
+    setState(() {
+      isLoading = true;
+    });
 
-  var eventUrl = Uri.parse('http://localhost:9090/events/${widget.event.id}');
-  var eventResponse = await http.get(eventUrl);
-
-  if (eventResponse.statusCode == 200) {
-    var eventData = json.decode(eventResponse.body);
-
-    List<String> commentIds = List<String>.from(eventData['idComments'] ?? []);
-
+    var eventUrl = Uri.parse('http://localhost:9090/events/${widget.event.id}');
+    var eventResponse = await http.get(eventUrl);
     List<Comment> loadedComments = [];
-    for (var commentId in commentIds) {
-      var commentUrl = Uri.parse('http://localhost:9090/comments/$commentId');
-      var commentResponse = await http.get(commentUrl);
+    if (eventResponse.statusCode == 200) {
+      var eventData = json.decode(eventResponse.body);
+      List<String> commentIds = List<String>.from(eventData['idComments'] ?? []);
 
-      if (commentResponse.statusCode == 200) {
-        var commentData = json.decode(commentResponse.body);
-
-        loadedComments.add(Comment.fromJson(commentData));
-      } else {
-        print('Error al cargar comentario: ${commentResponse.statusCode}');
+      for (var commentId in commentIds) {
+        var commentUrl = Uri.parse('http://localhost:9090/comments/$commentId');
+        var commentResponse = await http.get(commentUrl);
+        if (commentResponse.statusCode == 200) {
+          var commentData = json.decode(commentResponse.body);
+          loadedComments.add(Comment.fromJson(commentData));
+        }
       }
     }
 
@@ -89,13 +85,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
       comments = loadedComments;
       isLoading = false;
     });
-  } else {
-    print('Error al cargar detalles del evento: ${eventResponse.statusCode}');
-    setState(() {
-      isLoading = false;
-    });
   }
-}
 
   void handlePostComment() async {
     String? userId = await _getCurrentUserId();
@@ -148,7 +138,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
 
       if (updateEventResponse.statusCode == 200) {
         print('Evento actualizado con éxito');
-        _loadComments(); // recargar comentarios después de agregar uno nuevo
+        _loadComments(); // refresh de comentarios después de agregar uno nuevo
       } else {
         print('Error al actualizar evento: ${updateEventResponse.statusCode}');
       }
@@ -157,7 +147,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
     }
   }
 
-  @override
+   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -244,19 +234,41 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                 style: TextStyle(color: Colors.white),
               ),
             )).toList(),
-            if (currentUserId == widget.event.idUser)
-              Align(
-                alignment: Alignment.bottomRight,
-                child: ElevatedButton(
-                  onPressed: _deleteEvent,
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.orange,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+            SizedBox(height: 60),
+            if (currentUserId == widget.event.idUser) 
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EventoEditScreen(event: widget.event),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.white,
+                      onPrimary: Colors.orange,
+                      side: BorderSide(color: Colors.orange),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
+                    child: Text('Editar Evento'),
                   ),
-                  child: Text('Borrar Evento'),
-                ),
+                  ElevatedButton(
+                    onPressed: _deleteEvent,
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.orange,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Text('Borrar Evento'),
+                  ),
+                ],
               ),
           ],
         ),
@@ -265,6 +277,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
   }
 }
 
+// Declaración de la clase Comment fuera de la clase EventoDetailScreen
 class Comment {
   final String userId;
   final String userName;
@@ -273,7 +286,7 @@ class Comment {
 
   Comment({
     required this.userId,
-    required this.userName, 
+    required this.userName,
     required this.text,
     required this.date,
   });

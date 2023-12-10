@@ -1,32 +1,7 @@
-/*
-import 'package:applogin/screens/signin_screen.dart';
+import 'package:applogin/screens/chat_screen.dart';
+
 import 'package:flutter/material.dart';
-
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key});
-
-  @override
-  State<HomeScreen> createState() => _MyWidgetState();
-}
-
-class _MyWidgetState extends State<HomeScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: ElevatedButton(
-          child: Text("Logout"),
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => SignInScreen()));
-          },
-        ),
-      ),
-    );
-  }
-}
-*/
 import 'package:applogin/screens/events.dart';
-import 'package:flutter/material.dart';
 import 'package:applogin/screens/buscadoreventos.dart';
 import 'package:applogin/screens/buscarunevento.dart';
 import 'package:applogin/screens/signin_screen.dart';
@@ -71,7 +46,7 @@ class _MyAppState extends State<HomeScreen> {
               label: 'Events',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.search), 
+              icon: Icon(Icons.search),
               label: 'Search one event',
             ),
             BottomNavigationBarItem(
@@ -82,6 +57,34 @@ class _MyAppState extends State<HomeScreen> {
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
         ),
+        persistentFooterButtons: [
+          Container(
+            alignment: Alignment.center,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Do you want to join an event chat?',
+                    style: TextStyle(fontSize: 16),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ChatScreen()),
+                      );
+                    },
+                    child: Text('Join Chat'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

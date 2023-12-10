@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/screens/buscadoreventos.dart';
-import 'package:applogin/screens/signin_screen.dart'; // Acceso a currentUserEmail
+import 'package:applogin/screens/signin_screen.dart'; // acceso a currentUserEmail
 import 'package:applogin/screens/eventoeditar.dart';
 
 class EventoDetailScreen extends StatefulWidget {
@@ -19,6 +20,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
   List<Comment> comments = [];
   bool isLoading = true;
   String? currentUserId;
+  double currentRating = 0;
 
   @override
   void initState() {
@@ -51,9 +53,9 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
     var url = Uri.parse('http://localhost:9090/events/${widget.event.id}');
     var response = await http.delete(url);
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200) {
       print('Evento eliminado con éxito');
-      Navigator.pop(context, true); // Retorna verdadero para refrescar la lista en la pantalla anterior
+      Navigator.pop(context, true); // true para refresh de la lista en la pantalla anterior
     } else {
       print('Error al eliminar evento: ${response.statusCode}');
     }
@@ -88,6 +90,27 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
   }
 
   void handlePostComment() async {
+    if (currentRating == 0) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Error"),
+            content: Text("Es necesario indicar una puntuación para dejar el comentario"),
+            actions: <Widget>[
+              TextButton(
+                child: Text("Cerrar"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
     String? userId = await _getCurrentUserId();
     if (userId != null) {
       await postComment(userId);
@@ -105,6 +128,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
         'userId': userId,
         'text': commentController.text,
         'date': DateTime.now().toIso8601String(),
+        'punctuation': currentRating,
       }),
     );
 
@@ -138,7 +162,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
 
       if (updateEventResponse.statusCode == 200) {
         print('Evento actualizado con éxito');
-        _loadComments(); // Recargar comentarios después de agregar uno nuevo
+        _loadComments(); // refresh de comentarios después de agregar uno nuevo
       } else {
         print('Error al actualizar evento: ${updateEventResponse.statusCode}');
       }
@@ -205,6 +229,26 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
             ),
             SizedBox(height: 10),
             Center(
+              child: RatingBar.builder(
+                initialRating: currentRating,
+                minRating: 1,
+                direction: Axis.horizontal,
+                allowHalfRating: true,
+                itemCount: 5,
+                itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                itemBuilder: (context, _) => Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                ),
+                onRatingUpdate: (punctuation) {
+                  setState(() {
+                    currentRating = punctuation;
+                  });
+                },
+              ),
+            ),
+            SizedBox(height: 10),
+            Center(
               child: ElevatedButton(
                 onPressed: handlePostComment,
                 style: ElevatedButton.styleFrom(
@@ -218,7 +262,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                 child: Text('Dejar Comentario'),
               ),
             ),
-            if (isLoading)
+              if (isLoading)
               Center(child: CircularProgressIndicator()),
             if (!isLoading && comments.isEmpty)
               Text('No hay comentarios'),
@@ -250,6 +294,16 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                   Text(
                     comment.text,
                     style: TextStyle(color: Colors.white),
+                  ),
+                  RatingBarIndicator(
+                    rating: comment.punctuation,
+                    itemBuilder: (context, index) => Icon(
+                      Icons.star,
+                      color: Colors.amber,
+                    ),
+                    itemCount: 5,
+                    itemSize: 20.0,
+                    direction: Axis.horizontal,
                   ),
                 ],
               ),
@@ -297,18 +351,20 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
   }
 }
 
-// Declaración de la clase Comment fuera de la clase EventoDetailScreen
+
 class Comment {
   final String userId;
   final String userName;
   final String text;
   final DateTime date;
+  final double punctuation;
 
   Comment({
     required this.userId,
     required this.userName,
     required this.text,
     required this.date,
+    required this.punctuation,
   });
 
   factory Comment.fromJson(Map<String, dynamic> json) {
@@ -328,6 +384,8 @@ class Comment {
       userName: userName,
       text: json['text'],
       date: DateTime.parse(json['date']),
+      punctuation: json['punctuation'] != null ? json['punctuation'].toDouble() : 0.0,
     );
   }
 }
+

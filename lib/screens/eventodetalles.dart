@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/screens/buscadoreventos.dart';
-import 'package:applogin/screens/signin_screen.dart'; // acceso currentUserEmail
+import 'package:applogin/screens/signin_screen.dart'; // Acceso a currentUserEmail
 import 'package:applogin/screens/eventoeditar.dart';
 
 class EventoDetailScreen extends StatefulWidget {
@@ -51,9 +51,9 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
     var url = Uri.parse('http://localhost:9090/events/${widget.event.id}');
     var response = await http.delete(url);
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       print('Evento eliminado con éxito');
-      Navigator.pop(context, true); // true para refrescar la lista en la pantalla anterior
+      Navigator.pop(context, true); // Retorna verdadero para refrescar la lista en la pantalla anterior
     } else {
       print('Error al eliminar evento: ${response.statusCode}');
     }
@@ -138,7 +138,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
 
       if (updateEventResponse.statusCode == 200) {
         print('Evento actualizado con éxito');
-        _loadComments(); // refresh de comentarios después de agregar uno nuevo
+        _loadComments(); // Recargar comentarios después de agregar uno nuevo
       } else {
         print('Error al actualizar evento: ${updateEventResponse.statusCode}');
       }
@@ -147,7 +147,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
     }
   }
 
-   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -229,9 +229,29 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                 color: Colors.orange,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Text(
-                comment.text,
-                style: TextStyle(color: Colors.white),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    comment.userName,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    comment.date.toLocal().toString(),
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    comment.text,
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
               ),
             )).toList(),
             SizedBox(height: 60),

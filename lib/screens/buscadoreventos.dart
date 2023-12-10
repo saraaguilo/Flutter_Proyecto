@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/screens/crearevento.dart';
 import 'package:applogin/screens/eventodetalles.dart';
+import 'package:applogin/screens/eventoeditar.dart';
+
 
 class BuscadorScreen extends StatefulWidget {
-  const BuscadorScreen({Key? key});
+  const BuscadorScreen({Key? key}) : super(key: key);
 
   @override
-  State<BuscadorScreen> createState() => _MyWidgetState();
+  State<BuscadorScreen> createState() => _BuscadorScreenState();
 }
 
-class _MyWidgetState extends State<BuscadorScreen> {
+class _BuscadorScreenState extends State<BuscadorScreen> {
   List<Event> events = [];
 
   @override
@@ -47,6 +49,29 @@ class _MyWidgetState extends State<BuscadorScreen> {
     }
   }
 
+  void navigateToDetailEventScreen(Event event) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => EventoDetailScreen(event: event)),
+    );
+
+    if (result == true) {
+      getEvents();
+    }
+  }
+
+  // navegar a la pantalla de editar evento
+  void navigateToEditEventScreen(Event event) async {
+     final result = await Navigator.push(
+     context,
+     MaterialPageRoute(builder: (context) => EventoEditScreen(event: event)),
+     );
+
+     if (result == true) {
+       getEvents();
+     }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,12 +88,7 @@ class _MyWidgetState extends State<BuscadorScreen> {
               margin: EdgeInsets.symmetric(vertical: 8.0),
               color: Colors.grey[200],
               child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => EventoDetailScreen(event: events[index])),
-                  );
-                },
+                onTap: () => navigateToDetailEventScreen(events[index]),
                 child: ListTile(
                   title: Text('Event Name: ${events[index].eventName}'),
                   subtitle: Column(
@@ -114,7 +134,7 @@ class Event {
     required this.date,
     required this.eventName,
     required this.description,
-    this.idUser, 
+    this.idUser,
     this.idComments,
   });
 
@@ -131,7 +151,7 @@ class Event {
       date: DateTime.parse(json['date'] ?? DateTime.now().toIso8601String()),
       eventName: json['eventName'] ?? '',
       description: json['description'] ?? '',
-      idUser: parsedUserId, 
+      idUser: parsedUserId,
       idComments: json['idComments'] != null
           ? List<String>.from(json['idComments'])
           : null,

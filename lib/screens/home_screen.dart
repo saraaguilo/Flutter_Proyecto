@@ -1,3 +1,4 @@
+import 'package:applogin/screens/chat_home.dart';
 import 'package:applogin/screens/chat_screen.dart';
 
 import 'package:flutter/material.dart';
@@ -75,7 +76,7 @@ class _MyAppState extends State<HomeScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ChatScreen()),
+                        MaterialPageRoute(builder: (context) => ChatPrincipalScreen()),
                       );
                     },
                     child: Text('Join Chat'),

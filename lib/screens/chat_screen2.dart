@@ -1,26 +1,27 @@
 import 'package:applogin/controller/chat_controller.dart';
+import 'package:applogin/controller/chat_controller2.dart';
 import 'package:applogin/model/message.dart';
+import 'package:applogin/model/message2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-class ChatScreen extends StatefulWidget {
+class ChatScreen2 extends StatefulWidget {
   final String chatName;
-  const ChatScreen({required this.chatName, Key? key}) : super(key: key);
-  
+  const ChatScreen2({required this.chatName, Key? key}) : super(key: key);
 
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  _ChatScreenState2 createState() => _ChatScreenState2();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState2 extends State<ChatScreen2> {
   Color purple = Color(0xFF6C5CE7);
   Color black = Color(0xFF191919);
   Color orange = Color(0xFFFF7B00);
   Color darkorange = Color.fromARGB(255, 153, 64, 1);
   TextEditingController msgInputController = TextEditingController();
   late IO.Socket socket;
-  ChatController chatController = ChatController();
+  ChatController2 chatController2 = ChatController2();
 @override
   void initState(){
     socket = IO.io(
@@ -30,7 +31,7 @@ class _ChatScreenState extends State<ChatScreen> {
           .disableAutoConnect()
           .build());
     socket.connect();
-    setUpSocketListener();
+    setUpSocketListener2();
     super.initState();
   }
 
@@ -43,7 +44,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             Expanded(
             child: Obx( 
-          () => Container(padding: EdgeInsets.all(10),child: Text("Connected User ${chatController.connectedUser}",
+          () => Container(padding: EdgeInsets.all(10),child: Text("Connected User ${chatController2.connectedUser}",
             style: TextStyle(
               color: Colors.white,
               fontSize: 15.0, ),
@@ -54,9 +55,9 @@ class _ChatScreenState extends State<ChatScreen> {
               flex: 9,
               child: Obx(
                 ()=> ListView.builder(
-                  itemCount: chatController.chatMessages.length,
+                  itemCount: chatController2.chatMessages.length,
                   itemBuilder: (context, index) {
-                    var currentItem = chatController.chatMessages[index];
+                    var currentItem = chatController2.chatMessages[index];
                     return MessageItem(
                       sentByMe: currentItem.sentByMe == socket.id,
                       message: currentItem.message,
@@ -110,21 +111,19 @@ class _ChatScreenState extends State<ChatScreen> {
   void sendMessage(String text) {
     var messageJson = {"message": text, "sentByMe": socket.id};
     socket.emit('message', messageJson);
-    chatController.chatMessages.add(Message.fromJson(messageJson));
+    chatController2.chatMessages.add(Message.fromJson(messageJson));
   }
   
-  void setUpSocketListener() {
+  void setUpSocketListener2() {
     socket.on('message-receive', (msg){
       print(msg);
-      chatController.chatMessages.add(Message.fromJson(msg));
+      chatController2.chatMessages.add(Message.fromJson(msg));
     });
     socket.on('connected-user ', (msg){
       print(msg);
-      chatController.connectedUser.value = msg;
+      chatController2.connectedUser.value = msg;
     });
   }
- 
-  
 }
 
 class MessageItem extends StatelessWidget {

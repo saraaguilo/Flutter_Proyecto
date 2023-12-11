@@ -3,8 +3,38 @@ import 'package:applogin/screens/chat_screen2.dart';
 import 'package:applogin/screens/chat_screen3.dart';
 import 'package:flutter/material.dart';
 
-class ChatPrincipalScreen extends StatelessWidget {
-  final List<String> conciertos = ['Concierto Pop', 'Concierto Pop 2', 'Concierto Pop 3'];
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+class ChatPrincipalScreen extends StatefulWidget {
+  @override
+  _ChatPrincipalScreenState createState() => _ChatPrincipalScreenState();
+}
+
+class _ChatPrincipalScreenState extends State<ChatPrincipalScreen> {
+  List<String> eventNames = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchEventNames();
+  }
+
+  Future<void> fetchEventNames() async {
+    final response = await http.get(Uri.parse('http://localhost:9090/events'));
+
+    if (response.statusCode == 200) {
+      // Decodificar la respuesta JSON
+      final List<dynamic> data = json.decode(response.body);
+      setState(() {
+        // Extraer los nombres de los eventos
+        eventNames = data.map((event) => event['eventName'].toString()).toList();
+      });
+    } else {
+      // Si la solicitud falla, maneja el error según sea necesario
+      print('Error al cargar los eventos: ${response.statusCode}');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,13 +43,13 @@ class ChatPrincipalScreen extends StatelessWidget {
         title: Text('Chat Principal'),
       ),
       body: ListView.builder(
-        itemCount: conciertos.length,
+        itemCount: eventNames.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(conciertos[index]),
+            title: Text(eventNames[index]),
             onTap: () {
-              // Al hacer clic en un concierto, navega a la pantalla de chat correspondiente
-              navigateToChatScreen(context, conciertos[index]);
+              // Al hacer clic en un evento, navega a la pantalla de chat correspondiente
+              navigateToChatScreen(context, eventNames[index]);
             },
           );
         },
@@ -27,29 +57,12 @@ class ChatPrincipalScreen extends StatelessWidget {
     );
   }
 
-  void navigateToChatScreen(BuildContext context, String chatName) {
-  if (chatName == 'Concierto Pop') {
+  void navigateToChatScreen(BuildContext context, String eventName) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ChatScreen(chatName: chatName),
-      ),
-    );
-  } else if (chatName == 'Concierto Pop 2') {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ChatScreen2(chatName: chatName),
-      ),
-    );
-  } else if (chatName == 'Concierto Pop 3') {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ChatScreen3(chatName: chatName),
+        builder: (context) => ChatScreen(chatName: eventName),
       ),
     );
   }
 }
-}
-

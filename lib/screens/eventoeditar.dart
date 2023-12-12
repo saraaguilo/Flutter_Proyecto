@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/screens/buscadoreventos.dart'; // Asegúrate de que esta ruta sea correcta
+import 'package:applogin/config.dart';
+import 'package:applogin/models/event.dart';
 
 class EventoEditScreen extends StatefulWidget {
   final Event event;
@@ -34,7 +36,7 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
     List<String> coordinatesArray = _eventLocationController.text.split(',').map((s) => s.trim()).toList();
 
     var response = await http.put(
-      Uri.parse('http://localhost:9090/events/${widget.event.id}'),
+      Uri.parse('$uri/events/${widget.event.id}'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'eventName': _eventNameController.text,

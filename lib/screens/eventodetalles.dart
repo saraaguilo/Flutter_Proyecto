@@ -6,6 +6,7 @@ import 'package:applogin/screens/buscadoreventos.dart';
 import 'package:applogin/screens/signin_screen.dart'; // acceso a currentUserEmail
 import 'package:applogin/screens/eventoeditar.dart';
 import 'package:applogin/models/event.dart';
+import 'package:applogin/config.dart';
 
 class EventoDetailScreen extends StatefulWidget {
   final Event event;
@@ -31,7 +32,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
   }
 
   Future<String?> _getCurrentUserId() async {
-    var url = Uri.parse('http://localhost:9090/users');
+    var url = Uri.parse('$uri/users');
     var response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -51,10 +52,10 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
   }
 
   Future<void> _deleteEvent() async {
-    var url = Uri.parse('http://localhost:9090/events/${widget.event.id}');
+    var url = Uri.parse('$uri/events/${widget.event.id}');
     var response = await http.delete(url);
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       print('Evento eliminado con éxito');
       Navigator.pop(context, true); // true para refresh de la lista en la pantalla anterior
     } else {
@@ -67,7 +68,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
       isLoading = true;
     });
 
-    var eventUrl = Uri.parse('http://localhost:9090/events/${widget.event.id}');
+    var eventUrl = Uri.parse('$uri/events/${widget.event.id}');
     var eventResponse = await http.get(eventUrl);
     List<Comment> loadedComments = [];
     if (eventResponse.statusCode == 200) {
@@ -75,7 +76,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
       List<String> commentIds = List<String>.from(eventData['idComments'] ?? []);
 
       for (var commentId in commentIds) {
-        var commentUrl = Uri.parse('http://localhost:9090/comments/$commentId');
+        var commentUrl = Uri.parse('$uri/comments/$commentId');
         var commentResponse = await http.get(commentUrl);
         if (commentResponse.statusCode == 200) {
           var commentData = json.decode(commentResponse.body);
@@ -121,7 +122,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
   }
 
   Future<void> postComment(String userId) async {
-    var commentUrl = Uri.parse('http://localhost:9090/comments');
+    var commentUrl = Uri.parse('$uri/comments');
     var commentResponse = await http.post(
       commentUrl,
       headers: {'Content-Type': 'application/json'},
@@ -144,7 +145,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
   }
 
   Future<void> addCommentToEvent(String commentId) async {
-    var getEventUrl = Uri.parse('http://localhost:9090/events/${widget.event.id}');
+    var getEventUrl = Uri.parse('$uri/events/${widget.event.id}');
     var getEventResponse = await http.get(getEventUrl);
 
     if (getEventResponse.statusCode == 200) {
@@ -152,7 +153,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
       List<dynamic> idComments = List<dynamic>.from(eventData['idComments'] ?? []);
       idComments.add(commentId);
 
-      var updateEventUrl = Uri.parse('http://localhost:9090/events/${widget.event.id}');
+      var updateEventUrl = Uri.parse('$uri/events/${widget.event.id}');
       var updateEventResponse = await http.put(
         updateEventUrl,
         headers: {'Content-Type': 'application/json'},

@@ -5,6 +5,7 @@ import 'package:applogin/model/message2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:applogin/config.dart';
 
 class ChatScreen2 extends StatefulWidget {
   final String chatName;
@@ -25,7 +26,7 @@ class _ChatScreenState2 extends State<ChatScreen2> {
 @override
   void initState(){
     socket = IO.io(
-        'http://localhost:9090',
+        '$uri',
         IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()

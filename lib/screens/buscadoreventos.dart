@@ -6,6 +6,7 @@ import 'package:applogin/screens/eventodetalles.dart';
 import 'package:applogin/screens/eventoeditar.dart';
 import 'package:applogin/config.dart';
 import 'package:applogin/models/event.dart';
+import 'package:intl/intl.dart';
 
 class BuscadorScreen extends StatefulWidget {
   const BuscadorScreen({Key? key}) : super(key: key);
@@ -25,9 +26,7 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
 
   Future<void> getEvents() async {
     try {
-
-      final response =
-          await http.get(Uri.parse('$uri/events'));
+      final response = await http.get(Uri.parse('$uri/events'));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -67,14 +66,14 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
 
   // navegar a la pantalla de editar evento
   void navigateToEditEventScreen(Event event) async {
-     final result = await Navigator.push(
-     context,
-     MaterialPageRoute(builder: (context) => EventoEditScreen(event: event)),
-     );
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => EventoEditScreen(event: event)),
+    );
 
-     if (result == true) {
-       getEvents();
-     }
+    if (result == true) {
+      getEvents();
+    }
   }
 
   @override
@@ -92,7 +91,6 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
             return Card(
               color: Colors.grey[200],
               child: InkWell(
-
                 //onTap: () => navigateToDetailEventScreen(events[index]),
                 onTap: () {
                   Navigator.push(
@@ -108,7 +106,8 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Coordinates: ${events[index].coordinates}'),
-                      Text('Date: ${events[index].date}'),
+                      Text(
+                          'Date: ${DateFormat('yyyy-MM-dd').format(events[index].date)}'),
                       Text('Description: ${events[index].description}'),
                     ],
                   ),
@@ -131,7 +130,3 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
     );
   }
 }
-
-
-
-

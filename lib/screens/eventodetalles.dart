@@ -7,6 +7,7 @@ import 'package:applogin/screens/signin_screen.dart'; // acceso a currentUserEma
 import 'package:applogin/screens/eventoeditar.dart';
 import 'package:applogin/models/event.dart';
 import 'package:applogin/config.dart';
+import 'package:intl/intl.dart';
 
 class EventoDetailScreen extends StatefulWidget {
   final Event event;
@@ -57,7 +58,8 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
 
     if (response.statusCode == 201) {
       print('Evento eliminado con éxito');
-      Navigator.pop(context, true); // true para refresh de la lista en la pantalla anterior
+      Navigator.pop(context,
+          true); // true para refresh de la lista en la pantalla anterior
     } else {
       print('Error al eliminar evento: ${response.statusCode}');
     }
@@ -73,7 +75,8 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
     List<Comment> loadedComments = [];
     if (eventResponse.statusCode == 200) {
       var eventData = json.decode(eventResponse.body);
-      List<String> commentIds = List<String>.from(eventData['idComments'] ?? []);
+      List<String> commentIds =
+          List<String>.from(eventData['idComments'] ?? []);
 
       for (var commentId in commentIds) {
         var commentUrl = Uri.parse('$uri/comments/$commentId');
@@ -98,7 +101,8 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text("Error"),
-            content: Text("Es necesario indicar una puntuación para dejar el comentario"),
+            content: Text(
+                "Es necesario indicar una puntuación para dejar el comentario"),
             actions: <Widget>[
               TextButton(
                 child: Text("Cerrar"),
@@ -137,7 +141,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
     if (commentResponse.statusCode == 201) {
       print('Comentario enviado con éxito');
       var commentData = json.decode(commentResponse.body);
-      var commentId = commentData['_id']; 
+      var commentId = commentData['_id'];
       await addCommentToEvent(commentId);
     } else {
       print('Error al enviar comentario: ${commentResponse.statusCode}');
@@ -150,7 +154,8 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
 
     if (getEventResponse.statusCode == 200) {
       var eventData = json.decode(getEventResponse.body);
-      List<dynamic> idComments = List<dynamic>.from(eventData['idComments'] ?? []);
+      List<dynamic> idComments =
+          List<dynamic>.from(eventData['idComments'] ?? []);
       idComments.add(commentId);
 
       var updateEventUrl = Uri.parse('$uri/events/${widget.event.id}');
@@ -169,7 +174,8 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
         print('Error al actualizar evento: ${updateEventResponse.statusCode}');
       }
     } else {
-      print('Error al obtener detalles del evento: ${getEventResponse.statusCode}');
+      print(
+          'Error al obtener detalles del evento: ${getEventResponse.statusCode}');
     }
   }
 
@@ -186,22 +192,22 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Nombre del Evento: ${widget.event.eventName}',
+              'Name: ${widget.event.eventName}',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             ),
             SizedBox(height: 10),
             Text(
-              'Descripción: ${widget.event.description}',
+              'Description: ${widget.event.description}',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 10),
             Text(
-              'Fecha: ${widget.event.date}',
+              'Date: ${DateFormat('yyyy-MM-dd').format(widget.event.date)}',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 10),
             Text(
-              'Ubicación: ${widget.event.coordinates}',
+              'Location: ${widget.event.coordinates}',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 20),
@@ -224,7 +230,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
             TextField(
               controller: commentController,
               decoration: InputDecoration(
-                labelText: 'Deja tu comentario aquí',
+                labelText: 'Leave your comment here',
                 border: OutlineInputBorder(),
               ),
               maxLines: 3,
@@ -261,57 +267,57 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                child: Text('Dejar Comentario'),
+                child: Text('Leave Comment'),
               ),
             ),
-              if (isLoading)
-              Center(child: CircularProgressIndicator()),
-            if (!isLoading && comments.isEmpty)
-              Text('No hay comentarios'),
-            ...comments.map((comment) => Container(
-              margin: EdgeInsets.only(top: 10),
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.orange,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    comment.userName,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    comment.date.toLocal().toString(),
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 12,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    comment.text,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  RatingBarIndicator(
-                    rating: comment.punctuation,
-                    itemBuilder: (context, index) => Icon(
-                      Icons.star,
-                      color: Colors.amber,
-                    ),
-                    itemCount: 5,
-                    itemSize: 20.0,
-                    direction: Axis.horizontal,
-                  ),
-                ],
-              ),
-            )).toList(),
+            if (isLoading) Center(child: CircularProgressIndicator()),
+            if (!isLoading && comments.isEmpty) Text('There are no comments'),
+            ...comments
+                .map((comment) => Container(
+                      margin: EdgeInsets.only(top: 10),
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.orange,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            comment.userName,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            comment.date.toLocal().toString(),
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            comment.text,
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          RatingBarIndicator(
+                            rating: comment.punctuation,
+                            itemBuilder: (context, index) => Icon(
+                              Icons.star,
+                              color: Colors.amber,
+                            ),
+                            itemCount: 5,
+                            itemSize: 20.0,
+                            direction: Axis.horizontal,
+                          ),
+                        ],
+                      ),
+                    ))
+                .toList(),
             SizedBox(height: 60),
-            if (currentUserId == widget.event.idUser) 
+            if (currentUserId == widget.event.idUser)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -320,7 +326,8 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => EventoEditScreen(event: widget.event),
+                          builder: (context) =>
+                              EventoEditScreen(event: widget.event),
                         ),
                       );
                     },
@@ -332,7 +339,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    child: Text('Editar Evento'),
+                    child: Text('Edit Event'),
                   ),
                   ElevatedButton(
                     onPressed: _deleteEvent,
@@ -343,7 +350,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    child: Text('Borrar Evento'),
+                    child: Text('Delete Event'),
                   ),
                 ],
               ),
@@ -353,7 +360,6 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
     );
   }
 }
-
 
 class Comment {
   final String userId;
@@ -387,8 +393,8 @@ class Comment {
       userName: userName,
       text: json['text'],
       date: DateTime.parse(json['date']),
-      punctuation: json['punctuation'] != null ? json['punctuation'].toDouble() : 0.0,
+      punctuation:
+          json['punctuation'] != null ? json['punctuation'].toDouble() : 0.0,
     );
   }
 }
-

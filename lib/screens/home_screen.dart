@@ -10,17 +10,16 @@ import 'package:applogin/screens/profile.dart';
 import 'package:applogin/models/user.dart';
 
 class HomeScreen extends StatefulWidget {
-  @override
   const HomeScreen();
 
+  @override
   _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<HomeScreen> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
 
   final List<Widget> _pages = [
-    EventsScreen(),
     BuscadorUnEventoScreen(),
     BuscadorScreen(),
     ProfileScreen(),
@@ -43,10 +42,6 @@ class _MyAppState extends State<HomeScreen> {
           backgroundColor: Color.fromARGB(255, 255, 255, 255),
           selectedItemColor: Color.fromARGB(255, 255, 123, 0),
           items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Events',
-            ),
             BottomNavigationBarItem(
               icon: Icon(Icons.search),
               label: 'Search one event',
@@ -85,6 +80,9 @@ class _MyAppState extends State<HomeScreen> {
                             builder: (context) => ChatPrincipalScreen()),
                       );
                     },
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.orange, // Cambia a tu color deseado
+                    ),
                     child: Text('Join Chat'),
                   ),
                 ],
@@ -94,5 +92,12 @@ class _MyAppState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Establecer el índice inicial en 2 para BuscadorScreen
+    _selectedIndex = 2;
   }
 }

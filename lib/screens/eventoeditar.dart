@@ -20,20 +20,31 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
   late TextEditingController _eventLocationController;
   late String _selectedCategory;
   late DateTime _selectedDate;
-  final List<String> _categories = ['Pop', 'Rock', 'Rap', 'Trap', 'Jazz', 'Metal'];
+  final List<String> _categories = [
+    'Pop',
+    'Rock',
+    'Rap',
+    'Trap',
+    'Jazz',
+    'Metal'
+  ];
 
   @override
   void initState() {
     super.initState();
     _eventNameController = TextEditingController(text: widget.event.eventName);
-    _eventDescriptionController = TextEditingController(text: widget.event.description);
-    _eventLocationController = TextEditingController(text: widget.event.coordinates.join(', '));
-    _selectedCategory = 'Pop'; // Asumir categoría por defecto o añadir lógica para obtenerla
+    _eventDescriptionController =
+        TextEditingController(text: widget.event.description);
+    _eventLocationController =
+        TextEditingController(text: widget.event.coordinates.join(', '));
+    _selectedCategory =
+        'Pop'; // Asumir categoría por defecto o añadir lógica para obtenerla
     _selectedDate = widget.event.date;
   }
 
   Future<void> updateEvent() async {
-    List<String> coordinatesArray = _eventLocationController.text.split(',').map((s) => s.trim()).toList();
+    List<String> coordinatesArray =
+        _eventLocationController.text.split(',').map((s) => s.trim()).toList();
 
     var response = await http.put(
       Uri.parse('$uri/events/${widget.event.id}'),
@@ -49,9 +60,11 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
 
     if (response.statusCode == 200) {
       print('Evento actualizado correctamente');
-      Navigator.pop(context, true); // Retorno a la pantalla anterior con indicador de actualización
+      Navigator.pop(context,
+          true); // Retorno a la pantalla anterior con indicador de actualización
     } else {
-      print('Error al actualizar el evento. Código de estado: ${response.statusCode}');
+      print(
+          'Error al actualizar el evento. Código de estado: ${response.statusCode}');
     }
   }
 
@@ -59,7 +72,7 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Editar Evento'),
+        title: Text('Edit Event'),
         backgroundColor: Colors.orange,
       ),
       body: Padding(
@@ -69,11 +82,11 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
           children: <Widget>[
             TextField(
               controller: _eventNameController,
-              decoration: InputDecoration(labelText: 'Nombre del Evento'),
+              decoration: InputDecoration(labelText: 'Name'),
             ),
             TextField(
               controller: _eventDescriptionController,
-              decoration: InputDecoration(labelText: 'Descripción del Evento'),
+              decoration: InputDecoration(labelText: 'Description'),
             ),
             DropdownButtonFormField<String>(
               value: _selectedCategory,
@@ -88,7 +101,7 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
                   child: Text(value),
                 );
               }).toList(),
-              decoration: InputDecoration(labelText: 'Categoría Musical'),
+              decoration: InputDecoration(labelText: 'Category'),
             ),
             GestureDetector(
               onTap: () async {
@@ -115,11 +128,11 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
             ),
             TextField(
               controller: _eventLocationController,
-              decoration: InputDecoration(labelText: 'Ubicación'),
+              decoration: InputDecoration(labelText: 'Location'),
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              child: Text('Guardar Cambios'),
+              child: Text('Save changes'),
               onPressed: updateEvent,
               style: ElevatedButton.styleFrom(primary: Colors.orange),
             ),

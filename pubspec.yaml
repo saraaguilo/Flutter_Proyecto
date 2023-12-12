@@ -39,6 +39,7 @@ dependencies:
   http: any
   socket_io_client: ^2.0.3+1
   get: ^4.6.6
+  dev: ^1.0.0
 
 dev_dependencies:
   flutter_test:

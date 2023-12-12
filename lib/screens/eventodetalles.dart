@@ -335,7 +335,8 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                   ElevatedButton(
                     onPressed: _deleteEvent,
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.orange,
+                      primary: Colors.red,
+                      onPrimary: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),

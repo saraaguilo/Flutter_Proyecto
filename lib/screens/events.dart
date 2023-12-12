@@ -53,7 +53,7 @@ class _MyWidgetState extends State<EventsScreen> {
               SizedBox(height: 20),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.orange, // Cambia el color a naranja
+                  primary: Colors.orange, 
                 ),
                 child: Text("Show all events"),
                 onPressed: () {
@@ -63,7 +63,7 @@ class _MyWidgetState extends State<EventsScreen> {
               SizedBox(height: 20),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.orange, // Cambia el color a naranja
+                  primary: Colors.orange, 
                 ),
                 child: Text("Logout"),
                 onPressed: () {

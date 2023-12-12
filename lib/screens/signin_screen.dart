@@ -126,14 +126,15 @@ class _MyWidgetState extends State<SignInScreen> {
   }
 }
 */
-import 'package:applogin/reusable_/reusable_widget.dart';
-import 'package:applogin/screens/events.dart';
-import 'package:applogin/screens/home_screen.dart';
-import 'package:applogin/screens/signin_screen.dart';
-import 'package:applogin/screens/signup_screen.dart';
-import 'package:applogin/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:applogin/screens/home_screen.dart';
+import 'package:applogin/screens/signup_screen.dart';
+import 'package:applogin/reusable_/reusable_widget.dart';
+import 'package:applogin/utils/color_utils.dart';
+
+// variable global para almacenar el email del usuario
+String currentUserEmail = '';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({Key? key});
@@ -197,11 +198,6 @@ class _SignInScreenState extends State<SignInScreen> {
                     style: TextStyle(
                       color: Colors.white,
                     ),
-                    onSaved: (value) {
-                      setState(() {
-                        // Guarda el valor en una variable cuando el formulario se guarda
-                      });
-                    },
                   ),
                   SizedBox(height: 30),
                   //PASSWORD TEXT FIELD
@@ -222,11 +218,6 @@ class _SignInScreenState extends State<SignInScreen> {
                     style: TextStyle(
                       color: Colors.white,
                     ),
-                    onSaved: (value) {
-                      setState(() {
-                        // Guarda el valor en una variable cuando el formulario se guarda
-                      });
-                    },
                     obscureText: true,
                   ),
                   SizedBox(height: 16),
@@ -261,13 +252,13 @@ class _SignInScreenState extends State<SignInScreen> {
 
           if (response.statusCode == 200) {
             print('Usuario loggeado con éxito.');
+            // almacenar el email del usuario en la variable global
+            currentUserEmail = emailController.text;
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => HomeScreen()),
             );
           } else {
-            print(
-                'Error al loggear el usuario. Código de estado: ${response.statusCode}');
             showDialog(
               context: context,
               builder: (BuildContext context) {

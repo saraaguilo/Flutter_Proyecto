@@ -8,7 +8,7 @@ import 'package:applogin/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:applogin/models/user.dart';
 import 'package:applogin/models/event.dart';
-import 'package:applogin/services/event_services.dart';
+import 'package:applogin/services/user_services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:applogin/config.dart';
 import 'package:http/http.dart' as http;
@@ -87,7 +87,10 @@ class _MyWidgetState extends State<ProfileScreen> {
         title: Text("Profile"),
         backgroundColor: Colors.orange,
         actions: [
-          popUpMenuButton(),
+          Container(
+            margin: EdgeInsets.only(right: 25.0),
+            child: popUpMenuButton(),
+          ),
         ],
       ),
       body: Column(
@@ -150,14 +153,7 @@ class _MyWidgetState extends State<ProfileScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => ProfileEditScreen(
-                        userName: userName,
-                        idUser: idUser,
-                        email: email,
-                        description: description,
-                        password: password,
-                        birthDate: birthDate)),
+                MaterialPageRoute(builder: (context) => ProfileEditScreen()),
               );
             },
           ),
@@ -242,7 +238,9 @@ class _MyWidgetState extends State<ProfileScreen> {
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => SignInScreen()));
           } else if (value == 'deleteUser') {
-            // Handle delete user action
+            deleteUser(idUser);
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => SignInScreen()));
           }
         },
         itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[

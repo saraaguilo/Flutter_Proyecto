@@ -6,53 +6,48 @@ import 'package:applogin/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileEditScreen extends StatefulWidget {
-  final String userName;
-  final String email;
-  final String idUser;
-  final DateTime? birthDate;
-  final String password;
-  final String description;
-
-  const ProfileEditScreen({
-    Key? key,
-    required this.userName,
-    required this.email,
-    required this.idUser,
-    required this.description,
-    required this.password,
-    this.birthDate,
-  }) : super(key: key);
+  const ProfileEditScreen({Key? key}) : super(key: key);
 
   @override
   State<ProfileEditScreen> createState() => _MyWidgetState();
 }
 
 class _MyWidgetState extends State<ProfileEditScreen> {
-  late String passedUsername;
-  late String passedEmail;
-  late String passedIdUser;
-  late String passedDescription;
-  late String passedPassword;
-  late DateTime passedBirthdate;
+  String passedUsername = '';
+  String passedEmail = '';
+  String passedPassword = '';
+  String passedIdUser = '';
+  DateTime passedBirthdate = DateTime(2023, 11, 22);
+  String passedDescription = '';
 
   @override
   void initState() {
     super.initState();
-    passedUsername = widget.userName;
-    passedEmail = widget.email;
-    passedIdUser = widget.idUser;
-    passedDescription = widget.description;
-    passedPassword = widget.password;
-    passedBirthdate = widget.birthDate ?? DateTime(2023, 11, 22);
+    loadData();
+  }
 
-    usernameController.text = passedUsername;
-    emailController.text = passedEmail;
-    passwordController.text = passedPassword;
-    passwordController2.text = passedPassword;
-    _selectedDate = passedBirthdate;
-    descriptionController.text = passedDescription;
+  void loadData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      passedUsername = prefs.getString('userName') ?? '';
+      passedEmail = prefs.getString('email') ?? '';
+      passedIdUser = prefs.getString('idUser') ?? '';
+      String? date = prefs.getString('birthDate');
+      passedBirthdate = DateTime.parse(date ?? '2023-12-08T12:34:56');
+      passedPassword = prefs.getString('password') ?? '';
+      passedDescription = prefs.getString('description') ?? '';
+
+      usernameController.text = passedUsername;
+      emailController.text = passedEmail;
+      passwordController.text = passedPassword;
+      passwordController2.text = passedPassword;
+      _selectedDate = passedBirthdate;
+      descriptionController.text = passedDescription;
+    });
   }
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -271,11 +266,27 @@ class _MyWidgetState extends State<ProfileEditScreen> {
 
                                   if (response.statusCode == 201) {
                                     print('Perfil modificado con éxito.');
+
+                                    final SharedPreferences prefs =
+                                        await SharedPreferences.getInstance();
+                                    await prefs.setString(
+                                        'userName', _usernameController ?? '');
+                                    await prefs.setString(
+                                        'email', _emailController ?? "");
+                                    await prefs.setString(
+                                        'birthDate',
+                                        _selectedDate != null
+                                            ? _selectedDate.toString()
+                                            : "");
+                                    await prefs.setString(
+                                        'password', _passwordController ?? "");
+                                    await prefs.setString('description',
+                                        _descriptionController ?? "");
+
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) =>
-                                              ProfileScreen()),
+                                          builder: (context) => HomeScreen()),
                                     );
                                   } else {
                                     print(
@@ -311,7 +322,7 @@ class _MyWidgetState extends State<ProfileEditScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => ProfileScreen()),
+                                    builder: (context) => HomeScreen()),
                               );
                             },
                             style: ElevatedButton.styleFrom(

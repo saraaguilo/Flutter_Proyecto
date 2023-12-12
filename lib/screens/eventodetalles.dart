@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:applogin/screens/buscadoreventos.dart'; 
+import 'package:applogin/screens/buscadoreventos.dart';
+import 'package:applogin/models/event.dart';
 
 class EventoDetailScreen extends StatelessWidget {
   final Event event;
@@ -41,8 +42,7 @@ class EventoDetailScreen extends StatelessWidget {
             SizedBox(height: 20),
             Center(
               child: ElevatedButton(
-                onPressed: () {
-                },
+                onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   primary: Colors.orange,
                   shape: RoundedRectangleBorder(

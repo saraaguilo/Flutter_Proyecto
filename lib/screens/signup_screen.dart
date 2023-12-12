@@ -4,6 +4,7 @@ import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:applogin/config.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key});
@@ -22,7 +23,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String? _passwordController;
   TextEditingController passwordController2 = TextEditingController();
   String? _passwordController2;
+
   String? _passwordStrength;
+
+  DateTime _selectedDate = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +154,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     },
                     obscureText: true,
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: 30),
+                  GestureDetector(
+                    onTap: () async {
+                      final DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate: _selectedDate,
+                        firstDate: DateTime(1930),
+                        lastDate: DateTime.now(),
+                      );
+                      if (picked != null && picked != _selectedDate) {
+                        setState(() {
+                          _selectedDate = picked;
+                        });
+                      }
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Text('Select your birthdate: ',
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 16)),
+                        SizedBox(width: 15),
+                        Icon(Icons.calendar_today,
+                            color: Colors.white), // Set icon color to white
+                        SizedBox(width: 10),
+                        Text(
+                          '${_selectedDate.toLocal()}'.split(' ')[0],
+                          style: TextStyle(
+                              color: Colors.white), // Set text color to white
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 30),
                   Center(
                     child: Column(
                       children: [
@@ -164,19 +201,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 _formKey.currentState!.save();
 
                                 // Validar la fortaleza de la contraseña
-                                _passwordStrength =
-                                    validatePasswordStrength(passwordController.text);
+                                _passwordStrength = validatePasswordStrength(
+                                    passwordController.text);
+
+                                final Map<String, String> userData = {
+                                  'userName': _usernameController ?? "",
+                                  'email': _emailController ?? "",
+                                  'password': _passwordController ?? "",
+                                  'birthDate': _selectedDate != null
+                                      ? _selectedDate.toString()
+                                      : "",
+                                };
+                                print(userData);
+                                final response = await http.post(
+                                  Uri.parse('$uri/auth/signup'),
+                                  body: userData,
+                                );
 
                                 if (_passwordStrength == null) {
                                   // Contraseña fuerte, proceder con el registro
                                   await signUpUser();
                                 } else {
                                   // Contraseña no cumple con los requisitos
-                                  showErrorDialog(context, 'Error', _passwordStrength!);
+                                  showErrorDialog(
+                                      context, 'Error', _passwordStrength!);
                                 }
                               }
                             } else {
-                              showErrorDialog(context, 'Error', 'Passwords do not match');
+                              showErrorDialog(
+                                  context, 'Error', 'Passwords do not match');
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -244,27 +297,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
         context: context,
         builder: (BuildContext context) {
           return alert(
-              context,
-              'Success',
-              'User created successfully!',
-              SignInScreen());
+              context, 'Success', 'User created successfully!', SignInScreen());
         },
       );
     } else {
-      print('Error al crear el usuario. Código de estado: ${response.statusCode}');
+      print(
+          'Error al crear el usuario. Código de estado: ${response.statusCode}');
 
       if (response.statusCode == 404) {
         showErrorDialog(context, 'Error', 'This email is already used!');
       } else if (response.statusCode == 405) {
         showErrorDialog(context, 'Error', 'This username is already used!');
       } else {
-        showErrorDialog(context, 'Error', 'An unexpected error occurred. Please try again later.');
+        showErrorDialog(context, 'Error',
+            'An unexpected error occurred. Please try again later.');
       }
     }
   }
 }
 
-Future<void> showErrorDialog(BuildContext context, String title, String message) {
+Future<void> showErrorDialog(
+    BuildContext context, String title, String message) {
   return showDialog(
     context: context,
     builder: (BuildContext context) {

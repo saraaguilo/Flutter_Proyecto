@@ -31,6 +31,7 @@ import 'package:applogin/screens/buscadoreventos.dart';
 import 'package:applogin/screens/buscarunevento.dart';
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/screens/signup_screen.dart';
+import 'package:applogin/screens/mapa.dart';
 
 void main() {
   runApp(HomeScreen());
@@ -38,10 +39,10 @@ void main() {
 
 class HomeScreen extends StatefulWidget {
   @override
-  _MyAppState createState() => _MyAppState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _MyAppState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
@@ -71,7 +72,7 @@ class _MyAppState extends State<HomeScreen> {
               label: 'Events',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.search), 
+              icon: Icon(Icons.search),
               label: 'Search one event',
             ),
             BottomNavigationBarItem(
@@ -81,6 +82,16 @@ class _MyAppState extends State<HomeScreen> {
           ],
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MapScreen()),
+            );
+          },
+          tooltip: 'Show Map',
+          child: Icon(Icons.map),
         ),
       ),
     );

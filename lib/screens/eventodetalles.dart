@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:applogin/screens/buscadoreventos.dart';
 import 'package:applogin/screens/signin_screen.dart'; // acceso a currentUserEmail
 import 'package:applogin/screens/eventoeditar.dart';
+import 'package:applogin/models/event.dart';
 
 class EventoDetailScreen extends StatefulWidget {
   final Event event;

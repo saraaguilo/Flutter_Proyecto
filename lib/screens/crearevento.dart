@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/screens/signin_screen.dart'; // acceso a currentUserEmail
+import 'package:applogin/config.dart';
 
 class CrearEventoScreen extends StatefulWidget {
   @override
@@ -28,7 +29,7 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
   ];
 
   Future<void> saveEvent() async {
-    var url = Uri.parse('http://147.83.7.158:9090/events');
+    var url = Uri.parse('$uri/events');
     try {
       List<String> coordinatesArray = _eventLocationController.text
           .split(',')

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/screens/eventodetalles.dart';
 import 'package:applogin/screens/buscadoreventos.dart';
+import 'package:applogin/config.dart';
+import 'package:applogin/models/event.dart';
 
 class BuscadorUnEventoScreen extends StatefulWidget {
   const BuscadorUnEventoScreen({Key? key});
@@ -80,8 +82,7 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
 
   Future<void> searchEvent() async {
     try {
-      final response =
-          await http.get(Uri.parse('http://147.83.7.158:9090/events'));
+      final response = await http.get(Uri.parse('$uri/events'));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);

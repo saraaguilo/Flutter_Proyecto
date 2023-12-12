@@ -1,14 +1,4 @@
 /*
-import 'package:applogin/reusable_/reusable_widget.dart';
-import 'package:applogin/reusable_/reusable_widget.dart';
-import 'package:applogin/screens/events.dart';
-import 'package:applogin/screens/home_screen.dart';
-import 'package:applogin/screens/signup_screen.dart';
-import 'package:applogin/utils/color_utils.dart';
-import 'package:flutter/material.dart';
-import 'dart:html';
-import 'package:http/http.dart' as http;
-import 'dart:async';
 import 'dart:convert';
 
 
@@ -135,6 +125,17 @@ import 'package:applogin/utils/color_utils.dart';
 
 // variable global para almacenar el email del usuario
 String currentUserEmail = '';
+import 'package:applogin/reusable_/reusable_widget.dart';
+import 'package:applogin/screens/events.dart';
+import 'package:applogin/screens/home_screen.dart';
+import 'package:applogin/screens/signin_screen.dart';
+import 'package:applogin/screens/signup_screen.dart';
+import 'package:applogin/utils/color_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:applogin/models/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:applogin/config.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({Key? key});
@@ -147,6 +148,7 @@ class _SignInScreenState extends State<SignInScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  late final User userData;
 
   @override
   Widget build(BuildContext context) {
@@ -246,11 +248,37 @@ class _SignInScreenState extends State<SignInScreen> {
 
           //PETICIÓN HTTP
           final response = await http.post(
-            Uri.parse('http://147.83.7.158:9090/auth/signin'),
+            Uri.parse('$uri/auth/signin'),
             body: userData,
           );
 
           if (response.statusCode == 200) {
+            final Map<dynamic, dynamic> jsonResponse =
+                json.decode(response.body);
+            final bool auth = jsonResponse['auth'];
+            final String token = jsonResponse['token'];
+            // Ahora puedes extraer el usuario del cuerpo de la respuesta
+            final Map<String, dynamic> userJson = jsonResponse['user'];
+            final User user = User.fromJson(userJson);
+
+            final SharedPreferences prefs =
+                await SharedPreferences.getInstance();
+            await prefs.setString('userName', user.userName);
+            await prefs.setString('email', user.email);
+            await prefs.setString('idUser', user.idUser ?? '');
+            await prefs.setString(
+                'birthDate', user.birthDate?.toString() ?? '');
+            await prefs.setString('password', user.password);
+            await prefs.setString('avatar', jsonEncode(user.avatar));
+            await prefs.setString(
+                'createdEventsId', jsonEncode(user.createdEventsId));
+            await prefs.setString(
+                'joinedEventsId', jsonEncode(user.joinedEventsId));
+            await prefs.setString(
+                'idCategories', jsonEncode(user.idCategories));
+            await prefs.setString('role', user.role);
+            await prefs.setString('description', user.description);
+
             print('Usuario loggeado con éxito.');
             // almacenar el email del usuario en la variable global
             currentUserEmail = emailController.text;

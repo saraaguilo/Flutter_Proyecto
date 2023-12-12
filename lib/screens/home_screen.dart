@@ -1,19 +1,18 @@
 import 'package:applogin/screens/chat_home.dart';
 import 'package:applogin/screens/chat_screen.dart';
-
 import 'package:flutter/material.dart';
 import 'package:applogin/screens/events.dart';
 import 'package:applogin/screens/buscadoreventos.dart';
 import 'package:applogin/screens/buscarunevento.dart';
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/screens/signup_screen.dart';
-
-void main() {
-  runApp(HomeScreen());
-}
+import 'package:applogin/screens/profile.dart';
+import 'package:applogin/models/user.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
+  const HomeScreen();
+
   _MyAppState createState() => _MyAppState();
 }
 
@@ -24,6 +23,7 @@ class _MyAppState extends State<HomeScreen> {
     EventsScreen(),
     BuscadorUnEventoScreen(),
     BuscadorScreen(),
+    ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -35,6 +35,7 @@ class _MyAppState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: _pages[_selectedIndex],
         bottomNavigationBar: BottomNavigationBar(
@@ -53,6 +54,10 @@ class _MyAppState extends State<HomeScreen> {
             BottomNavigationBarItem(
               icon: Icon(Icons.list),
               label: 'Events list',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
             ),
           ],
           currentIndex: _selectedIndex,
@@ -76,7 +81,8 @@ class _MyAppState extends State<HomeScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ChatPrincipalScreen()),
+                        MaterialPageRoute(
+                            builder: (context) => ChatPrincipalScreen()),
                       );
                     },
                     child: Text('Join Chat'),

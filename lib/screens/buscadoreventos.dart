@@ -4,7 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:applogin/screens/crearevento.dart';
 import 'package:applogin/screens/eventodetalles.dart';
 import 'package:applogin/screens/eventoeditar.dart';
-
+import 'package:applogin/config.dart';
+import 'package:applogin/models/event.dart';
 
 class BuscadorScreen extends StatefulWidget {
   const BuscadorScreen({Key? key}) : super(key: key);
@@ -27,6 +28,7 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
 
       final response =
           await http.get(Uri.parse('http://147.83.7.158:9090/events'));
+      final response = await http.get(Uri.parse('$uri/events'));
 
       final response = await http.get(Uri.parse('http://localhost:9090/events'));
 
@@ -91,11 +93,18 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
           itemCount: events.length,
           itemBuilder: (context, index) {
             return Card(
-
-
               color: Colors.grey[200],
               child: InkWell(
+
                 onTap: () => navigateToDetailEventScreen(events[index]),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            EventoDetailScreen(event: events[index])),
+                  );
+                },
                 child: ListTile(
                   title: Text('Event Name: ${events[index].eventName}'),
                   subtitle: Column(
@@ -106,7 +115,6 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
                       Text('Description: ${events[index].description}'),
                     ],
                   ),
-
                 ),
               ),
             );
@@ -126,6 +134,7 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
     );
   }
 }
+
 
 class Event {
   final String id;
@@ -166,3 +175,4 @@ class Event {
     );
   }
 }
+

@@ -8,6 +8,8 @@ import 'package:applogin/screens/eventoeditar.dart';
 import 'package:applogin/models/event.dart';
 import 'package:applogin/config.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:socket_io_client/socket_io_client.dart';
 
 class EventoDetailScreen extends StatefulWidget {
   final Event event;
@@ -24,6 +26,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
   bool isLoading = true;
   String? currentUserId;
   double currentRating = 0;
+  String? url;
 
   @override
   void initState() {
@@ -185,6 +188,18 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
       appBar: AppBar(
         title: Text(widget.event.eventName),
         backgroundColor: Colors.orange,
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(right: 40),
+            child: IconButton(
+                onPressed: () {
+                  url = 'http://147.83.7.158:8080/';
+                  Share.share(
+                      'Take a look at this event in SocialGroove App! ${widget.event.eventName} will take place the ${widget.event.date.toLocal()} at location ${widget.event.coordinates} \n Click here for more information! $url');
+                },
+                icon: Icon(Icons.share_outlined)),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -211,9 +226,12 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 20),
-            Center(
+            Align(
+              alignment: Alignment.center,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  //hauria d'enviar al chat
+                },
                 style: ElevatedButton.styleFrom(
                   primary: Colors.orange,
                   shape: RoundedRectangleBorder(

@@ -5,6 +5,7 @@ class Event {
   final String eventName;
   final String description;
   final String? idUser;
+  final String? link;
   final List<String>? idComments;
 
   Event({
@@ -13,6 +14,7 @@ class Event {
     required this.date,
     required this.eventName,
     required this.description,
+    this.link,
     this.idUser,
     this.idComments,
   });
@@ -20,7 +22,8 @@ class Event {
   factory Event.fromJson(Map<String, dynamic> json) {
     String? parsedUserId;
     if (json['idUser'] != null) {
-      parsedUserId = json['idUser'] is String ? json['idUser'] : json['idUser']['_id'];
+      parsedUserId =
+          json['idUser'] is String ? json['idUser'] : json['idUser']['_id'];
     }
     return Event(
       id: json['_id'] ?? '',
@@ -30,6 +33,7 @@ class Event {
       date: DateTime.parse(json['date'] ?? DateTime.now().toIso8601String()),
       eventName: json['eventName'] ?? '',
       description: json['description'] ?? '',
+      link: json['link'] ?? '',
       idUser: parsedUserId,
       idComments: json['idComments'] != null
           ? List<String>.from(json['idComments'])

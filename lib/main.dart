@@ -1,4 +1,6 @@
+import 'package:applogin/screens/home_screen.dart';
 import 'package:applogin/screens/signin_screen.dart';
+import 'package:applogin/screens/signup_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -32,7 +34,16 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const SignInScreen(),
+      
+      initialRoute: '/',
+      routes: {
+      '/': (context) => const SignInScreen(),
+      '/signup': (context) => const SignUpScreen(),
+      '/home':(context) => const HomeScreen(),
+      },
+      
+      //eliminar el home si usamos las rutas
+      //home: const SignInScreen(),
     );
   }
 }

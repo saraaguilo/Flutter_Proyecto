@@ -160,10 +160,13 @@ class _SignInScreenState extends State<SignInScreen> {
             print('Usuario loggeado con éxito.');
             // almacenar el email del usuario en la variable global
             currentUserEmail = emailController.text;
+            /*
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => HomeScreen()),
             );
+            */
+            Navigator.pushNamed(context, '/home');
           } else {
             showDialog(
               context: context,
@@ -195,10 +198,14 @@ class _SignInScreenState extends State<SignInScreen> {
         ),
         GestureDetector(
           onTap: () {
+            /*
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => SignUpScreen()),
             );
+*/
+            //opcion router
+            Navigator.pushNamed(context, '/signup');
           },
           child: const Text(
             " Sign Up",

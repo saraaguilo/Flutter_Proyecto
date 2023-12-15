@@ -45,36 +45,42 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
   }
 
   Future<void> saveEvent() async {
-    var idUser = await getCurrentUserId();
-    if (idUser == null) {
-      print('No se pudo obtener el ID del usuario');
-      return;
-    }
-
-    List<String> coordinatesArray = _eventLocationController.text
-        .split(',')
-        .map((s) => s.trim())
-        .toList();
-
-    var response = await http.post(
-      Uri.parse('$uri/events'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'eventName': _eventNameController.text,
-        'description': _eventDescriptionController.text,
-        'coordinates': coordinatesArray,
-        'date': _selectedDate.toIso8601String(),
-        'idUser': idUser,
-      }),
-    );
-
-    if (response.statusCode == 201) {
-      print('Evento guardado correctamente');
-      Navigator.pop(context, true); // return a pantalla anterior e indica que se ha creado evento para refresh)
-    } else {
-      print('Error al guardar el evento. Código de estado: ${response.statusCode}');
-    }
+  var idUser = await getCurrentUserId();
+  if (idUser == null) {
+    print('No se pudo obtener el ID del usuario');
+    return;
   }
+
+  List<String> coordinatesArray = _eventLocationController.text
+      .split(',')
+      .map((s) => s.trim())
+      .toList();
+
+  //convertir las coordenadas a numeros y crear un objeto GeoJSON
+  var coordinates = {
+    'type': 'Point',
+    'coordinates': [double.parse(coordinatesArray[1]), double.parse(coordinatesArray[0])]
+  };
+
+  var response = await http.post(
+    Uri.parse('$uri/events'),
+    headers: {'Content-Type': 'application/json'},
+    body: json.encode({
+      'eventName': _eventNameController.text,
+      'description': _eventDescriptionController.text,
+      'coordinates': coordinates, // Aquí se envía el objeto GeoJSON
+      'date': _selectedDate.toIso8601String(),
+      'idUser': idUser,
+    }),
+  );
+
+  if (response.statusCode == 201) {
+    print('Evento guardado correctamente');
+    Navigator.pop(context, true);
+  } else {
+    print('Error al guardar el evento. Código de estado: ${response.statusCode}');
+  }
+}
 
   @override
   Widget build(BuildContext context) {

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "492498325517",
+    "project_id": "fqsara-a0d79",
+    "storage_bucket": "fqsara-a0d79.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:492498325517:android:27f8fca2bf4d18a9d98544",
+        "android_client_info": {
+          "package_name": "com.FQSara.firebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "492498325517-4a1puue2p0v7h6e5aepjt1iga7hv5bla.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQSftYo2HTCtUjjVah5CG5WPeIki8dhuc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "492498325517-4a1puue2p0v7h6e5aepjt1iga7hv5bla.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -51,6 +51,11 @@ dependencies:
   flutter_map: ^6.1.0
   latlong2: ^0.9.0
   geolocator: ^10.1.0
+  google_sign_in: ^5.4.1
+  sign_in_with_apple: ^4.1.0
+  flutter_signin_button: ^2.0.0
+  crypto: ^3.0.2
+  firebase_auth: ^4.15.3
 
 
 dev_dependencies:

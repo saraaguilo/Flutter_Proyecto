@@ -1,17 +1,26 @@
+import 'dart:io';
+
 import 'package:applogin/reusable_/reusable_widget.dart';
 import 'package:applogin/screens/events.dart';
 import 'package:applogin/screens/home_screen.dart';
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/screens/signup_screen.dart';
 import 'package:applogin/utils/color_utils.dart';
+import 'package:crypto/crypto.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
+import 'package:http/http.dart' as http;
 import 'package:applogin/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:applogin/config.dart';
 import 'dart:convert';
 import 'package:applogin/screens/mapa.dart';
+import 'package:flutter_signin_button/flutter_signin_button.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:applogin/services/auth_services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
 
 String currentUserEmail = '';
 
@@ -103,6 +112,12 @@ class _SignInScreenState extends State<SignInScreen> {
                   SizedBox(height: 16),
                   signInButton(),
                   SizedBox(height: 20),
+
+                  // Añade el widget BotonesGoogleApple aquí
+                  BotonesGoogleApple(),
+
+                  SizedBox(height: 20),
+
                   signUpOption(),
                 ],
               ),
@@ -141,6 +156,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
             final SharedPreferences prefs =
                 await SharedPreferences.getInstance();
+          //await prefs.setString('token', user.token)
             await prefs.setString('userName', user.userName);
             await prefs.setString('email', user.email);
             await prefs.setString('idUser', user.idUser ?? '');
@@ -208,4 +224,42 @@ class _SignInScreenState extends State<SignInScreen> {
       ],
     );
   }
+
+  Widget BotonesGoogleApple() {
+  return Column(
+    children: [
+      SignInButton(
+        Buttons.Google,
+        onPressed: () async {
+          await AuthService().signInWithGoogle();
+          if (FirebaseAuth.instance.currentUser != null) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => HomeScreen()),
+              (Route<dynamic> route) => false,
+            );
+          }
+        },
+      ),
+      /*
+      Offstage(
+        offstage: !Platform.isIOS,
+        child: SignInButton(
+          Buttons.Apple,
+          onPressed: () async {
+            await AuthService().signInWithApple();
+            if (FirebaseAuth.instance.currentUser != null) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen()),
+                (Route<dynamic> route) => false,
+              );
+            }
+          },
+        ),
+      ),
+      */
+    ],
+  );
+}
 }

@@ -63,6 +63,7 @@ class _MyWidgetState extends State<ProfileScreen> {
     setState(() {
       userName = prefs.getString('userName') ?? '';
       //no fa falta
+    //token = prefs.getString('token') ?? '';
       email = prefs.getString('email') ?? '';
       idUser = prefs.getString('idUser') ?? '';
       String? date = prefs.getString('birthDate');

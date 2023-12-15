@@ -6,11 +6,12 @@ import 'package:applogin/screens/signup_screen.dart';
 import 'package:applogin/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
 import 'package:applogin/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:applogin/config.dart';
 import 'dart:convert';
-
+import 'package:applogin/screens/mapa.dart';
 
 String currentUserEmail = '';
 

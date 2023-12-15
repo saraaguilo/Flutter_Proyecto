@@ -6,18 +6,25 @@ import 'package:applogin/screens/buscadoreventos.dart';
 import 'package:applogin/screens/buscarunevento.dart';
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/screens/signup_screen.dart';
+
 import 'package:applogin/screens/profile.dart';
 import 'package:applogin/models/user.dart';
+
+import 'package:applogin/screens/mapa.dart';
+
+void main() {
+  runApp(HomeScreen());
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen();
 
   @override
-  _MyAppState createState() => _MyAppState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _MyAppState extends State<HomeScreen> {
-  int _selectedIndex = 1;
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
 
   final List<Widget> _pages = [
     BuscadorUnEventoScreen(),
@@ -90,6 +97,17 @@ class _MyAppState extends State<HomeScreen> {
             ),
           ),
         ],
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MapScreen()),
+            );
+          },
+          tooltip: 'Show Map',
+          child: Icon(Icons.map),
+          backgroundColor: Colors.orange,
+        ),
       ),
     );
   }
@@ -97,7 +115,6 @@ class _MyAppState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Establecer el índice inicial en 2 para BuscadorScreen
     _selectedIndex = 2;
   }
 }

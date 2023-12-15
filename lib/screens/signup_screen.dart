@@ -204,20 +204,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 _passwordStrength = validatePasswordStrength(
                                     passwordController.text);
 
-                                final Map<String, String> userData = {
-                                  'userName': _usernameController ?? "",
-                                  'email': _emailController ?? "",
-                                  'password': _passwordController ?? "",
-                                  'birthDate': _selectedDate != null
-                                      ? _selectedDate.toString()
-                                      : "",
-                                };
-                                print(userData);
-                                final response = await http.post(
-                                  Uri.parse('$uri/auth/signup'),
-                                  body: userData,
-                                );
-
                                 if (_passwordStrength == null) {
                                   // Contraseña fuerte, proceder con el registro
                                   await signUpUser();
@@ -283,10 +269,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       'userName': _usernameController ?? "",
       'email': _emailController ?? "",
       'password': _passwordController ?? "",
+      'birthDate': _selectedDate != null ? _selectedDate.toString() : "",
     };
 
     final response = await http.post(
-      Uri.parse('http://147.83.7.158:9090/auth/signup'),
+      Uri.parse('$uri/auth/signup'),
       body: userData,
     );
 

@@ -14,21 +14,30 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  LatLng? myPosition;
+  LatLng myPosition = LatLng(41.2736, 1.9701);
+  
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    throw UnimplementedError();
+  }
 
+  /*
   Future<void> determinePosition() async {
     LocationPermission permission;
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        throw Exception('Location permission denied');
+        setState(() {
+          myPosition = LatLng(41.2736, 1.9701);
+        });
       }
     }
     final Position position = await Geolocator.getCurrentPosition();
     setState(() {
       myPosition = LatLng(position.latitude, position.longitude);
-    });
+    });*/
   }
 
   Widget mapLayer({

@@ -8,6 +8,8 @@ import 'package:applogin/screens/eventoeditar.dart';
 import 'package:applogin/models/event.dart';
 import 'package:applogin/config.dart';
 import 'package:intl/intl.dart';
+import 'package:applogin/screens/chat_home.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EventoDetailScreen extends StatefulWidget {
   final Event event;
@@ -24,37 +26,28 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
   bool isLoading = true;
   String? currentUserId;
   double currentRating = 0;
+  String token = '';
+  String passedIdUser = '';
 
   @override
   void initState() {
     super.initState();
     _loadComments();
-    _getCurrentUserId();
+    loadData();
   }
 
-  Future<String?> _getCurrentUserId() async {
-    var url = Uri.parse('$uri/users');
-    var response = await http.get(url);
+  void loadData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    if (response.statusCode == 200) {
-      List<dynamic> users = json.decode(response.body);
-      var currentUser = users.firstWhere(
-        (user) => user['email'] == currentUserEmail,
-        orElse: () => null,
-      );
-      setState(() {
-        currentUserId = currentUser?['_id'];
-      });
-      return currentUser?['_id'];
-    } else {
-      print('Error al obtener usuarios: ${response.statusCode}');
-      return null;
-    }
+    setState(() {
+      token = prefs.getString('token') ?? '';
+      passedIdUser = prefs.getString('idUser') ?? '';
+    });
   }
 
   Future<void> _deleteEvent() async {
     var url = Uri.parse('$uri/events/${widget.event.id}');
-    var response = await http.delete(url);
+    var response = await http.delete(url, headers: {'x-access-token': token});
 
     if (response.statusCode == 201) {
       print('Evento eliminado con éxito');
@@ -117,7 +110,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
       return;
     }
 
-    String? userId = await _getCurrentUserId();
+    String? userId = await passedIdUser;
     if (userId != null) {
       await postComment(userId);
     } else {
@@ -129,7 +122,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
     var commentUrl = Uri.parse('$uri/comments');
     var commentResponse = await http.post(
       commentUrl,
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json', 'x-access-token': token},
       body: json.encode({
         'userId': userId,
         'text': commentController.text,
@@ -161,7 +154,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
       var updateEventUrl = Uri.parse('$uri/events/${widget.event.id}');
       var updateEventResponse = await http.put(
         updateEventUrl,
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json','x-access-token': token},
         body: json.encode({
           'idComments': idComments,
         }),
@@ -191,29 +184,62 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              'Name: ${widget.event.eventName}',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Description: ${widget.event.description}',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Date: ${DateFormat('yyyy-MM-dd').format(widget.event.date)}',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Location: ${widget.event.coordinates}',
-              style: TextStyle(fontSize: 16),
+            Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${widget.event.eventName}',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'Description: ${widget.event.description}',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'Date: ${DateFormat('yyyy-MM-dd').format(widget.event.date)}',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'Location: ${widget.event.coordinates}',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+                SizedBox(width: 200),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    margin: EdgeInsets.all(16.0),
+                    padding: EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    child: Icon(
+                      Icons.image,
+                      size: 100.0,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ],
             ),
             SizedBox(height: 20),
             Center(
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ChatPrincipalScreen()),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   primary: Colors.orange,
                   shape: RoundedRectangleBorder(
@@ -277,42 +303,46 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                       margin: EdgeInsets.only(top: 10),
                       padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.orange,
+                        color: const Color.fromARGB(255, 255, 196, 107),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            comment.userName,
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              comment.userName,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          Text(
-                            comment.date.toLocal().toString(),
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 12,
+                            SizedBox(height: 10),
+                            Text(
+                              comment.date.toLocal().toString(),
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 12,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            comment.text,
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          RatingBarIndicator(
-                            rating: comment.punctuation,
-                            itemBuilder: (context, index) => Icon(
-                              Icons.star,
-                              color: Colors.amber,
+                            SizedBox(height: 10),
+                            Text(
+                              comment.text,
+                              style: TextStyle(color: Colors.black),
                             ),
-                            itemCount: 5,
-                            itemSize: 20.0,
-                            direction: Axis.horizontal,
-                          ),
-                        ],
+                            RatingBarIndicator(
+                              rating: comment.punctuation,
+                              itemBuilder: (context, index) => Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                              ),
+                              itemCount: 5,
+                              itemSize: 20.0,
+                              direction: Axis.horizontal,
+                            ),
+                          ],
+                        ),
                       ),
                     ))
                 .toList(),
@@ -360,7 +390,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
     );
   }
 }
-
+//moure a una classe
 class Comment {
   final String userId;
   final String userName;

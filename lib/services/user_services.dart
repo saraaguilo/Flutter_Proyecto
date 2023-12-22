@@ -10,9 +10,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:applogin/config.dart';
 import 'package:http/http.dart' as http;
 
-Future<void> deleteUser(idUser) async {
+Future<void> deleteUser(idUser, token) async {
   try {
-    final response = await http.delete(Uri.parse('$uri/users/$idUser'));
+    final response = await http.delete(
+      Uri.parse('$uri/users/$idUser'),
+      headers: {'x-access-token': token},
+    );
 
     if (response.statusCode == 200) {
       print('Usuario eliminado. Código de estado: ${response.statusCode}');

@@ -16,6 +16,7 @@ class ProfileEditScreen extends StatefulWidget {
 }
 
 class _MyWidgetState extends State<ProfileEditScreen> {
+  String token = '';
   String passedUsername = '';
   String passedEmail = '';
   String passedPassword = '';
@@ -33,6 +34,7 @@ class _MyWidgetState extends State<ProfileEditScreen> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     setState(() {
+      token = prefs.getString('token') ?? '';
       passedUsername = prefs.getString('userName') ?? '';
       passedEmail = prefs.getString('email') ?? '';
       passedIdUser = prefs.getString('idUser') ?? '';
@@ -261,6 +263,7 @@ class _MyWidgetState extends State<ProfileEditScreen> {
                                   print(userData);
                                   final response = await http.put(
                                     Uri.parse('$uri/users/$passedIdUser'),
+                                    headers: {'x-access-token': token},
                                     body: userData,
                                   );
 

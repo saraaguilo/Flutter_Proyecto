@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:applogin/screens/buscadoreventos.dart'; // Asegúrate de que esta ruta sea correcta
 import 'package:applogin/config.dart';
 import 'package:applogin/models/event.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EventoEditScreen extends StatefulWidget {
   final Event event;
@@ -20,6 +21,7 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
   late TextEditingController _eventLocationController;
   late String _selectedCategory;
   late DateTime _selectedDate;
+  String token = '';
   final List<String> _categories = [
     'Pop',
     'Rock',
@@ -32,6 +34,7 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
   @override
   void initState() {
     super.initState();
+    loadData();
     _eventNameController = TextEditingController(text: widget.event.eventName);
     _eventDescriptionController =
         TextEditingController(text: widget.event.description);
@@ -42,13 +45,21 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
     _selectedDate = widget.event.date;
   }
 
+  void loadData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      token = prefs.getString('token') ?? '';
+    });
+  }
+
   Future<void> updateEvent() async {
     List<String> coordinatesArray =
         _eventLocationController.text.split(',').map((s) => s.trim()).toList();
 
     var response = await http.put(
       Uri.parse('$uri/events/${widget.event.id}'),
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json', 'x-access-token': token},
       body: json.encode({
         'eventName': _eventNameController.text,
         'description': _eventDescriptionController.text,

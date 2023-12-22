@@ -1,5 +1,4 @@
 import 'package:applogin/reusable_/reusable_widget.dart';
-import 'package:applogin/screens/events.dart';
 import 'package:applogin/screens/home_screen.dart';
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/screens/signup_screen.dart';
@@ -141,6 +140,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
             final SharedPreferences prefs =
                 await SharedPreferences.getInstance();
+            await prefs.setString('token', token);
+
             await prefs.setString('userName', user.userName);
             await prefs.setString('email', user.email);
             await prefs.setString('idUser', user.idUser ?? '');

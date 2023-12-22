@@ -21,6 +21,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _MyWidgetState extends State<ProfileScreen> {
+  String token = '';
   String userName = '';
   String email = '';
   String idUser = '';
@@ -61,8 +62,8 @@ class _MyWidgetState extends State<ProfileScreen> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     setState(() {
+      token = prefs.getString('token') ?? '';
       userName = prefs.getString('userName') ?? '';
-      //no fa falta
       email = prefs.getString('email') ?? '';
       idUser = prefs.getString('idUser') ?? '';
       String? date = prefs.getString('birthDate');
@@ -238,7 +239,7 @@ class _MyWidgetState extends State<ProfileScreen> {
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => SignInScreen()));
           } else if (value == 'deleteUser') {
-            deleteUser(idUser);
+            deleteUser(idUser,token);
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => SignInScreen()));
           }

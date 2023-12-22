@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:applogin/screens/signin_screen.dart'; // acceso a currentUserEmail
 import 'package:applogin/config.dart';
 import 'package:applogin/models/event.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CrearEventoScreen extends StatefulWidget {
   @override
@@ -12,10 +13,14 @@ class CrearEventoScreen extends StatefulWidget {
 
 class _CrearEventoScreenState extends State<CrearEventoScreen> {
   final TextEditingController _eventNameController = TextEditingController();
-  final TextEditingController _eventDescriptionController = TextEditingController();
-  final TextEditingController _eventLocationController = TextEditingController();
+  final TextEditingController _eventDescriptionController =
+      TextEditingController();
+  final TextEditingController _eventLocationController =
+      TextEditingController();
   String _selectedCategory = 'Pop';
   DateTime _selectedDate = DateTime.now();
+  String token = '';
+  String passedIdUser = '';
 
   // categorías musicales
   final List<String> _categories = [
@@ -27,38 +32,34 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
     'Metal'
   ];
 
-  Future<String?> getCurrentUserId() async {
-    var url = Uri.parse('$uri/users');
-    var response = await http.get(url);
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
 
-    if (response.statusCode == 200) {
-      List<dynamic> users = json.decode(response.body);
-      var currentUser = users.firstWhere(
-        (user) => user['email'] == currentUserEmail,
-        orElse: () => null,
-      );
-      return currentUser?['_id'];
-    } else {
-      print('Error al obtener usuarios: ${response.statusCode}');
-      return null;
-    }
+  void loadData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      token = prefs.getString('token') ?? '';
+      passedIdUser = prefs.getString('idUser') ?? '';
+    });
   }
 
   Future<void> saveEvent() async {
-    var idUser = await getCurrentUserId();
+    var idUser = await passedIdUser;
     if (idUser == null) {
       print('No se pudo obtener el ID del usuario');
       return;
     }
 
-    List<String> coordinatesArray = _eventLocationController.text
-        .split(',')
-        .map((s) => s.trim())
-        .toList();
+    List<String> coordinatesArray =
+        _eventLocationController.text.split(',').map((s) => s.trim()).toList();
 
     var response = await http.post(
       Uri.parse('$uri/events'),
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json', 'x-access-token': token},
       body: json.encode({
         'eventName': _eventNameController.text,
         'description': _eventDescriptionController.text,
@@ -70,9 +71,11 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
 
     if (response.statusCode == 201) {
       print('Evento guardado correctamente');
-      Navigator.pop(context, true); // return a pantalla anterior e indica que se ha creado evento para refresh)
+      Navigator.pop(context,
+          true); // return a pantalla anterior e indica que se ha creado evento para refresh)
     } else {
-      print('Error al guardar el evento. Código de estado: ${response.statusCode}');
+      print(
+          'Error al guardar el evento. Código de estado: ${response.statusCode}');
     }
   }
 
@@ -80,7 +83,7 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Crear un nuevo evento'),
+        title: Text('Create a new event!'),
         backgroundColor: Colors.orange,
       ),
       body: Padding(
@@ -90,11 +93,11 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
           children: <Widget>[
             TextField(
               controller: _eventNameController,
-              decoration: InputDecoration(labelText: 'Nombre del Evento'),
+              decoration: InputDecoration(labelText: 'Name'),
             ),
             TextField(
               controller: _eventDescriptionController,
-              decoration: InputDecoration(labelText: 'Descripción del Evento'),
+              decoration: InputDecoration(labelText: 'Description'),
             ),
             DropdownButtonFormField<String>(
               value: _selectedCategory,
@@ -109,7 +112,7 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
                   child: Text(value),
                 );
               }).toList(),
-              decoration: InputDecoration(labelText: 'Categoría Musical'),
+              decoration: InputDecoration(labelText: 'Musical category'),
             ),
             GestureDetector(
               onTap: () async {
@@ -136,13 +139,22 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
             ),
             TextField(
               controller: _eventLocationController,
-              decoration: InputDecoration(labelText: 'Ubicación del Evento'),
+              decoration: InputDecoration(labelText: 'Location (coordinates)'),
             ),
             SizedBox(height: 20),
-            ElevatedButton(
-              child: Text('Guardar Evento'),
-              onPressed: saveEvent,
-              style: ElevatedButton.styleFrom(primary: Colors.orange),
+            Container(
+              alignment: Alignment.center,
+              child: ElevatedButton(
+                child: Text('Save Event'),
+                onPressed: saveEvent,
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.orange,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                        20.0), // Ajusta el radio según sea necesario
+                  ),
+                ),
+              ),
             ),
           ],
         ),

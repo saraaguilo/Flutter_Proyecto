@@ -1,7 +1,6 @@
 import 'package:applogin/screens/chat_home.dart';
 import 'package:applogin/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:applogin/screens/events.dart';
 import 'package:applogin/screens/buscadoreventos.dart';
 import 'package:applogin/screens/buscarunevento.dart';
 import 'package:applogin/screens/signin_screen.dart';
@@ -65,38 +64,6 @@ class _HomeScreenState extends State<HomeScreen> {
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
         ),
-        persistentFooterButtons: [
-          Container(
-            alignment: Alignment.center,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Do you want to join an event chat?',
-                    style: TextStyle(fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ChatPrincipalScreen()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.orange, // Cambia a tu color deseado
-                    ),
-                    child: Text('Join Chat'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             Navigator.push(

@@ -1,10 +1,12 @@
+import 'package:applogin/app_navigation.dart';
 import 'package:applogin/reusable_/reusable_widget.dart';
-import 'package:applogin/screens/events.dart';
 import 'package:applogin/screens/home_screen.dart';
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/screens/signup_screen.dart';
 import 'package:applogin/utils/color_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:applogin/models/user.dart';
@@ -30,7 +32,12 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        // Disable back navigation when on the login page after logout
+        return false;
+      },
+      child: Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -110,7 +117,8 @@ class _SignInScreenState extends State<SignInScreen> {
           ),
         ),
       ),
-    );
+    )
+      );
   }
 
   ElevatedButton signInButton() {
@@ -160,13 +168,9 @@ class _SignInScreenState extends State<SignInScreen> {
             print('Usuario loggeado con éxito.');
             // almacenar el email del usuario en la variable global
             currentUserEmail = emailController.text;
-            /*
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => HomeScreen()),
-            );
-            */
-            Navigator.pushNamed(context, '/home');
+
+            GoRouter.of(context).go('/events');
+
           } else {
             showDialog(
               context: context,
@@ -198,14 +202,8 @@ class _SignInScreenState extends State<SignInScreen> {
         ),
         GestureDetector(
           onTap: () {
-            /*
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => SignUpScreen()),
-            );
-*/
-            //opcion router
-            Navigator.pushNamed(context, '/signup');
+
+            GoRouter.of(context).go('/events');
           },
           child: const Text(
             " Sign Up",

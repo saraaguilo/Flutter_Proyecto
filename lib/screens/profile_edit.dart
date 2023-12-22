@@ -4,6 +4,7 @@ import 'package:applogin/screens/profile.dart';
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/utils/color_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -70,6 +71,13 @@ class _MyWidgetState extends State<ProfileEditScreen> {
       appBar: AppBar(
         title: Text("Edit Profile"),
         backgroundColor: Colors.orange,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            // Navegar hacia atrás al presionar el botón de retroceso
+            Navigator.of(context).pop();
+          },
+        ),
       ),
       body: Container(
         width: MediaQuery.of(context).size.width,
@@ -282,12 +290,7 @@ class _MyWidgetState extends State<ProfileEditScreen> {
                                         'password', _passwordController ?? "");
                                     await prefs.setString('description',
                                         _descriptionController ?? "");
-
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => HomeScreen()),
-                                    );
+                                    GoRouter.of(context).go('/profile');
                                   } else {
                                     print(
                                         'Error al modificar el usuario. Código de estado: ${response.statusCode}');
@@ -319,11 +322,7 @@ class _MyWidgetState extends State<ProfileEditScreen> {
                           const SizedBox(width: 20),
                           ElevatedButton(
                             onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => HomeScreen()),
-                              );
+                              GoRouter.of(context).go('/profile');
                             },
                             style: ElevatedButton.styleFrom(
                                 primary: Colors.orange),

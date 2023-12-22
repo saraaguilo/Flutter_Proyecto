@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:applogin/app_navigation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/screens/crearevento.dart';
 import 'package:applogin/screens/eventodetalles.dart';
@@ -8,7 +10,6 @@ import 'package:applogin/config.dart';
 import 'package:applogin/models/event.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
-
 
 class BuscadorScreen extends StatefulWidget {
   const BuscadorScreen({Key? key}) : super(key: key);
@@ -45,6 +46,7 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
     }
   }
 
+//cambiar al routing
   void navigateToCreateEventScreen() async {
     final result = await Navigator.push(
       context,
@@ -56,6 +58,7 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
     }
   }
 
+//SE USAN?
   void navigateToDetailEventScreen(Event event) async {
     final result = await Navigator.push(
       context,
@@ -92,47 +95,44 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
           itemCount: events.length,
           itemBuilder: (context, index) {
             return Card(
-  color: Colors.grey[200],
-  child: InkWell(
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => EventoDetailScreen(event: events[index]),
-        ),
-      );
-    },
-    child: Row(
-      children: [
-        // Contenido de la Card
-        Expanded(
-          child: ListTile(
-            title: Text('Event Name: ${events[index].eventName}'),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Coordinates: ${events[index].coordinates}'),
-                Text(
-                  'Date: ${DateFormat('yyyy-MM-dd').format(events[index].date)}',
-                ),
-                Text('Description: ${events[index].description}'),
-              ],
-            ),
-          ),
-        ),
-        IconButton(
-          icon: Icon(Icons.share_outlined),
-          onPressed: () {
-            url = 'http://147.83.7.158:8080/'; //aqui faltaria afegir a la url el routing al details de l'esdeveniment
-            Share.share('Take a look at this event in SocialGroove App! ${events[index].eventName} will take place the ${events[index].date.toLocal()} at location ${events[index].coordinates}. \n Click here for more information! $url');
-                
-          },
-        ),
-      ],
-    ),
-  ),
-);
+              color: Colors.grey[200],
+              child: InkWell(
+                onTap: () {
+                  AppNavigation.eventArguments = events[index];
+                  GoRouter.of(context).go('/events/${events[index].id}');
+                },
+                child: Row(
+                  children: [
+                    // Contenido de la Card
+                    Expanded(
+                      child: ListTile(
+                        title: Text('Event Name: ${events[index].eventName}'),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Coordinates: ${events[index].coordinates}'),
+                            Text(
+                              'Date: ${DateFormat('yyyy-MM-dd').format(events[index].date)}',
+                            ),
+                            Text('Description: ${events[index].description}'),
+                          ],
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.share_outlined),
+                      onPressed: () {
+                        url =
+                            'http://147.83.7.158:8080/#/events/${events[index].id}';
 
+                        Share.share(
+                            'Take a look at this event in SocialGroove App! ${events[index].eventName} will take place the ${events[index].date.toLocal()} at location ${events[index].coordinates}. \n Click here for more information! $url');
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
           },
         ),
       ),

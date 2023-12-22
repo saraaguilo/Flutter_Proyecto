@@ -193,7 +193,8 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
             padding: EdgeInsets.only(right: 40),
             child: IconButton(
                 onPressed: () {
-                  url = 'http://147.83.7.158:8080/';
+                  url = 'http://147.83.7.158:8080/#/events/${widget.event.id}';
+
                   Share.share(
                       'Take a look at this event in SocialGroove App! ${widget.event.eventName} will take place the ${widget.event.date.toLocal()} at location ${widget.event.coordinates} \n Click here for more information! $url');
                 },

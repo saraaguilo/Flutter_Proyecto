@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:applogin/screens/signin_screen.dart'; // acceso a currentUserEmail
 import 'package:applogin/config.dart';
 import 'package:applogin/models/event.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CrearEventoScreen extends StatefulWidget {
   @override
@@ -12,10 +13,13 @@ class CrearEventoScreen extends StatefulWidget {
 
 class _CrearEventoScreenState extends State<CrearEventoScreen> {
   final TextEditingController _eventNameController = TextEditingController();
-  final TextEditingController _eventDescriptionController = TextEditingController();
-  final TextEditingController _eventLocationController = TextEditingController();
+  final TextEditingController _eventDescriptionController =
+      TextEditingController();
+  final TextEditingController _eventLocationController =
+      TextEditingController();
   String _selectedCategory = 'Pop';
   DateTime _selectedDate = DateTime.now();
+  String idUser = '';
 
   // categorías musicales
   final List<String> _categories = [
@@ -27,34 +31,26 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
     'Metal'
   ];
 
-  Future<String?> getCurrentUserId() async {
-    var url = Uri.parse('$uri/users');
-    var response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      List<dynamic> users = json.decode(response.body);
-      var currentUser = users.firstWhere(
-        (user) => user['email'] == currentUserEmail,
-        orElse: () => null,
-      );
-      return currentUser?['_id'];
-    } else {
-      print('Error al obtener usuarios: ${response.statusCode}');
-      return null;
-    }
+  void initState() {
+    super.initState();
+    loadData();
   }
 
-  Future<void> saveEvent() async {
-    var idUser = await getCurrentUserId();
-    if (idUser == null) {
-      print('No se pudo obtener el ID del usuario');
-      return;
-    }
+  void loadData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    List<String> coordinatesArray = _eventLocationController.text
-        .split(',')
-        .map((s) => s.trim())
-        .toList();
+    setState(() {
+      idUser = prefs.getString('idUser') ?? '';
+      //role = prefs.getString('role') ?? '';
+    });
+  }
+
+  
+
+  Future<void> saveEvent() async {
+
+    List<String> coordinatesArray =
+        _eventLocationController.text.split(',').map((s) => s.trim()).toList();
 
     var response = await http.post(
       Uri.parse('$uri/events'),
@@ -70,9 +66,11 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
 
     if (response.statusCode == 201) {
       print('Evento guardado correctamente');
-      Navigator.pop(context, true); // return a pantalla anterior e indica que se ha creado evento para refresh)
+      Navigator.pop(context,
+          true);
     } else {
-      print('Error al guardar el evento. Código de estado: ${response.statusCode}');
+      print(
+          'Error al guardar el evento. Código de estado: ${response.statusCode}');
     }
   }
 

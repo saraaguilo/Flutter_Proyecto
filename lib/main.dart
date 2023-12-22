@@ -1,3 +1,5 @@
+import 'package:applogin/app_navigation.dart';
+
 import 'package:applogin/screens/home_screen.dart';
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/screens/signup_screen.dart';
@@ -13,7 +15,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
@@ -33,17 +35,18 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+
       ),
-      
-      initialRoute: '/',
-      routes: {
-      '/': (context) => const SignInScreen(),
-      '/signup': (context) => const SignUpScreen(),
-      '/home':(context) => const HomeScreen(),
-      },
-      
+      //initialRoute: getInitialPage(),
+      routerConfig: AppNavigation.router,
+      debugShowCheckedModeBanner: false, // Remove the debug banner
+
       //eliminar el home si usamos las rutas
       //home: const SignInScreen(),
     );
   }
+  
+  /* getInitialPage() {
+      return AppRoutes.signin;
+  } */
 }

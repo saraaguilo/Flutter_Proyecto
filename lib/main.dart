@@ -1,8 +1,12 @@
 import 'package:applogin/screens/signin_screen.dart';
+import 'package:cloudinary_flutter/cloudinary_context.dart';
+import 'package:cloudinary_flutter/cloudinary_object.dart';
 import 'package:flutter/material.dart';
+import 'package:applogin/screens/profile.dart';
 
 void main() {
   runApp(const MyApp());
+
 }
 
 class MyApp extends StatelessWidget {
@@ -32,7 +36,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const SignInScreen(),
+      //home: const SignInScreen(),
+      home: const ProfileScreen(), //CAMBIAR
       debugShowCheckedModeBanner: false,
     );
   }

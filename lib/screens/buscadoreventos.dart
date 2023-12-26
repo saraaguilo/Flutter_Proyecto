@@ -3,15 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/screens/crearevento.dart';
 import 'package:applogin/screens/eventodetalles.dart';
+import 'package:applogin/screens/eventoeditar.dart';
+import 'package:applogin/config.dart';
+import 'package:applogin/models/event.dart';
+import 'package:intl/intl.dart';
 
 class BuscadorScreen extends StatefulWidget {
-  const BuscadorScreen({Key? key});
+  const BuscadorScreen({Key? key}) : super(key: key);
 
   @override
-  State<BuscadorScreen> createState() => _MyWidgetState();
+  State<BuscadorScreen> createState() => _BuscadorScreenState();
 }
 
-class _MyWidgetState extends State<BuscadorScreen> {
+class _BuscadorScreenState extends State<BuscadorScreen> {
   List<Event> events = [];
 
   @override
@@ -22,12 +26,10 @@ class _MyWidgetState extends State<BuscadorScreen> {
 
   Future<void> getEvents() async {
     try {
-      final response =
-          await http.get(Uri.parse('http://147.83.7.158:9090/events'));
+      final response = await http.get(Uri.parse('$uri/events'));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-
         setState(() {
           events = data.map((item) => Event.fromJson(item)).toList();
         });
@@ -37,6 +39,40 @@ class _MyWidgetState extends State<BuscadorScreen> {
       }
     } catch (error) {
       print('Error de red al cargar eventos: $error');
+    }
+  }
+
+  void navigateToCreateEventScreen() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CrearEventoScreen()),
+    );
+
+    if (result == true) {
+      getEvents();
+    }
+  }
+
+  void navigateToDetailEventScreen(Event event) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => EventoDetailScreen(event: event)),
+    );
+
+    if (result == true) {
+      getEvents();
+    }
+  }
+
+  // navegar a la pantalla de editar evento
+  void navigateToEditEventScreen(Event event) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => EventoEditScreen(event: event)),
+    );
+
+    if (result == true) {
+      getEvents();
     }
   }
 
@@ -53,14 +89,15 @@ class _MyWidgetState extends State<BuscadorScreen> {
           itemCount: events.length,
           itemBuilder: (context, index) {
             return Card(
-
-
               color: Colors.grey[200],
               child: InkWell(
+                //onTap: () => navigateToDetailEventScreen(events[index]),
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => EventoDetailScreen(event: events[index])),
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            EventoDetailScreen(event: events[index])),
                   );
                 },
                 child: ListTile(
@@ -69,11 +106,11 @@ class _MyWidgetState extends State<BuscadorScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Coordinates: ${events[index].coordinates}'),
-                      Text('Date: ${events[index].date}'),
+                      Text(
+                          'Date: ${DateFormat('yyyy-MM-dd').format(events[index].date)}'),
                       Text('Description: ${events[index].description}'),
                     ],
                   ),
-
                 ),
               ),
             );
@@ -83,41 +120,13 @@ class _MyWidgetState extends State<BuscadorScreen> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 50.0, right: 10.0),
         child: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => CrearEventoScreen()),
-            );
-          },
+          onPressed: navigateToCreateEventScreen,
           label: Text('Crear Evento'),
           icon: Icon(Icons.add),
           backgroundColor: Colors.orange,
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-    );
-  }
-}
-
-class Event {
-  final String coordinates;
-  final DateTime date;
-  final String eventName;
-  final String description;
-
-  Event({
-    required this.coordinates,
-    required this.date,
-    required this.eventName,
-    required this.description,
-  });
-
-  factory Event.fromJson(Map<String, dynamic> json) {
-    return Event(
-      coordinates: (json['coordinates'] as List<dynamic>).join(', '),
-      date: DateTime.parse(json['date'] ?? ''),
-      eventName: json['eventName'] ?? '',
-      description: json['description'] ?? '',
     );
   }
 }

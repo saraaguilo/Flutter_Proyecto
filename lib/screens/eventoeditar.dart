@@ -1,28 +1,27 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:applogin/screens/signin_screen.dart'; // acceso a currentUserEmail
+import 'package:applogin/screens/buscadoreventos.dart'; // Asegúrate de que esta ruta sea correcta
 import 'package:applogin/config.dart';
 import 'package:applogin/models/event.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class CrearEventoScreen extends StatefulWidget {
+class EventoEditScreen extends StatefulWidget {
+  final Event event;
+
+  EventoEditScreen({Key? key, required this.event}) : super(key: key);
+
   @override
-  _CrearEventoScreenState createState() => _CrearEventoScreenState();
+  _EventoEditScreenState createState() => _EventoEditScreenState();
 }
 
-class _CrearEventoScreenState extends State<CrearEventoScreen> {
-  final TextEditingController _eventNameController = TextEditingController();
-  final TextEditingController _eventDescriptionController =
-      TextEditingController();
-  final TextEditingController _eventLocationController =
-      TextEditingController();
-  String _selectedCategory = 'Pop';
-  DateTime _selectedDate = DateTime.now();
+class _EventoEditScreenState extends State<EventoEditScreen> {
+  late TextEditingController _eventNameController;
+  late TextEditingController _eventDescriptionController;
+  late TextEditingController _eventLocationController;
+  late String _selectedCategory;
+  late DateTime _selectedDate;
   String token = '';
-  String passedIdUser = '';
-
-  // categorías musicales
   final List<String> _categories = [
     'Pop',
     'Rock',
@@ -36,6 +35,14 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
   void initState() {
     super.initState();
     loadData();
+    _eventNameController = TextEditingController(text: widget.event.eventName);
+    _eventDescriptionController =
+        TextEditingController(text: widget.event.description);
+    _eventLocationController =
+        TextEditingController(text: widget.event.coordinates.join(', '));
+    _selectedCategory =
+        'Pop'; // Asumir categoría por defecto o añadir lógica para obtenerla
+    _selectedDate = widget.event.date;
   }
 
   void loadData() async {
@@ -43,39 +50,32 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
 
     setState(() {
       token = prefs.getString('token') ?? '';
-      passedIdUser = prefs.getString('idUser') ?? '';
     });
   }
 
-  Future<void> saveEvent() async {
-    var idUser = await passedIdUser;
-    if (idUser == null) {
-      print('No se pudo obtener el ID del usuario');
-      return;
-    }
-
+  Future<void> updateEvent() async {
     List<String> coordinatesArray =
         _eventLocationController.text.split(',').map((s) => s.trim()).toList();
 
-    var response = await http.post(
-      Uri.parse('$uri/events'),
+    var response = await http.put(
+      Uri.parse('$uri/events/${widget.event.id}'),
       headers: {'Content-Type': 'application/json', 'x-access-token': token},
       body: json.encode({
         'eventName': _eventNameController.text,
         'description': _eventDescriptionController.text,
         'coordinates': coordinatesArray,
         'date': _selectedDate.toIso8601String(),
-        'idUser': idUser,
+        // Aquí puedes añadir otros campos que quieras actualizar
       }),
     );
 
-    if (response.statusCode == 201) {
-      print('Evento guardado correctamente');
+    if (response.statusCode == 200) {
+      print('Evento actualizado correctamente');
       Navigator.pop(context,
-          true); // return a pantalla anterior e indica que se ha creado evento para refresh)
+          true); // Retorno a la pantalla anterior con indicador de actualización
     } else {
       print(
-          'Error al guardar el evento. Código de estado: ${response.statusCode}');
+          'Error al actualizar el evento. Código de estado: ${response.statusCode}');
     }
   }
 
@@ -83,7 +83,7 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create a new event!'),
+        title: Text('Edit Event'),
         backgroundColor: Colors.orange,
       ),
       body: Padding(
@@ -112,7 +112,7 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
                   child: Text(value),
                 );
               }).toList(),
-              decoration: InputDecoration(labelText: 'Musical category'),
+              decoration: InputDecoration(labelText: 'Category'),
             ),
             GestureDetector(
               onTap: () async {
@@ -139,22 +139,13 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
             ),
             TextField(
               controller: _eventLocationController,
-              decoration: InputDecoration(labelText: 'Location (coordinates)'),
+              decoration: InputDecoration(labelText: 'Location'),
             ),
             SizedBox(height: 20),
-            Container(
-              alignment: Alignment.center,
-              child: ElevatedButton(
-                child: Text('Save Event'),
-                onPressed: saveEvent,
-                style: ElevatedButton.styleFrom(
-                  primary: Colors.orange,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                        20.0), // Ajusta el radio según sea necesario
-                  ),
-                ),
-              ),
+            ElevatedButton(
+              child: Text('Save changes'),
+              onPressed: updateEvent,
+              style: ElevatedButton.styleFrom(primary: Colors.orange),
             ),
           ],
         ),

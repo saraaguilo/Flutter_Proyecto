@@ -9,16 +9,19 @@ import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/utils/color_utils.dart';
 import 'package:applogin/utils/utilsPictures.dart';
 import 'package:cloudinary/cloudinary.dart';
+import 'package:cloudinary_flutter/image/cld_image.dart';
 import 'package:flutter/material.dart';
 import 'package:applogin/models/user.dart';
 import 'package:applogin/models/event.dart';
 import 'package:applogin/services/user_services.dart';
+import 'package:applogin/services/cloudinary_services.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:applogin/config.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key});
@@ -35,31 +38,41 @@ class _MyWidgetState extends State<ProfileScreen> {
   DateTime? birthDate;
   String password = '';
   String avatar =
-      'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
+      'https://res.cloudinary.com/dsivbpzlp/image/upload/v1703593654/profilePics/ykj88nlthv29rkdg69dk.webp';
   List<String> createdEventsId = [];
   List<String> joinedEventsId = [];
   List<String> idCategories = [];
+
+  List<String> selectedCategories = [];
+  final List<String> _categories = [
+    'Pop',
+    'Rock',
+    'Rap',
+    'Trap',
+    'Jazz',
+    'Metal'
+  ];
+
   String role = '';
   String description = '';
   List<Event> events = [];
+  bool _isExpanded = false; //desplegable
 
   XFile? _image;
   Uint8List? _imageBytes;
-
-  //late Cloudinary cloudinary;
+  String defaultPic = "";
   Cloudinary? cloudinary;
   final uploadUrl =
       Uri.parse('https://api.cloudinary.com/v1_1/dsivbpzlp/upload');
-  final String apiKey = '663893452531627';
-  final String apiSecret = '0_DJghpiMZUtH4t9AX5O-967op8';
+
   void initState() {
     super.initState();
     loadData();
+    setState(() {});
     cloudinary = Cloudinary.signedConfig(
         apiKey: '663893452531627',
         apiSecret: '0_DJghpiMZUtH4t9AX5O-967op8',
         cloudName: 'dsivbpzlp');
-    //cloudinary = CloudinaryObject.fromCloudName(cloudName: 'dsivbpzlp' );
   }
 
   Future<void> getEventsByUser(idUser) async {
@@ -91,7 +104,8 @@ class _MyWidgetState extends State<ProfileScreen> {
       String? date = prefs.getString('birthDate');
       birthDate = DateTime.parse(date ?? '2023-12-08T12:34:56');
       password = prefs.getString('password') ?? '';
-      //avatar = prefs.getString('avatar') ?? '';
+      avatar = (prefs.getString('avatar') ?? '').replaceAll('"', '');
+      print(avatar);
       //String? createdEventsIdString = prefs.getString('createdEventsId');
       //print(createdEventsIdString);
       //createdEventsId = (prefs.getStringList('createdEventsId') ?? []);
@@ -104,7 +118,6 @@ class _MyWidgetState extends State<ProfileScreen> {
   }
 
   void selectImage() async {
-    //Uint8List img = await pickImage(ImageSource.gallery);
     XFile? img = await pickImage(ImageSource.gallery);
     if (img != null) {
       var bytes = await img.readAsBytes();
@@ -113,144 +126,111 @@ class _MyWidgetState extends State<ProfileScreen> {
         _image = img;
       });
     }
-    _uploadImage();
-  }
-
-  /* Future<void> _uploadImage() async {
-    try {
-      var stream = http.ByteStream.fromBytes(_imageBytes!);
-      var length = await _imageBytes!.length;
-
-      var request = http.MultipartRequest(
-          'POST', uploadUrl)
-        ..fields['upload_preset'] = 'ml_default'
-        ..headers['Authorization'] = 'Basic ' +
-            base64Encode(utf8.encode('$apiKey:$apiSecret'))
-        ..files.add(http.MultipartFile('file', stream, length,
-            filename: 'uploaded_file.jpg'));
-
-      var response = await request.send();
-      if (response.statusCode == 200) {
-        // Handle successful upload
-        print('Image uploaded successfully!');
-      } else {
-        // Handle failed upload
-        print('Failed to upload image. Status code: ${response.statusCode}');
-      }
-    } catch (error) {
-      print('Error uploading image: $error');
-    }
-  } */
-
-  Future<void> _uploadImage() async {
-    try {
-      CloudinaryResponse response;
-
-      if (_image != null) {
-        response = await cloudinary!.upload(
-          fileBytes: _imageBytes,
-          resourceType: CloudinaryResourceType.image,
-          folder: 'profilePics',
-        );
-        if (response.isSuccessful) {
-          print('Get your image from with ${response.secureUrl}');
-        } else {
-          print('No se ha subido bien');
-        }
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
+    uploadImage(
+        cloudinary, _imageBytes, userName, email, password, idUser, token);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Profile"),
-        backgroundColor: Colors.orange,
-        actions: [
-          Container(
-            margin: EdgeInsets.only(right: 10.0),
-            child: popUpMenuButton(),
-          ),
-        ],
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 10),
-          Row(
+        appBar: AppBar(
+          title: Text("Profile"),
+          backgroundColor: Colors.orange,
+          actions: [
+            Container(
+              margin: EdgeInsets.only(right: 10.0),
+              child: popUpMenuButton(),
+            ),
+          ],
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(width: 50),
-              profilePicture(),
-              SizedBox(width: 10),
-              counters(),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  profilePicture(),
+                  const SizedBox(width: 10),
+                  counters(),
+                ],
+              ),
+              const SizedBox(height: 5),
+              basicInfo(),
+              Expanded(child: eventsList()),
             ],
           ),
-          const SizedBox(height: 20),
-          basicInfo(),
-          const SizedBox(height: 10),
-          //tabBar(),
-          Expanded(child: eventsList()),
-        ],
-      ),
-    );
+        ));
   }
 
-  Widget basicInfo() => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget basicInfo() => Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.only(left: 20.0), // Margen a la izquierda
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 10),
-                    Text(
-                      userName,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      email,
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 80),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  side: BorderSide.none,
-                  shape: const StadiumBorder(),
-                ),
-                child: const Text('Edit Profile',
-                    style: TextStyle(color: Colors.white)),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ProfileEditScreen()),
-                  );
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
           Padding(
-            padding: const EdgeInsets.only(left: 20.0), // Margen a la izquierda
-            child: Text(
-              description,
-              style: TextStyle(fontSize: 14, height: 1.4, color: Colors.grey),
+            padding: const EdgeInsets.only(left: 30.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 10),
+                Text(
+                  userName,
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  email,
+                  style: TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  description,
+                  style:
+                      TextStyle(fontSize: 14, height: 1.4, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 60),
+          Container(
+            padding: EdgeInsets.all(16.0),
+            width: 250.0, // Establece el ancho deseado del contenedor
+            child: MultiSelectDialogField(
+              items: _categories
+                  .map(
+                      (category) => MultiSelectItem<String>(category, category))
+                  .toList(),
+              title: Text("Select Categories"),
+              selectedColor: Colors.grey,
+              selectedItemsTextStyle: const TextStyle(color: Colors.black),
+              decoration: BoxDecoration(
+                color: Colors.orange[200],
+                borderRadius: const BorderRadius.all(Radius.circular(40)),
+                border: Border.all(
+                  color: Colors.orange,
+                  width: 2,
+                ),
+              ),
+              buttonIcon: Icon(
+                Icons.music_note_outlined,
+                color: Colors.orange,
+              ),
+              buttonText: Text(
+                "Select categories",
+                style: TextStyle(
+                  color: Colors.orange[800],
+                  fontSize: 16,
+                ),
+              ),
+              onConfirm: (results) {
+                setState(() {
+                  selectedCategories = results;
+                });
+              },
             ),
           ),
         ],
@@ -261,15 +241,26 @@ class _MyWidgetState extends State<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "My events",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
+            Container(
+              decoration: BoxDecoration(
+                color:
+                    Colors.orange[200], // Utiliza un tono más claro de naranja
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(
+                      20.0), // Bordes redondos en la parte superior
+                ),
+              ),
+              width: double.infinity,
+              padding: EdgeInsets.all(10.0),
+              child: Text(
+                "My events",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
             ),
-            const SizedBox(height: 5),
             Expanded(
               child: Container(
                 padding: EdgeInsets.all(10.0),
@@ -332,16 +323,8 @@ class _MyWidgetState extends State<ProfileScreen> {
                                   ],
                                 ),
                               ),
-                              const SizedBox(width: 10), // Espaciador
-                              // Foto a la derecha
-                              Image.network(
-                                avatar,
-                                width:
-                                    100, // Ajusta el ancho según tus necesidades
-                                height:
-                                    100, // Ajusta la altura según tus necesidades
-                                fit: BoxFit.cover,
-                              ),
+                              //const SizedBox(width: 10),
+                              //Image.network( ),
                             ],
                           ),
                         ),
@@ -358,12 +341,16 @@ class _MyWidgetState extends State<ProfileScreen> {
   Widget popUpMenuButton() => PopupMenuButton<String>(
         onSelected: (value) {
           if (value == 'logOut') {
+            deletePrefs();
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => SignInScreen()));
           } else if (value == 'deleteUser') {
             deleteUser(idUser, token);
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => SignInScreen()));
+          } else if (value == 'editProfile') {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => ProfileEditScreen()));
           }
         },
         itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -381,6 +368,13 @@ class _MyWidgetState extends State<ProfileScreen> {
               title: Text('Delete account'),
             ),
           ),
+          const PopupMenuItem<String>(
+            value: 'editProfile',
+            child: ListTile(
+              leading: Icon(Icons.edit_attributes),
+              title: Text('Edit profile'),
+            ),
+          ),
         ],
       );
 
@@ -391,7 +385,8 @@ class _MyWidgetState extends State<ProfileScreen> {
         ),
         elevation: 4,
         child: Container(
-          width: 230, // Ajusta el ancho según tus necesidades
+          height: 100,
+          width: 200, // Ajusta el ancho según tus necesidades
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
@@ -410,7 +405,7 @@ class _MyWidgetState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        '3',
+                        events.length.toString(),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -439,7 +434,7 @@ class _MyWidgetState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        '4',
+                        selectedCategories.length.toString(),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -459,21 +454,15 @@ class _MyWidgetState extends State<ProfileScreen> {
         children: [
           _imageBytes != null
               ? CircleAvatar(
-                  radius: 70,
+                  radius: 60,
                   backgroundColor: Colors.white,
                   backgroundImage: MemoryImage(_imageBytes!),
                 )
               : CircleAvatar(
-                  radius: 70,
+                  radius: 60,
                   backgroundColor: Colors.white,
                   backgroundImage: NetworkImage(avatar),
                 ),
-          /*CldImageWidget(
-                  cloudinary: cloudinary,
-                  publicId: "cld-sample",
-                  width: 150,
-                  height: 150,
-                ),*/
           Positioned(
             bottom: 0,
             right: 4,
@@ -505,19 +494,8 @@ class _MyWidgetState extends State<ProfileScreen> {
         ],
       );
 
-  Widget tabBar() => Column(
-        children: [
-          TabBar(tabs: [
-            Tab(
-              icon: Icon(Icons.event, color: Colors.orange),
-            ),
-            Tab(
-              icon: Icon(Icons.list, color: Colors.orange),
-            )
-          ]),
-          //TabBarView(children: [Expanded(child: eventsList()), categories()])
-        ],
-      );
-
-  Widget categories() => Container();
+  Future<void> deletePrefs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.clear();
+  }
 }

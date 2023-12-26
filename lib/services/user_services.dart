@@ -16,7 +16,6 @@ Future<void> deleteUser(idUser, token) async {
       Uri.parse('$uri/users/$idUser'),
       headers: {'x-access-token': token},
     );
-
     if (response.statusCode == 200) {
       print('Usuario eliminado. Código de estado: ${response.statusCode}');
     } else {
@@ -26,4 +25,10 @@ Future<void> deleteUser(idUser, token) async {
   } catch (error) {
     print('Error de red al cargar eventos: $error');
   }
+}
+
+Future<void> updateUser(idUser, token, body) async {
+
+
+  
 }

@@ -1,26 +1,18 @@
 import 'dart:convert';
-import 'dart:math';
 import 'dart:typed_data';
-import 'package:applogin/reusable_/reusable_widget.dart';
 import 'package:applogin/screens/eventodetalles.dart';
-import 'package:applogin/screens/home_screen.dart';
 import 'package:applogin/screens/profile_edit.dart';
 import 'package:applogin/screens/signin_screen.dart';
-import 'package:applogin/utils/color_utils.dart';
 import 'package:applogin/utils/utilsPictures.dart';
 import 'package:cloudinary/cloudinary.dart';
-import 'package:cloudinary_flutter/image/cld_image.dart';
 import 'package:flutter/material.dart';
-import 'package:applogin/models/user.dart';
 import 'package:applogin/models/event.dart';
 import 'package:applogin/services/user_services.dart';
 import 'package:applogin/services/cloudinary_services.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:applogin/config.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -37,13 +29,17 @@ class _MyWidgetState extends State<ProfileScreen> {
   String idUser = '';
   DateTime? birthDate;
   String password = '';
-  String avatar =
-      'https://res.cloudinary.com/dsivbpzlp/image/upload/v1703593654/profilePics/ykj88nlthv29rkdg69dk.webp';
+  String avatar = '';
   List<String> createdEventsId = [];
   List<String> joinedEventsId = [];
   List<String> idCategories = [];
+  String role = '';
+  String description = '';
+  List<Event> events = [];
+  XFile? _image;
+  Uint8List? _imageBytes;
+  Cloudinary? cloudinary;
 
-  List<String> selectedCategories = [];
   final List<String> _categories = [
     'Pop',
     'Rock',
@@ -53,18 +49,6 @@ class _MyWidgetState extends State<ProfileScreen> {
     'Metal'
   ];
 
-  String role = '';
-  String description = '';
-  List<Event> events = [];
-  bool _isExpanded = false; //desplegable
-
-  XFile? _image;
-  Uint8List? _imageBytes;
-  String defaultPic = "";
-  Cloudinary? cloudinary;
-  final uploadUrl =
-      Uri.parse('https://api.cloudinary.com/v1_1/dsivbpzlp/upload');
-
   void initState() {
     super.initState();
     loadData();
@@ -73,24 +57,6 @@ class _MyWidgetState extends State<ProfileScreen> {
         apiKey: '663893452531627',
         apiSecret: '0_DJghpiMZUtH4t9AX5O-967op8',
         cloudName: 'dsivbpzlp');
-  }
-
-  Future<void> getEventsByUser(idUser) async {
-    try {
-      final response = await http.get(Uri.parse('$uri/events/user/$idUser'));
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        setState(() {
-          events = data.map((item) => Event.fromJson(item)).toList();
-        });
-      } else {
-        print(
-            'Error al cargar eventos. Código de estado: ${response.statusCode}');
-      }
-    } catch (error) {
-      print('Error de red al cargar eventos: $error');
-    }
   }
 
   void loadData() async {
@@ -105,29 +71,15 @@ class _MyWidgetState extends State<ProfileScreen> {
       birthDate = DateTime.parse(date ?? '2023-12-08T12:34:56');
       password = prefs.getString('password') ?? '';
       avatar = (prefs.getString('avatar') ?? '').replaceAll('"', '');
-      print(avatar);
       //String? createdEventsIdString = prefs.getString('createdEventsId');
       //print(createdEventsIdString);
       //createdEventsId = (prefs.getStringList('createdEventsId') ?? []);
       //joinedEventsId = (prefs.getStringList('joinedEventsId') ?? []);
-      //idCategories = (prefs.getStringList('idCategories') ?? []);
+      idCategories = (prefs.getStringList('idCategories') ?? []);
       role = prefs.getString('role') ?? '';
       description = prefs.getString('description') ?? '';
       getEventsByUser(idUser);
     });
-  }
-
-  void selectImage() async {
-    XFile? img = await pickImage(ImageSource.gallery);
-    if (img != null) {
-      var bytes = await img.readAsBytes();
-      setState(() {
-        _imageBytes = bytes;
-        _image = img;
-      });
-    }
-    uploadImage(
-        cloudinary, _imageBytes, userName, email, password, idUser, token);
   }
 
   @override
@@ -162,6 +114,24 @@ class _MyWidgetState extends State<ProfileScreen> {
             ],
           ),
         ));
+  }
+
+  Future<void> getEventsByUser(idUser) async {
+    try {
+      final response = await http.get(Uri.parse('$uri/events/user/$idUser'));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          events = data.map((item) => Event.fromJson(item)).toList();
+        });
+      } else {
+        print(
+            'Error al cargar eventos. Código de estado: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error de red al cargar eventos: $error');
+    }
   }
 
   Widget basicInfo() => Row(
@@ -226,9 +196,11 @@ class _MyWidgetState extends State<ProfileScreen> {
                   fontSize: 16,
                 ),
               ),
+              initialValue: idCategories,
               onConfirm: (results) {
                 setState(() {
-                  selectedCategories = results;
+                  idCategories = results;
+                  updateCategories();
                 });
               },
             ),
@@ -434,7 +406,7 @@ class _MyWidgetState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        selectedCategories.length.toString(),
+                        idCategories.length.toString(),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -449,6 +421,19 @@ class _MyWidgetState extends State<ProfileScreen> {
           ),
         ),
       );
+  
+  void selectImage() async {
+    XFile? img = await pickImage(ImageSource.gallery);
+    if (img != null) {
+      var bytes = await img.readAsBytes();
+      setState(() {
+        _imageBytes = bytes;
+        _image = img;
+      });
+    }
+    uploadImage(
+        cloudinary, _imageBytes, userName, email, password, idUser, token);
+  }
 
   Widget profilePicture() => Stack(
         children: [
@@ -468,7 +453,6 @@ class _MyWidgetState extends State<ProfileScreen> {
             right: 4,
             child: GestureDetector(
               onTap: () {
-                print('Tocaste el ícono de edición');
                 selectImage();
               },
               child: ClipOval(
@@ -493,6 +477,33 @@ class _MyWidgetState extends State<ProfileScreen> {
           )
         ],
       );
+
+  Future<void> updateCategories() async {
+    String idCategoriesJson = jsonEncode(idCategories);
+
+    final Map<String, dynamic> userData = {
+      'userName': userName,
+      'email': email,
+      'password': password,
+      'idCategories': idCategoriesJson
+    };
+
+    final response = await http.put(
+      Uri.parse('$uri/users/$idUser'),
+      headers: {'x-access-token': token},
+      body: (userData),
+    );
+
+    if (response.statusCode == 201) {
+      print('Perfil modificado con éxito.');
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('idCategories', idCategories);
+    } else {
+      print(
+          'Error al modificar el usuario. Código de estado: ${response.statusCode}');
+    }
+  }
 
   Future<void> deletePrefs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

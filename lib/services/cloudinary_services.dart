@@ -3,10 +3,8 @@ import 'package:http/http.dart' as http;
  import 'package:cloudinary/cloudinary.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
  Future<void> uploadImage(cloudinary, imageBytes, userName, email, password, idUser, token) async {
     try {
-      
 
       CloudinaryResponse response;
 

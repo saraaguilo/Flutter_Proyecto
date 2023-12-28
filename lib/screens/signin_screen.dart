@@ -149,17 +149,15 @@ class _SignInScreenState extends State<SignInScreen> {
                 'birthDate', user.birthDate?.toString() ?? '');
             await prefs.setString('password', user.password);
             await prefs.setString('avatar', jsonEncode(user.avatar));
-            await prefs.setString(
-                'createdEventsId', jsonEncode(user.createdEventsId));
-            await prefs.setString(
-                'joinedEventsId', jsonEncode(user.joinedEventsId));
-            await prefs.setString(
-                'idCategories', jsonEncode(user.idCategories));
+            //await prefs.setString(
+            //'createdEventsId', jsonEncode(user.createdEventsId));
+            //await prefs.setString(
+            //'joinedEventsId', jsonEncode(user.joinedEventsId));
+            await prefs.setStringList('idCategories', user.idCategories ?? []);
             await prefs.setString('role', user.role);
             await prefs.setString('description', user.description);
 
             print('Usuario loggeado con éxito.');
-            // almacenar el email del usuario en la variable global
             currentUserEmail = emailController.text;
             Navigator.push(
               context,

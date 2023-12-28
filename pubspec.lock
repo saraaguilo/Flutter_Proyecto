@@ -40,10 +40,7 @@ packages:
       sha256: ee67cb0715911d28db6bf4af1026078bd6f0128b07a5f66fb2ed94ec6783c09a
       url: "https://pub.dev"
     source: hosted
-
     version: "1.18.0"
-
-    version: "1.17.2"
   crypto:
     dependency: transitive
     description:
@@ -60,7 +57,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
->>>>>>> 509b2269888f9a1f6790d86948798ba8ca7cd606
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -371,10 +367,7 @@ packages:
       sha256: a6e590c838b18133bb482a2745ad77c5bb7715fb0451209e1a7567d416678b8e
       url: "https://pub.dev"
     source: hosted
-
     version: "1.10.0"
-
-    version: "1.9.1"
   mgrs_dart:
     dependency: transitive
     description:
@@ -383,7 +376,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
-
   path:
     dependency: transitive
     description:
@@ -564,10 +556,7 @@ packages:
       sha256: ba2aa5d8cc609d96bbb2899c28934f9e1af5cddbd60a827822ea467161eb54e7
       url: "https://pub.dev"
     source: hosted
-
     version: "2.1.2"
-
-    version: "2.1.1"
   stream_transform:
     dependency: transitive
     description:
@@ -576,7 +565,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-
   string_scanner:
     dependency: transitive
     description:
@@ -640,11 +628,7 @@ packages:
       sha256: afe077240a270dcfd2aafe77602b4113645af95d0ad31128cc02bce5ac5d5152
       url: "https://pub.dev"
     source: hosted
-
     version: "0.3.0"
-sdks:
-
-    version: "0.1.4-beta"
   win32:
     dependency: transitive
     description:
@@ -670,6 +654,5 @@ sdks:
     source: hosted
     version: "1.0.3"
 sdks:
-  dart: ">=3.1.5 <4.0.0"
+  dart: ">=3.2.0-194.0.dev <4.0.0"
   flutter: ">=3.13.0"
->>>>>>> 509b2269888f9a1f6790d86948798ba8ca7cd606

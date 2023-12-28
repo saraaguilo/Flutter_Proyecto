@@ -7,30 +7,33 @@ import 'package:applogin/config.dart';
 
 class ChatScreen extends StatefulWidget {
   final String chatName;
+
   const ChatScreen({required this.chatName, Key? key}) : super(key: key);
-  
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  Color purple = Color(0xFF6C5CE7);
   Color black = Color(0xFF191919);
   Color orange = Color(0xFFFF7B00);
-  Color darkorange = Color.fromARGB(255, 153, 64, 1);
   TextEditingController msgInputController = TextEditingController();
   late IO.Socket socket;
   ChatController chatController = ChatController();
-@override
-  void initState(){
+
+  @override
+  void initState() {
     socket = IO.io(
-        '$uri',
-        IO.OptionBuilder()
-          .setTransports(['websocket'])
-          .disableAutoConnect()
-          .build());
+      '$uri',
+      IO.OptionBuilder()
+        .setTransports(['websocket'])
+        .disableAutoConnect()
+        .build(),
+    );
+
     socket.connect();
+    socket.emit('join-room', widget.chatName);
+
     setUpSocketListener();
     super.initState();
   }
@@ -43,18 +46,23 @@ class _ChatScreenState extends State<ChatScreen> {
         child: Column(
           children: [
             Expanded(
-            child: Obx( 
-          () => Container(padding: EdgeInsets.all(10),child: Text("Connected User ${chatController.connectedUser}",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 15.0, ),
-            ),
-            )),
+              child: Obx(
+                () => Container(
+                  padding: EdgeInsets.all(10),
+                  child: Text(
+                    "Connected User ${chatController.connectedUser}",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15.0,
+                    ),
+                  ),
+                ),
+              ),
             ),
             Expanded(
               flex: 9,
               child: Obx(
-                ()=> ListView.builder(
+                () => ListView.builder(
                   itemCount: chatController.chatMessages.length,
                   itemBuilder: (context, index) {
                     var currentItem = chatController.chatMessages[index];
@@ -109,23 +117,21 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void sendMessage(String text) {
-    var messageJson = {"message": text, "sentByMe": socket.id};
+    var messageJson = {"message": text, "sentByMe": socket.id, "room": widget.chatName};
     socket.emit('message', messageJson);
-    chatController.chatMessages.add(Message.fromJson(messageJson));
+    // chatController.chatMessages.add(Message.fromJson(messageJson));
   }
-  
+
   void setUpSocketListener() {
-    socket.on('message-receive', (msg){
+    socket.on('message-receive', (msg) {
       print(msg);
       chatController.chatMessages.add(Message.fromJson(msg));
     });
-    socket.on('connected-user ', (msg){
+    socket.on('connected-user ', (msg) {
       print(msg);
       chatController.connectedUser.value = msg;
     });
   }
- 
-  
 }
 
 class MessageItem extends StatelessWidget {
@@ -135,7 +141,6 @@ class MessageItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color black = Color(0xFF191919);
     Color orange = Color(0xFFFF7B00);
     Color white = Colors.white;
 
@@ -147,8 +152,7 @@ class MessageItem extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(5),
           color: sentByMe ? orange : Colors.white,
-          ),
-        
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -175,3 +179,4 @@ class MessageItem extends StatelessWidget {
     );
   }
 }
+

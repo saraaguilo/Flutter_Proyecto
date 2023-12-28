@@ -1,6 +1,4 @@
 import 'package:applogin/screens/chat_screen.dart';
-import 'package:applogin/screens/chat_screen2.dart';
-import 'package:applogin/screens/chat_screen3.dart';
 import 'package:flutter/material.dart';
 import 'package:applogin/config.dart';
 import 'package:http/http.dart' as http;
@@ -24,14 +22,12 @@ class _ChatPrincipalScreenState extends State<ChatPrincipalScreen> {
     final response = await http.get(Uri.parse('$uri/events'));
 
     if (response.statusCode == 200) {
-      // Decodificar la respuesta JSON
       final List<dynamic> data = json.decode(response.body);
       setState(() {
-        // Extraer los nombres de los eventos
-        eventNames = data.map((event) => event['eventName'].toString()).toList();
+        eventNames =
+            data.map((event) => event['eventName'].toString()).toList();
       });
     } else {
-      // Si la solicitud falla, maneja el error según sea necesario
       print('Error al cargar los eventos: ${response.statusCode}');
     }
   }
@@ -40,17 +36,36 @@ class _ChatPrincipalScreenState extends State<ChatPrincipalScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat Principal'),
+        title: Text('Principal Chat'),
       ),
       body: ListView.builder(
         itemCount: eventNames.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(eventNames[index]),
-            onTap: () {
-              // Al hacer clic en un evento, navega a la pantalla de chat correspondiente
-              navigateToChatScreen(context, eventNames[index]);
-            },
+          return Card(
+            margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            elevation: 2.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            child: ListTile(
+              contentPadding: EdgeInsets.all(16.0),
+              title: Text(
+                eventNames[index],
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18.0,
+                ),
+              ),
+              subtitle: Text(
+                'Join this event chat!',
+                style: TextStyle(
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+              onTap: () {
+                navigateToChatScreen(context, eventNames[index]);
+              },
+            ),
           );
         },
       ),

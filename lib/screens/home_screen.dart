@@ -64,16 +64,19 @@ class _HomeScreenState extends State<HomeScreen> {
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => MapScreen()),
-            );
-          },
-          tooltip: 'Show Map',
-          child: Icon(Icons.map),
-          backgroundColor: Colors.orange,
+        floatingActionButton: Container(
+          margin: EdgeInsets.only(top: 20.0),
+          child: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MapScreen()),
+              );
+            },
+            tooltip: 'Show Map',
+            child: Icon(Icons.map),
+            backgroundColor: Colors.orange,
+          ),
         ),
       ),
     );

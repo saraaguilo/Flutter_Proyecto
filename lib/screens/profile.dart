@@ -1,17 +1,19 @@
 import 'dart:convert';
-import 'package:applogin/reusable_/reusable_widget.dart';
+import 'dart:typed_data';
 import 'package:applogin/screens/eventodetalles.dart';
-import 'package:applogin/screens/home_screen.dart';
 import 'package:applogin/screens/profile_edit.dart';
 import 'package:applogin/screens/signin_screen.dart';
-import 'package:applogin/utils/color_utils.dart';
+import 'package:applogin/utils/utilsPictures.dart';
+import 'package:cloudinary/cloudinary.dart';
 import 'package:flutter/material.dart';
-import 'package:applogin/models/user.dart';
 import 'package:applogin/models/event.dart';
 import 'package:applogin/services/user_services.dart';
+import 'package:applogin/services/cloudinary_services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:applogin/config.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key});
@@ -34,10 +36,84 @@ class _MyWidgetState extends State<ProfileScreen> {
   String role = '';
   String description = '';
   List<Event> events = [];
+  XFile? _image;
+  Uint8List? _imageBytes;
+  Cloudinary? cloudinary;
+
+  final List<String> _categories = [
+    'Pop',
+    'Rock',
+    'Rap',
+    'Trap',
+    'Jazz',
+    'Metal'
+  ];
 
   void initState() {
     super.initState();
     loadData();
+    setState(() {});
+    cloudinary = Cloudinary.signedConfig(
+        apiKey: '663893452531627',
+        apiSecret: '0_DJghpiMZUtH4t9AX5O-967op8',
+        cloudName: 'dsivbpzlp');
+  }
+
+  void loadData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      token = prefs.getString('token') ?? '';
+      userName = prefs.getString('userName') ?? '';
+      email = prefs.getString('email') ?? '';
+      idUser = prefs.getString('idUser') ?? '';
+      String? date = prefs.getString('birthDate');
+      birthDate = DateTime.parse(date ?? '2023-12-08T12:34:56');
+      password = prefs.getString('password') ?? '';
+      avatar = (prefs.getString('avatar') ?? '').replaceAll('"', '');
+      //String? createdEventsIdString = prefs.getString('createdEventsId');
+      //print(createdEventsIdString);
+      //createdEventsId = (prefs.getStringList('createdEventsId') ?? []);
+      //joinedEventsId = (prefs.getStringList('joinedEventsId') ?? []);
+      idCategories = (prefs.getStringList('idCategories') ?? []);
+      role = prefs.getString('role') ?? '';
+      description = prefs.getString('description') ?? '';
+      getEventsByUser(idUser);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("Profile"),
+          backgroundColor: Colors.orange,
+          actions: [
+            Container(
+              margin: EdgeInsets.only(right: 10.0),
+              child: popUpMenuButton(),
+            ),
+          ],
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  profilePicture(),
+                  const SizedBox(width: 10),
+                  counters(),
+                ],
+              ),
+              const SizedBox(height: 5),
+              basicInfo(),
+              Expanded(child: eventsList()),
+            ],
+          ),
+        ));
   }
 
   Future<void> getEventsByUser(idUser) async {
@@ -58,150 +134,116 @@ class _MyWidgetState extends State<ProfileScreen> {
     }
   }
 
-  void loadData() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    setState(() {
-      token = prefs.getString('token') ?? '';
-      userName = prefs.getString('userName') ?? '';
-      email = prefs.getString('email') ?? '';
-      idUser = prefs.getString('idUser') ?? '';
-      String? date = prefs.getString('birthDate');
-      birthDate = DateTime.parse(date ?? '2023-12-08T12:34:56');
-      password = prefs.getString('password') ?? '';
-      avatar = prefs.getString('avatar') ?? '';
-      //String? createdEventsIdString = prefs.getString('createdEventsId');
-      //print(createdEventsIdString);
-      //createdEventsId = (prefs.getStringList('createdEventsId') ?? []);
-      //joinedEventsId = (prefs.getStringList('joinedEventsId') ?? []);
-      //idCategories = (prefs.getStringList('idCategories') ?? []);
-      role = prefs.getString('role') ?? '';
-      description = prefs.getString('description') ?? '';
-      getEventsByUser(idUser);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Profile"),
-        backgroundColor: Colors.orange,
-        actions: [
-          Container(
-            margin: EdgeInsets.only(right: 25.0),
-            child: popUpMenuButton(),
-          ),
-        ],
-      ),
-      body: Column(
+  Widget basicInfo() => Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            alignment: Alignment.center,
+          Padding(
+            padding: const EdgeInsets.only(left: 30.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-                basicInfo(),
+                Text(
+                  userName,
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  email,
+                  style: TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  description,
+                  style:
+                      TextStyle(fontSize: 14, height: 1.4, color: Colors.grey),
+                ),
               ],
             ),
           ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const SizedBox(width: 16),
-              details(),
-            ],
-          ),
-          const SizedBox(height: 10),
-          const Divider(),
-          const SizedBox(height: 10),
-          Expanded(child: eventsList()),
-        ],
-      ),
-    );
-  }
-
-  Widget basicInfo() => Column(
-        children: [
-          const SizedBox(height: 10),
-          ClipRRect(
-              borderRadius: BorderRadius.circular(100),
-              child: const Icon(Icons.person, size: 100)),
-          Text(
-            userName,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            email,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey),
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              side: BorderSide.none,
-              shape: const StadiumBorder(),
+          const SizedBox(width: 60),
+          Container(
+            padding: EdgeInsets.all(16.0),
+            width: 250.0, // Establece el ancho deseado del contenedor
+            child: MultiSelectDialogField(
+              items: _categories
+                  .map(
+                      (category) => MultiSelectItem<String>(category, category))
+                  .toList(),
+              title: Text("Select Categories"),
+              selectedColor: Colors.grey,
+              selectedItemsTextStyle: const TextStyle(color: Colors.black),
+              decoration: BoxDecoration(
+                color: Colors.orange[200],
+                borderRadius: const BorderRadius.all(Radius.circular(40)),
+                border: Border.all(
+                  color: Colors.orange,
+                  width: 2,
+                ),
+              ),
+              buttonIcon: Icon(
+                Icons.music_note_outlined,
+                color: Colors.orange,
+              ),
+              buttonText: Text(
+                "Select categories",
+                style: TextStyle(
+                  color: Colors.orange[800],
+                  fontSize: 16,
+                ),
+              ),
+              initialValue: idCategories,
+              onConfirm: (results) {
+                setState(() {
+                  idCategories = results;
+                  updateCategories();
+                });
+              },
             ),
-            child: const Text('Edit Profile',
-                style: TextStyle(color: Colors.white)),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ProfileEditScreen()),
-              );
-            },
           ),
         ],
       );
-
-  Widget details() => Container(
-      alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.only(left: 25.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "My details",
-            style: TextStyle(
-                fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            description,
-            style: TextStyle(fontSize: 14, height: 1.4, color: Colors.grey),
-          ),
-        ],
-      ));
 
   Widget eventsList() => Container(
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "My events",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
+            Container(
+              decoration: BoxDecoration(
+                color:
+                    Colors.orange[200], // Utiliza un tono más claro de naranja
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(
+                      20.0), // Bordes redondos en la parte superior
+                ),
+              ),
+              width: double.infinity,
+              padding: EdgeInsets.all(10.0),
+              child: Text(
+                "My events",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
             ),
-            const SizedBox(height: 10),
             Expanded(
               child: Container(
-                padding: EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(10.0),
                 child: ListView.builder(
                   itemCount: events.length,
                   itemBuilder: (context, index) {
                     return Card(
-                      color: Colors.grey[200],
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                       child: InkWell(
                         onTap: () {
                           Navigator.push(
@@ -212,14 +254,49 @@ class _MyWidgetState extends State<ProfileScreen> {
                             ),
                           );
                         },
-                        child: ListTile(
-                          title: Text(events[index].eventName),
-                          subtitle: Column(
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(events[index].description),
-                              Text('Coordinates: ${events[index].coordinates}'),
-                              Text('Date: ${events[index].date}'),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      events[index].eventName,
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      events[index].description,
+                                      style: TextStyle(
+                                          fontSize: 14, color: Colors.black87),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      'Coordinates: ${events[index].coordinates}',
+                                      style: TextStyle(
+                                          fontSize: 12, color: Colors.grey),
+                                    ),
+                                    Text(
+                                      'Date: ${events[index].date}',
+                                      style: TextStyle(
+                                          fontSize: 12, color: Colors.grey),
+                                    ),
+                                    const SizedBox(height: 10),
+                                  ],
+                                ),
+                              ),
+                              //const SizedBox(width: 10),
+                              //Image.network( ),
                             ],
                           ),
                         ),
@@ -236,12 +313,16 @@ class _MyWidgetState extends State<ProfileScreen> {
   Widget popUpMenuButton() => PopupMenuButton<String>(
         onSelected: (value) {
           if (value == 'logOut') {
+            deletePrefs();
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => SignInScreen()));
           } else if (value == 'deleteUser') {
-            deleteUser(idUser,token);
+            deleteUser(idUser, token);
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => SignInScreen()));
+          } else if (value == 'editProfile') {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => ProfileEditScreen()));
           }
         },
         itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -259,6 +340,173 @@ class _MyWidgetState extends State<ProfileScreen> {
               title: Text('Delete account'),
             ),
           ),
+          const PopupMenuItem<String>(
+            value: 'editProfile',
+            child: ListTile(
+              leading: Icon(Icons.edit_attributes),
+              title: Text('Edit profile'),
+            ),
+          ),
         ],
       );
+
+  Widget counters() => Card(
+        margin: EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        elevation: 4,
+        child: Container(
+          height: 100,
+          width: 200, // Ajusta el ancho según tus necesidades
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text(
+                        "Events",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        events.length.toString(),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 1, // Ancho del separador vertical
+                  height: 70, // Altura del separador vertical
+                  color: Colors.grey,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text(
+                        "Categories",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        idCategories.length.toString(),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+  
+  void selectImage() async {
+    XFile? img = await pickImage(ImageSource.gallery);
+    if (img != null) {
+      var bytes = await img.readAsBytes();
+      setState(() {
+        _imageBytes = bytes;
+        _image = img;
+      });
+    }
+    uploadImage(
+        cloudinary, _imageBytes, userName, email, password, idUser, token);
+  }
+
+  Widget profilePicture() => Stack(
+        children: [
+          _imageBytes != null
+              ? CircleAvatar(
+                  radius: 60,
+                  backgroundColor: Colors.white,
+                  backgroundImage: MemoryImage(_imageBytes!),
+                )
+              : CircleAvatar(
+                  radius: 60,
+                  backgroundColor: Colors.white,
+                  backgroundImage: NetworkImage(avatar),
+                ),
+          Positioned(
+            bottom: 0,
+            right: 4,
+            child: GestureDetector(
+              onTap: () {
+                selectImage();
+              },
+              child: ClipOval(
+                child: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.orange,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white,
+                      width: 2.0,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.edit,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+          )
+        ],
+      );
+
+  Future<void> updateCategories() async {
+    String idCategoriesJson = jsonEncode(idCategories);
+
+    final Map<String, dynamic> userData = {
+      'userName': userName,
+      'email': email,
+      'password': password,
+      'idCategories': idCategoriesJson
+    };
+
+    final response = await http.put(
+      Uri.parse('$uri/users/$idUser'),
+      headers: {'x-access-token': token},
+      body: (userData),
+    );
+
+    if (response.statusCode == 201) {
+      print('Perfil modificado con éxito.');
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('idCategories', idCategories);
+    } else {
+      print(
+          'Error al modificar el usuario. Código de estado: ${response.statusCode}');
+    }
+  }
+
+  Future<void> deletePrefs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.clear();
+  }
 }

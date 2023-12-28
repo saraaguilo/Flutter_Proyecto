@@ -10,7 +10,7 @@ import 'package:applogin/screens/signup_screen.dart';
 import 'package:applogin/screens/profile.dart';
 import 'package:applogin/models/user.dart';
 
-import 'package:applogin/screens/mapa.dart';
+import 'mapa.dart';
 
 void main() {
   runApp(HomeScreen());

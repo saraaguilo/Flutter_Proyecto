@@ -60,9 +60,7 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
       MaterialPageRoute(builder: (context) => ChatPrincipalScreen()),
     );
 
-    if (result == true) {
-      getEvents();
-    }
+    
   }
 
   void navigateToDetailEventScreen(Event event) async {

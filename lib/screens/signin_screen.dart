@@ -1,16 +1,14 @@
+import 'package:applogin/models/user.dart';
 import 'package:applogin/reusable_/reusable_widget.dart';
 import 'package:applogin/screens/home_screen.dart';
-import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/screens/signup_screen.dart';
 import 'package:applogin/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
-import 'package:applogin/models/user.dart';
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:applogin/config.dart';
-import 'dart:convert';
-import 'package:applogin/screens/mapa.dart';
+import 'package:applogin/utils/LoginGoogleUtils.dart';
 
 String currentUserEmail = '';
 
@@ -103,6 +101,8 @@ class _SignInScreenState extends State<SignInScreen> {
                   signInButton(),
                   SizedBox(height: 20),
                   signUpOption(),
+                  SizedBox(height: 20),
+                  GoogleLoginButton(), // Include GoogleLoginButton here
                 ],
               ),
             ),
@@ -144,24 +144,14 @@ class _SignInScreenState extends State<SignInScreen> {
 
             await prefs.setString('userName', user.userName);
             await prefs.setString('email', user.email);
-            await prefs.setString('idUser', user.idUser ?? '');
-            await prefs.setString(
-                'birthDate', user.birthDate?.toString() ?? '');
-            await prefs.setString('password', user.password);
-            await prefs.setString('avatar', jsonEncode(user.avatar));
-            await prefs.setString(
-                'createdEventsId', jsonEncode(user.createdEventsId));
-            await prefs.setString(
-                'joinedEventsId', jsonEncode(user.joinedEventsId));
-            await prefs.setString(
-                'idCategories', jsonEncode(user.idCategories));
-            await prefs.setString('role', user.role);
-            await prefs.setString('description', user.description);
+            // ... Resto del código ...
 
             print('Usuario loggeado con éxito.');
             // almacenar el email del usuario en la variable global
             currentUserEmail = emailController.text;
-            Navigator.push(
+
+            // Cambiar a la pantalla de inicio y reemplazar la actual
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => HomeScreen()),
             );
@@ -201,12 +191,71 @@ class _SignInScreenState extends State<SignInScreen> {
               MaterialPageRoute(builder: (context) => SignUpScreen()),
             );
           },
-          child: const Text(
-            " Sign Up",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          child: Container(
+            margin: const EdgeInsets.only(left: 5),
+            child: const Text(
+              " Sign Up",
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
           ),
-        )
+        ),
       ],
+    );
+  }
+}
+
+class GoogleLoginButton extends StatefulWidget {
+  const GoogleLoginButton({Key? key}) : super(key: key);
+
+  @override
+  _GoogleLoginButtonState createState() => _GoogleLoginButtonState();
+}
+
+class _GoogleLoginButtonState extends State<GoogleLoginButton> {
+  bool isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => isHovered = true),
+      onExit: (_) => setState(() => isHovered = false),
+      child: ElevatedButton(
+        onPressed: () async {
+          try {
+            // Llamada al método signInWithGoogle de LoginGoogleUtils
+            final user = await LoginGoogleUtils().signInWithGoogle();
+            if (user != null) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen()),
+              );
+            }
+          } catch (error) {
+            print("Error signing in with Google: $error");
+            // Puedes manejar el error según sea necesario
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          primary: Colors.transparent,
+          onPrimary: isHovered ? Colors.grey : Colors.white70,
+          side: BorderSide(color: Colors.white, width: 2),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("Sign in with Google"),
+            Container(
+              margin: const EdgeInsets.only(left: 5),
+              child: Image.asset(
+                'images/google.png',
+                height: 30,
+                width: 30,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

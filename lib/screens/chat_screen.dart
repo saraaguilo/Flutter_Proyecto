@@ -2,8 +2,10 @@ import 'package:applogin/controller/chat_controller.dart';
 import 'package:applogin/model/message.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:applogin/config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatScreen extends StatefulWidget {
   final String chatName;
@@ -20,28 +22,57 @@ class _ChatScreenState extends State<ChatScreen> {
   TextEditingController msgInputController = TextEditingController();
   late IO.Socket socket;
   ChatController chatController = ChatController();
+  late String miUsuario; // Variable para almacenar el nombre de usuario
 
   @override
   void initState() {
+    super.initState();
+    setUpSocket();
+  }
+
+  Future<void> setUpSocket() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      miUsuario = prefs.getString('userName') ?? "Usuario Desconocido";
+      print('Nombre de usuario almacenado: $miUsuario');
+    } catch (error) {
+      print('Error al obtener el nombre de usuario desde SharedPreferences: $error');
+    }
+
     socket = IO.io(
       '$uri',
       IO.OptionBuilder()
-        .setTransports(['websocket'])
-        .disableAutoConnect()
-        .build(),
+          .setTransports(['websocket'])
+          .disableAutoConnect()
+          .build(),
     );
 
     socket.connect();
     socket.emit('join-room', widget.chatName);
 
     setUpSocketListener();
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.white),
+        title: Text(
+          "Chat Room: ${widget.chatName}",
+          style: TextStyle(color: Colors.white),
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            leaveRoom();
+            Navigator.pop(context);
+          },
+        ),
+      ),
       body: Container(
         child: Column(
           children: [
@@ -50,7 +81,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 () => Container(
                   padding: EdgeInsets.all(10),
                   child: Text(
-                    "Connected User ${chatController.connectedUser}",
+                    "Connected Users: ${chatController.connectedUser}",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 15.0,
@@ -69,6 +100,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     return MessageItem(
                       sentByMe: currentItem.sentByMe == socket.id,
                       message: currentItem.message,
+                      sentByUserName: miUsuario,
                     );
                   },
                 ),
@@ -117,27 +149,53 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void sendMessage(String text) {
-    var messageJson = {"message": text, "sentByMe": socket.id, "room": widget.chatName};
+    var messageJson = {
+      "message": text,
+      "sentByMe": socket.id,
+      "room": widget.chatName,
+      "username": miUsuario,
+    };
     socket.emit('message', messageJson);
-    // chatController.chatMessages.add(Message.fromJson(messageJson));
   }
 
   void setUpSocketListener() {
     socket.on('message-receive', (msg) {
-      print(msg);
       chatController.chatMessages.add(Message.fromJson(msg));
     });
-    socket.on('connected-user ', (msg) {
-      print(msg);
-      chatController.connectedUser.value = msg;
+
+    socket.on('connected-user', (count) {
+      chatController.updateConnectedUser(count, socket.id!);
     });
+
+    socket.on('user-left', (count) {
+      chatController.updateConnectedUser(count, socket.id!);
+    });
+  }
+
+  void leaveRoom() {
+    socket.emit('leave-room', widget.chatName);
   }
 }
 
 class MessageItem extends StatelessWidget {
-  const MessageItem({Key? key, required this.sentByMe, required this.message}) : super(key: key);
+  const MessageItem({
+    Key? key,
+    required this.sentByMe,
+    required this.message,
+    required this.sentByUserName,
+  }) : super(key: key);
+
   final bool sentByMe;
   final String message;
+  final String sentByUserName;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'message': message,
+      'sentByMe': sentByMe,
+      //'sentByUserName': sentByUserName,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -159,15 +217,15 @@ class MessageItem extends StatelessWidget {
           textBaseline: TextBaseline.alphabetic,
           children: [
             Text(
-              message,
+              sentByMe ? "Me: $message" : "$sentByUserName: $message",
               style: TextStyle(
                 color: sentByMe ? white : orange,
                 fontSize: 18,
               ),
             ),
-            SizedBox(width: 5),
+            SizedBox(width: 20),
             Text(
-              "1:10 AM",
+              "${DateFormat('h:mm a').format(DateTime.now())}",
               style: TextStyle(
                 color: (sentByMe ? white : orange).withOpacity(0.7),
                 fontSize: 10,
@@ -179,4 +237,3 @@ class MessageItem extends StatelessWidget {
     );
   }
 }
-

@@ -36,32 +36,32 @@ class _ChatPrincipalScreenState extends State<ChatPrincipalScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Principal Chat'),
+        title: Text('Chat Home'),
+        backgroundColor: Color(0xFFFF7B00), // Color naranja personalizado
       ),
       body: ListView.builder(
         itemCount: eventNames.length,
         itemBuilder: (context, index) {
           return Card(
-            margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            margin: EdgeInsets.all(0), // Margen ajustado a cero
             elevation: 2.0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.0),
             ),
             child: ListTile(
-              contentPadding: EdgeInsets.all(16.0),
-              title: Text(
-                eventNames[index],
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18.0,
+              contentPadding: EdgeInsets.all(0), // Margen interno ajustado a cero
+              title: Align(
+                alignment: Alignment.centerLeft, // Alinear al centro izquierda
+                child: Text(
+                  eventNames[index],
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.0,
+                    color: Color(0xFF191919), // Color de texto personalizado
+                  ),
                 ),
               ),
-              subtitle: Text(
-                'Join this event chat!',
-                style: TextStyle(
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
+              
               onTap: () {
                 navigateToChatScreen(context, eventNames[index]);
               },

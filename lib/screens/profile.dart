@@ -317,15 +317,78 @@ class _MyWidgetState extends State<ProfileScreen> {
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => SignInScreen()));
           } else if (value == 'deleteUser') {
-            deleteUser(idUser, token);
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => SignInScreen()));
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text(
+                    'Delete Account',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  content: Text(
+                    'Are you sure you want to delete your account?',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                    ),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  backgroundColor: Colors.white,
+                  elevation: 10.0,
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize: 16.0,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        deleteUser(idUser, token);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SignInScreen(),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        'Delete',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
           } else if (value == 'editProfile') {
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => ProfileEditScreen()));
           }
         },
         itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+          const PopupMenuItem<String>(
+            value: 'editProfile',
+            child: ListTile(
+              leading: Icon(Icons.edit_attributes),
+              title: Text('Edit profile'),
+            ),
+          ),
           const PopupMenuItem<String>(
             value: 'logOut',
             child: ListTile(
@@ -337,14 +400,12 @@ class _MyWidgetState extends State<ProfileScreen> {
             value: 'deleteUser',
             child: ListTile(
               leading: Icon(Icons.delete),
-              title: Text('Delete account'),
-            ),
-          ),
-          const PopupMenuItem<String>(
-            value: 'editProfile',
-            child: ListTile(
-              leading: Icon(Icons.edit_attributes),
-              title: Text('Edit profile'),
+              title: Text(
+                'Delete account',
+                style: TextStyle(
+                  color: Colors.red,
+                ),
+              ),
             ),
           ),
         ],
@@ -421,7 +482,7 @@ class _MyWidgetState extends State<ProfileScreen> {
           ),
         ),
       );
-  
+
   void selectImage() async {
     XFile? img = await pickImage(ImageSource.gallery);
     if (img != null) {

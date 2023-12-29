@@ -29,87 +29,92 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          "LOG IN",
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+    return WillPopScope(
+        child: Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            title: const Text(
+              "LOG IN",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
           ),
-        ),
-      ),
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
-          gradient: gradientBackground(),
-        ),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: <Widget>[
-                  SizedBox(height: 30),
-                  logoWidget("images/logoOrange.png"),
-                  SizedBox(height: 20, width: double.infinity),
-                  //EMAIL TEXT FIELD
-                  TextFormField(
-                    controller: emailController,
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      labelStyle: TextStyle(
-                        color: Color.fromARGB(255, 255, 255, 255),
+          body: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            decoration: BoxDecoration(
+              gradient: gradientBackground(),
+            ),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(height: 30),
+                      logoWidget("images/logoOrange.png"),
+                      SizedBox(height: 20, width: double.infinity),
+                      //EMAIL TEXT FIELD
+                      TextFormField(
+                        controller: emailController,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          labelStyle: TextStyle(
+                            color: Color.fromARGB(255, 255, 255, 255),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
+                      SizedBox(height: 30),
+                      //PASSWORD TEXT FIELD
+                      TextFormField(
+                        controller: passwordController,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          labelStyle: TextStyle(
+                            color: Color.fromARGB(255, 255, 255, 255),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                        obscureText: true,
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                    ),
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
+                      SizedBox(height: 16),
+                      signInButton(),
+                      SizedBox(height: 20),
+                      signUpOption(),
+                    ],
                   ),
-                  SizedBox(height: 30),
-                  //PASSWORD TEXT FIELD
-                  TextFormField(
-                    controller: passwordController,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      labelStyle: TextStyle(
-                        color: Color.fromARGB(255, 255, 255, 255),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                    ),
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                    obscureText: true,
-                  ),
-                  SizedBox(height: 16),
-                  signInButton(),
-                  SizedBox(height: 20),
-                  signUpOption(),
-                ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
+        onWillPop: () async {
+          
+          return false;
+        });
   }
 
   ElevatedButton signInButton() {
@@ -159,6 +164,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
             print('Usuario loggeado con éxito.');
             currentUserEmail = emailController.text;
+            emailController.text = '';
+            passwordController.text = '';
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => HomeScreen()),

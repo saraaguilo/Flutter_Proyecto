@@ -1,5 +1,6 @@
 import 'package:applogin/controller/chat_controller.dart';
 import 'package:applogin/model/message.dart';
+import 'package:applogin/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -23,6 +24,8 @@ class _ChatScreenState extends State<ChatScreen> {
   late IO.Socket socket;
   ChatController chatController = ChatController();
   late String miUsuario; // Variable para almacenar el nombre de usuario
+  late String username;
+  late String miUsuario2;
 
   @override
   void initState() {
@@ -35,6 +38,12 @@ class _ChatScreenState extends State<ChatScreen> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       miUsuario = prefs.getString('userName') ?? "Usuario Desconocido";
       print('Nombre de usuario almacenado: $miUsuario');
+
+      // Envía el nombre de usuario al servidor cuando se establece la conexión
+      var usernameData = {
+        "username": miUsuario,
+      };
+      socket.emit('username', usernameData);
     } catch (error) {
       print('Error al obtener el nombre de usuario desde SharedPreferences: $error');
     }
@@ -101,6 +110,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       sentByMe: currentItem.sentByMe == socket.id,
                       message: currentItem.message,
                       sentByUserName: miUsuario,
+                      username: miUsuario,
                     );
                   },
                 ),
@@ -149,14 +159,19 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void sendMessage(String text) {
+    // Mantén el nombre de usuario actualizado al enviar un mensaje
     var messageJson = {
       "message": text,
       "sentByMe": socket.id,
       "room": widget.chatName,
       "username": miUsuario,
     };
+    // Envía el mensaje al servidor
     socket.emit('message', messageJson);
+    var username = messageJson['username'];
+  print('El valor de username es: $username');
   }
+
 
   void setUpSocketListener() {
     socket.on('message-receive', (msg) {
@@ -169,6 +184,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
     socket.on('user-left', (count) {
       chatController.updateConnectedUser(count, socket.id!);
+    });
+
+    socket.on('username-receive', (data){
+      var receivedUsername = data['username'];
+      print('Nombre de usuario recibido: $receivedUsername');
     });
   }
 
@@ -183,17 +203,20 @@ class MessageItem extends StatelessWidget {
     required this.sentByMe,
     required this.message,
     required this.sentByUserName,
+    required this.username,
   }) : super(key: key);
 
   final bool sentByMe;
   final String message;
   final String sentByUserName;
+  final String username;
 
   Map<String, dynamic> toJson() {
     return {
       'message': message,
       'sentByMe': sentByMe,
-      //'sentByUserName': sentByUserName,
+      'username': username,
+      'sentByUserName': sentByUserName,
     };
   }
 
@@ -217,7 +240,7 @@ class MessageItem extends StatelessWidget {
           textBaseline: TextBaseline.alphabetic,
           children: [
             Text(
-              sentByMe ? "Me: $message" : "$sentByUserName: $message",
+              sentByMe ? "Me: $message" : "$username: $message",
               style: TextStyle(
                 color: sentByMe ? white : orange,
                 fontSize: 18,

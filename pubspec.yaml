@@ -55,6 +55,7 @@ dependencies:
   google_sign_in: ^6.2.1
   firebase_auth: ^4.15.3
   firebase_core: ^2.24.2
+  flutter_typeahead: ^3.1.3
   
   
 

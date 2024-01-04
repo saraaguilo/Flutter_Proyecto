@@ -1,16 +1,14 @@
+import 'package:applogin/models/user.dart';
 import 'package:applogin/reusable_/reusable_widget.dart';
 import 'package:applogin/screens/home_screen.dart';
-import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/screens/signup_screen.dart';
 import 'package:applogin/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
-import 'package:applogin/models/user.dart';
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:applogin/config.dart';
-import 'dart:convert';
-import 'package:applogin/screens/mapa.dart';
+import 'package:applogin/utils/LoginGoogleUtils.dart';
 
 String currentUserEmail = '';
 
@@ -51,7 +49,7 @@ class _SignInScreenState extends State<SignInScreen> {
         ),
         child: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
+            padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
             child: Form(
               key: _formKey,
               child: Column(
@@ -103,6 +101,8 @@ class _SignInScreenState extends State<SignInScreen> {
                   signInButton(),
                   SizedBox(height: 20),
                   signUpOption(),
+                  SizedBox(height: 20),
+                  GoogleLoginButton(),
                 ],
               ),
             ),
@@ -150,15 +150,19 @@ class _SignInScreenState extends State<SignInScreen> {
             await prefs.setString('password', user.password);
             await prefs.setString('avatar', jsonEncode(user.avatar));
             //await prefs.setString(
-            //'createdEventsId', jsonEncode(user.createdEventsId));
+               
+               // 'createdEventsId', jsonEncode(user.createdEventsId));
             //await prefs.setString(
-            //'joinedEventsId', jsonEncode(user.joinedEventsId));
-            await prefs.setStringList('idCategories', user.idCategories ?? []);
+                //'joinedEventsId', jsonEncode(user.joinedEventsId));
+            await prefs.setStringList(
+                'idCategories', user.idCategories ?? []);
             await prefs.setString('role', user.role);
             await prefs.setString('description', user.description);
 
             print('Usuario loggeado con éxito.');
-            currentUserEmail = emailController.text;
+             currentUserEmail = emailController.text;
+            emailController.text = '';
+            passwordController.text = '';
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => HomeScreen()),
@@ -199,12 +203,71 @@ class _SignInScreenState extends State<SignInScreen> {
               MaterialPageRoute(builder: (context) => SignUpScreen()),
             );
           },
-          child: const Text(
-            " Sign Up",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          child: Container(
+            margin: const EdgeInsets.only(left: 5),
+            child: const Text(
+              " Sign Up",
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
           ),
-        )
+        ),
       ],
+    );
+  }
+}
+
+class GoogleLoginButton extends StatefulWidget {
+  const GoogleLoginButton({Key? key}) : super(key: key);
+
+  @override
+  _GoogleLoginButtonState createState() => _GoogleLoginButtonState();
+}
+
+class _GoogleLoginButtonState extends State<GoogleLoginButton> {
+  bool isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => isHovered = true),
+      onExit: (_) => setState(() => isHovered = false),
+      child: ElevatedButton(
+        onPressed: () async {
+          try {
+            // Llamada al método signInWithGoogle de LoginGoogleUtils
+            final user = await LoginGoogleUtils().signInWithGoogle();
+            if (user != null) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen()),
+              );
+            }
+          } catch (error) {
+            print("Error signing in with Google: $error");
+            // Puedes manejar el error según sea necesario
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          primary: Colors.transparent,
+          onPrimary: isHovered ? Colors.grey : Colors.white70,
+          side: BorderSide(color: Colors.white, width: 2),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("Sign in with Google"),
+            Container(
+              margin: const EdgeInsets.only(left: 5),
+              child: Image.asset(
+                'images/google.png',
+                height: 30,
+                width: 30,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

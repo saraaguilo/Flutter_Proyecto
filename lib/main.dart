@@ -1,43 +1,74 @@
+
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:cloudinary_flutter/cloudinary_context.dart';
 import 'package:cloudinary_flutter/cloudinary_object.dart';
 import 'package:flutter/material.dart';
 import 'package:applogin/screens/profile.dart';
 
-void main() {
+import 'package:applogin/theme/dark_theme.dart';
+import 'package:applogin/theme/light_theme.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:applogin/controller/profile_controller.dart';
+import 'package:applogin/screens/signin_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:applogin/theme/darkModeProvider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+
+void main() async {
+  // Inicializa ProfileController utilizando Get.put
+  Get.put(ProfileController());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Espera a que Firebase.initializeApp() se complete
+  await Firebase.initializeApp(
+  options: const FirebaseOptions(
+    apiKey: "AIzaSyAtHrrHPxwhPKQsaMadeXwf2Vz-rxiKXUQ",
+    authDomain: "fir-c14b5.firebaseapp.com",
+    projectId: "fir-c14b5",
+    storageBucket: "fir-c14b5.appspot.com",
+    messagingSenderId: "627441200007",
+    appId: "1:627441200007:web:af58934c506c4a02dd4122"
+  ),
+);
+
+
   runApp(const MyApp());
 
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+  
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    
     return MaterialApp(
       title: 'Flutter Demo',
+
+      /*
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a blue toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
+      */
+    
+      theme: ThemeData(
+        // Tema claro por defecto
+        brightness: Brightness.light,
+        // Aquí puedes personalizar otros atributos del tema claro si es necesario
+      ),
+      darkTheme: ThemeData.dark().copyWith(
+        // Personaliza los atributos del tema oscuro según sea necesario
+      ),
+      
       home: const SignInScreen(),
+
       //home: const ProfileScreen(), //CAMBIAR
+
+
       debugShowCheckedModeBanner: false,
     );
   }

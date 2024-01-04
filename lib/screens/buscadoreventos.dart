@@ -7,6 +7,7 @@ import 'package:applogin/screens/eventoeditar.dart';
 import 'package:applogin/config.dart';
 import 'package:applogin/models/event.dart';
 import 'package:intl/intl.dart';
+import 'package:applogin/screens/chat_home.dart';
 
 class BuscadorScreen extends StatefulWidget {
   const BuscadorScreen({Key? key}) : super(key: key);
@@ -53,6 +54,15 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
     }
   }
 
+  void navigateToChatPrincipalScreen() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ChatPrincipalScreen()),
+    );
+
+    
+  }
+
   void navigateToDetailEventScreen(Event event) async {
     final result = await Navigator.push(
       context,
@@ -83,50 +93,64 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
         title: Text('Events list'),
         backgroundColor: Colors.orange,
       ),
-      body: Container(
-        padding: EdgeInsets.all(16.0),
-        child: ListView.builder(
-          itemCount: events.length,
-          itemBuilder: (context, index) {
-            return Card(
-              color: Colors.grey[200],
-              child: InkWell(
-                //onTap: () => navigateToDetailEventScreen(events[index]),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            EventoDetailScreen(event: events[index])),
-                  );
-                },
-                child: ListTile(
-                  title: Text('Event Name: ${events[index].eventName}'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Coordinates: ${events[index].coordinates}'),
-                      Text(
-                          'Date: ${DateFormat('yyyy-MM-dd').format(events[index].date)}'),
-                      Text('Description: ${events[index].description}'),
-                    ],
+      
+      body: Stack(
+        children: [
+          Container(
+            padding: EdgeInsets.all(16.0),
+            child: ListView.builder(
+              itemCount: events.length,
+              itemBuilder: (context, index) {
+                return Card(
+                  color: Colors.grey[200],
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                EventoDetailScreen(event: events[index])),
+                      );
+                    },
+                    child: ListTile(
+                      title: Text('Event Name: ${events[index].eventName}'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Coordinates: ${events[index].coordinates}'),
+                          Text(
+                              'Date: ${DateFormat('yyyy-MM-dd').format(events[index].date)}'),
+                          Text('Description: ${events[index].description}'),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            );
-          },
-        ),
+                );
+              },
+            ),
+          ),
+          Positioned(
+            bottom: 75.0,
+            right: 20.0,
+            child: FloatingActionButton.extended(
+              onPressed: navigateToCreateEventScreen,
+              label: Text('Create Event'),
+              icon: Icon(Icons.add),
+              backgroundColor: Colors.orange,
+            ),
+          ),
+          Positioned(
+            bottom: 140.0,
+            right: 20.0,
+            child: FloatingActionButton.extended(
+              onPressed: navigateToChatPrincipalScreen,
+              label: Text('Join Chat Room'),
+              icon: Icon(Icons.add),
+              backgroundColor: Colors.orange,
+            ),
+          ),
+        ],
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 50.0, right: 10.0),
-        child: FloatingActionButton.extended(
-          onPressed: navigateToCreateEventScreen,
-          label: Text('Crear Evento'),
-          icon: Icon(Icons.add),
-          backgroundColor: Colors.orange,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
 }

@@ -5,7 +5,7 @@ import 'package:applogin/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/config.dart';
-
+import 'package:fluttertoast/fluttertoast.dart';
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key});
 
@@ -24,7 +24,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController passwordController2 = TextEditingController();
   String? _passwordController2;
 
-  String? _passwordStrength;
+  int? _passwordStrength;
 
   DateTime _selectedDate = DateTime.now();
 
@@ -202,7 +202,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                                 // Validar la fortaleza de la contraseña
                                 _passwordStrength = validatePasswordStrength(
-                                    passwordController.text);
+                                    passwordController.toString());
 
                                 if (_passwordStrength == null) {
                                   // Contraseña fuerte, proceder con el registro
@@ -210,7 +210,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 } else {
                                   // Contraseña no cumple con los requisitos
                                   showErrorDialog(
-                                      context, 'Error', _passwordStrength!);
+                                      context, 'Error', _passwordStrength.toString());
                                 }
                               }
                             } else {
@@ -240,29 +240,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  String? validatePasswordStrength(String password) {
-    if (password.length < 8) {
-      return 'La contraseña debe tener al menos 8 caracteres.';
-    }
-
-    if (!RegExp(r'[A-Z]').hasMatch(password)) {
-      return 'La contraseña debe contener al menos una letra mayúscula.';
-    }
-
-    if (!RegExp(r'[a-z]').hasMatch(password)) {
-      return 'La contraseña debe contener al menos una letra minúscula.';
-    }
-
-    if (!RegExp(r'[0-9]').hasMatch(password)) {
-      return 'La contraseña debe contener al menos un número.';
-    }
-
-    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) {
-      return 'La contraseña debe contener al menos un carácter especial.';
-    }
-
-    return null;
+  int? validatePasswordStrength(String password) {
+  if (password.length < 8) {
+    showErrorToast('La contraseña debe tener al menos 8 caracteres.');
+    return 400;
   }
+
+  if (!RegExp(r'[A-Z]').hasMatch(password)) {
+    showErrorToast('La contraseña debe contener al menos una letra mayúscula.');
+    return 400;
+  }
+
+  if (!RegExp(r'[a-z]').hasMatch(password)) {
+    showErrorToast('La contraseña debe contener al menos una letra minúscula.');
+    return 400;
+  }
+
+  if (!RegExp(r'[0-9]').hasMatch(password)) {
+    showErrorToast('La contraseña debe contener al menos un número.');
+    return 400;
+  }
+
+  if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) {
+    showErrorToast('La contraseña debe contener al menos un carácter especial.');
+    return 400;
+  }
+
+  return null;
+}
 
   Future<void> signUpUser() async {
     final Map<String, String> userData = {
@@ -295,6 +300,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         showErrorDialog(context, 'Error', 'This email is already used!');
       } else if (response.statusCode == 405) {
         showErrorDialog(context, 'Error', 'This username is already used!');
+      }else if (response.statusCode == 400) {
+      
+      showErrorDialog(context, 'Error', response.body);
       } else {
         showErrorDialog(context, 'Error',
             'An unexpected error occurred. Please try again later.');
@@ -321,5 +329,15 @@ Future<void> showErrorDialog(
         ],
       );
     },
+  );
+}
+void showErrorToast(String message) {
+  Fluttertoast.showToast(
+    msg: message,
+    toastLength: Toast.LENGTH_SHORT,
+    gravity: ToastGravity.BOTTOM,
+    timeInSecForIosWeb: 1,
+    backgroundColor: Colors.red,
+    textColor: Colors.white,
   );
 }

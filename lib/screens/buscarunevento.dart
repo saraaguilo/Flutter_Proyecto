@@ -1,10 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:applogin/screens/eventodetalles.dart';
-import 'package:applogin/screens/buscadoreventos.dart';
+import 'dart:convert';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:applogin/config.dart';
 import 'package:applogin/models/event.dart';
+import 'package:applogin/screens/eventodetalles.dart';
 
 class BuscadorUnEventoScreen extends StatefulWidget {
   const BuscadorUnEventoScreen({Key? key});
@@ -15,6 +15,7 @@ class BuscadorUnEventoScreen extends StatefulWidget {
 
 class _MyWidgetState extends State<BuscadorUnEventoScreen> {
   TextEditingController searchController = TextEditingController();
+  String searchText = "";
   Event? foundEvent;
 
   @override
@@ -23,58 +24,100 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
       appBar: AppBar(
         title: Text('Event details'),
         backgroundColor: Colors.orange,
-      ),
-      body: Container(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Enter the event name',
-                    ),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: searchEvent,
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.orange,
-                  ),
-                  child: Text('Search'),
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-            if (foundEvent != null)
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            EventoDetailScreen(event: foundEvent!)),
-                  );
-                },
-                child: Card(
-                  margin: EdgeInsets.symmetric(vertical: 8.0),
-                  color: Colors.grey[200],
-                  child: ListTile(
-                    title: Text('Event Name: ${foundEvent!.eventName}'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Coordinates: ${foundEvent!.coordinates}'),
-                        Text('Date: ${foundEvent!.date}'),
-                        Text('Description: ${foundEvent!.description}'),
-                      ],
-                    ),
-                  ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              onPressed: searchEvent,
+              style: ElevatedButton.styleFrom(
+                primary: Colors.orange,
+              ),
+              child: Text(
+                'Search',
+                style: TextStyle(
+                  color: Colors.black,
                 ),
               ),
-          ],
+            ),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              TypeAheadFormField(
+                textFieldConfiguration: TextFieldConfiguration(
+                  controller: searchController,
+                  onChanged: (value) {
+                    setState(() {
+                      searchText = value;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Enter the event name',
+                  ),
+                ),
+                suggestionsCallback: (pattern) async {
+                  final response = await http.get(Uri.parse('$uri/events'));
+                  if (response.statusCode == 200) {
+                    final List<dynamic> data = json.decode(response.body);
+                    return data
+                        .map((item) => Event.fromJson(item))
+                        .where((event) =>
+                            event.eventName
+                                .toLowerCase()
+                                .contains(pattern.toLowerCase()))
+                        .toList();
+                  } else {
+                    throw Exception('Error al cargar eventos');
+                  }
+                },
+                itemBuilder: (context, suggestion) {
+                  return ListTile(
+                    title: Text((suggestion as Event).eventName),
+                  );
+                },
+                onSuggestionSelected: (suggestion) {
+                  setState(() {
+                    foundEvent = suggestion as Event?;
+                    searchText = (suggestion as Event).eventName;
+                  });
+
+                  // Establece el texto seleccionado en el controlador del campo de búsqueda
+                  searchController.text = (suggestion as Event).eventName;
+                },
+              ),
+              SizedBox(height: 20),
+              if (foundEvent != null)
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              EventoDetailScreen(event: foundEvent!)),
+                    );
+                  },
+                  child: Card(
+                    margin: EdgeInsets.symmetric(vertical: 8.0),
+                    color: Colors.grey[200],
+                    child: ListTile(
+                      title: Text('Event Name: ${foundEvent!.eventName}'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Coordinates: ${foundEvent!.coordinates}'),
+                          Text('Date: ${foundEvent!.date}'),
+                          Text('Description: ${foundEvent!.description}'),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -90,8 +133,7 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
         final List<Event> matchingEvents = data
             .map((item) => Event.fromJson(item))
             .where((event) =>
-                event.eventName.toLowerCase() ==
-                searchController.text.toLowerCase())
+                event.eventName.toLowerCase() == searchText.toLowerCase())
             .toList();
 
         if (matchingEvents.isNotEmpty) {

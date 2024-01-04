@@ -189,7 +189,7 @@ Future<void> deleteComment(String commentId) async {
   var url = Uri.parse('$uri/comments/$commentId');
   var response = await http.delete(url, headers: {'x-access-token': token});
 
-  if (response.statusCode == 201) {
+  if (response.statusCode == 200) {
     print('Comentario eliminado con éxito');
     _loadComments();
   } else {

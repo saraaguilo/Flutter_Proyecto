@@ -93,6 +93,7 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
         title: Text('Events list'),
         backgroundColor: Colors.orange,
       ),
+      
       body: Stack(
         children: [
           Container(

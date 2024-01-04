@@ -49,7 +49,7 @@ class _SignInScreenState extends State<SignInScreen> {
         ),
         child: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
+            padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
             child: Form(
               key: _formKey,
               child: Column(
@@ -101,6 +101,8 @@ class _SignInScreenState extends State<SignInScreen> {
                   signInButton(),
                   SizedBox(height: 20),
                   signUpOption(),
+                  SizedBox(height: 20),
+                  GoogleLoginButton(),
                 ],
               ),
             ),
@@ -147,17 +149,20 @@ class _SignInScreenState extends State<SignInScreen> {
                 'birthDate', user.birthDate?.toString() ?? '');
             await prefs.setString('password', user.password);
             await prefs.setString('avatar', jsonEncode(user.avatar));
-            await prefs.setString(
-                'createdEventsId', jsonEncode(user.createdEventsId));
-            await prefs.setString(
-                'joinedEventsId', jsonEncode(user.joinedEventsId));
-            await prefs.setString(
-                'idCategories', jsonEncode(user.idCategories));
+            //await prefs.setString(
+               
+               // 'createdEventsId', jsonEncode(user.createdEventsId));
+            //await prefs.setString(
+                //'joinedEventsId', jsonEncode(user.joinedEventsId));
+            await prefs.setStringList(
+                'idCategories', user.idCategories ?? []);
             await prefs.setString('role', user.role);
             await prefs.setString('description', user.description);
 
             print('Usuario loggeado con éxito.');
-            currentUserEmail = emailController.text;
+             currentUserEmail = emailController.text;
+            emailController.text = '';
+            passwordController.text = '';
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => HomeScreen()),

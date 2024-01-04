@@ -61,6 +61,8 @@ dependencies:
   cloudinary_url_gen: ^1.0.0
   cloudinary: ^1.2.0
   multi_select_flutter: ^4.1.3
+  logger: ^2.0.2+1
+  flutter_map_marker_popup: ^6.1.2
 
 
 

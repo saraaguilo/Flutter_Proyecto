@@ -9,7 +9,7 @@ import 'package:applogin/screens/signup_screen.dart';
 import 'package:applogin/screens/profile.dart';
 import 'package:applogin/models/user.dart';
 
-import 'package:applogin/screens/mapa.dart';
+import 'mapa.dart';
 
 void main() {
   runApp(HomeScreen());
@@ -29,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
     BuscadorUnEventoScreen(),
     BuscadorScreen(),
     ProfileScreen(),
+    MapScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -60,6 +61,10 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icon(Icons.person),
               label: 'Profile',
             ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: 'Map',
+            ),
           ],
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
@@ -82,6 +87,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedIndex = 2;
+    _selectedIndex = 3;
   }
 }

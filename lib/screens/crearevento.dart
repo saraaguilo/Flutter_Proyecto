@@ -5,6 +5,8 @@ import 'package:applogin/screens/signin_screen.dart'; // acceso a currentUserEma
 import 'package:applogin/config.dart';
 import 'package:applogin/models/event.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:typed_data';
+import 'package:image_picker/image_picker.dart';
 
 class CrearEventoScreen extends StatefulWidget {
   @override
@@ -21,6 +23,8 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
   DateTime _selectedDate = DateTime.now();
   String token = '';
   String passedIdUser = '';
+  XFile? _eventImage;
+  Uint8List? _imageBytes;
 
   // categorías musicales
   final List<String> _categories = [
@@ -37,6 +41,52 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
     super.initState();
     loadData();
   }
+
+    void selectImage() async {
+    final ImagePicker _picker = ImagePicker();
+    XFile? img = await _picker.pickImage(source: ImageSource.gallery);
+    if (img != null) {
+      var bytes = await img.readAsBytes();
+      setState(() {
+        _imageBytes = bytes;
+        _eventImage = img;
+      });
+    }
+  }
+
+  Widget eventImageWidget() => Stack(
+        children: [
+          _imageBytes != null
+              ? CircleAvatar(
+                  radius: 60,
+                  backgroundColor: Colors.white,
+                  backgroundImage: MemoryImage(_imageBytes!),
+                )
+              : CircleAvatar(
+                  radius: 60,
+                  backgroundColor: Colors.white,
+                  backgroundImage: AssetImage('path/to/default/image'),
+                ),
+          Positioned(
+            bottom: 0,
+            right: 4,
+            child: GestureDetector(
+              onTap: selectImage,
+              child: ClipOval(
+                child: Container(
+                  padding: EdgeInsets.all(8),
+                  color: Colors.orange,
+                  child: Icon(
+                    Icons.edit,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+          )
+        ],
+      );
 
   void loadData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -141,6 +191,7 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
               controller: _eventLocationController,
               decoration: InputDecoration(labelText: 'Location (coordinates)'),
             ),
+            eventImageWidget(),
             SizedBox(height: 20),
             Container(
               alignment: Alignment.center,

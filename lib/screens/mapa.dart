@@ -69,6 +69,7 @@ class _MapScreen extends State<MapScreen> {
     final List<Marker> mapMarkers =
         _markers.map((_PopupMarker pm) => pm.marker).toList();
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Social Groove'),

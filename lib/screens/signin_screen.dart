@@ -55,7 +55,14 @@ class _SignInScreenState extends State<SignInScreen> {
               child: Column(
                 children: <Widget>[
                   SizedBox(height: 30),
-                  logoWidget("images/logoOrange.png"),
+                  Container(
+                    width: double.infinity,
+                    height: 200, // Ajusta la altura según tus necesidades
+                    child: Image.network(
+                      'https://res.cloudinary.com/dsivbpzlp/image/upload/v1704492508/logoOrange_yemw9o.png',
+                      fit: BoxFit.fitHeight,
+                    ),
+                  ),
                   SizedBox(height: 20, width: double.infinity),
                   //EMAIL TEXT FIELD
                   TextFormField(
@@ -150,17 +157,16 @@ class _SignInScreenState extends State<SignInScreen> {
             await prefs.setString('password', user.password);
             await prefs.setString('avatar', jsonEncode(user.avatar));
             //await prefs.setString(
-               
-               // 'createdEventsId', jsonEncode(user.createdEventsId));
+
+            // 'createdEventsId', jsonEncode(user.createdEventsId));
             //await prefs.setString(
-                //'joinedEventsId', jsonEncode(user.joinedEventsId));
-            await prefs.setStringList(
-                'idCategories', user.idCategories ?? []);
+            //'joinedEventsId', jsonEncode(user.joinedEventsId));
+            await prefs.setStringList('idCategories', user.idCategories ?? []);
             await prefs.setString('role', user.role);
             await prefs.setString('description', user.description);
 
             print('Usuario loggeado con éxito.');
-             currentUserEmail = emailController.text;
+            currentUserEmail = emailController.text;
             emailController.text = '';
             passwordController.text = '';
             Navigator.push(
@@ -259,11 +265,11 @@ class _GoogleLoginButtonState extends State<GoogleLoginButton> {
             Text("Sign in with Google"),
             Container(
               margin: const EdgeInsets.only(left: 5),
-              child: Image.asset(
-                'images/google.png',
-                height: 30,
-                width: 30,
-              ),
+              child: Image.network(
+                      'https://res.cloudinary.com/dsivbpzlp/image/upload/v1704492805/Google__G__logo.svg_qyvf04.png',
+                      height: 25,
+                      width: 25,
+                    ),
             ),
           ],
         ),

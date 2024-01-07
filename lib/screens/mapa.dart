@@ -3,15 +3,23 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:logger/logger.dart';
+import 'crearevento.dart';
+import 'package:applogin/models/event.dart';
+import 'buscadoreventos.dart';
 
 const String MAPBOX_ACCESS_TOKEN =
     'pk.eyJ1IjoiYm9yamEyMDIzIiwiYSI6ImNscHd5Mmh0aDBoOXoya28yODB3dXNkNXUifQ.TLNdg-RLv0nuy5N9ihcoeg';
 
 void main() {
-  runApp(MapScreen());
+  final List<Event> events = [];
+  //navigateToCreateListEvents(events);
+  runApp(MapScreen(events: events));
 }
 
 class MapScreen extends StatefulWidget {
+  final List<Event> events;
+  const MapScreen({Key? key, required this.events}) : super(key: key);
+
   @override
   _MapScreen createState() => _MapScreen();
 }
@@ -20,6 +28,7 @@ class _MapScreen extends State<MapScreen> {
   late LatLng clickedLatlng;
   late List<_PopupMarker> _markers;
   late TapPosition pointed;
+  late Event event;
 
   final PopupController _popupController = PopupController();
   final Logger logger = Logger();
@@ -29,9 +38,51 @@ class _MapScreen extends State<MapScreen> {
     super.initState();
     clickedLatlng = LatLng(51.509364, -0.128928);
     _markers = [];
+    initMarkers(widget.events);
   }
 
-  void handleTap(TapPosition position, LatLng latLng) {
+  Future<void> initMarkers(List<Event> events) async {
+    print('$events');
+    setState(() {
+      _markers = _generateMarkers(events);
+      print('$events');
+    });
+  }
+
+  Future<void> handleMapTap(TapPosition position, LatLng selectedLatLng) async {
+    // Pasa las coordenadas seleccionadas de regreso a la pantalla de creación de eventos
+    Navigator.pop(context, selectedLatLng);
+  }
+
+  List<_PopupMarker> _generateMarkers(List<Event> events) {
+    print('$events');
+    return events.map((event) {
+      LatLng eventLatLng = LatLng(
+        event.coordinates[0], // Suponiendo que el primer valor es la latitud
+        event.coordinates[1], // Suponiendo que el segundo valor es la longitud
+      );
+      return _PopupMarker(
+        eventLatLng,
+        marker: Marker(
+          width: 40.0,
+          height: 40.0,
+          point: eventLatLng,
+          child: Container(
+            child: Icon(
+              Icons.location_on,
+              color: Colors.red,
+            ),
+          ),
+        ),
+        popupBuilder: (BuildContext context, Marker marker) {
+          return ExamplePopup(marker,
+              eventLatLng); // Puedes personalizar el contenido del popup
+        },
+      );
+    }).toList();
+  }
+
+  /* void handleTap(TapPosition position, LatLng latLng) {
     setState(() {
       pointed = position;
       clickedLatlng = latLng;
@@ -56,7 +107,7 @@ class _MapScreen extends State<MapScreen> {
       );
       print('Coordenadas clickeadas: ${latLng.latitude}, ${latLng.longitude}');
     });
-  }
+  }*/
 
   @override
   void dispose() {
@@ -80,7 +131,7 @@ class _MapScreen extends State<MapScreen> {
             options: MapOptions(
               initialCenter: LatLng(41.2741, 1.9922),
               initialZoom: 9.2,
-              onTap: handleTap,
+              onTap: handleMapTap,
             ),
             children: [
               MapLayer(
@@ -126,6 +177,12 @@ class _MapScreen extends State<MapScreen> {
               ),
             ],
           ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.pop(context, clickedLatlng);
+          },
+          child: Icon(Icons.check),
         ),
       ),
     );

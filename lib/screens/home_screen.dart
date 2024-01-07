@@ -5,7 +5,7 @@ import 'package:applogin/screens/buscadoreventos.dart';
 import 'package:applogin/screens/buscarunevento.dart';
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/screens/signup_screen.dart';
-
+import 'package:applogin/models/event.dart';
 import 'package:applogin/screens/profile.dart';
 import 'package:applogin/models/user.dart';
 
@@ -24,13 +24,15 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  late List<Event> events = [];
+  late List<Widget> _pages;
 
-  final List<Widget> _pages = [
-    BuscadorUnEventoScreen(),
-    BuscadorScreen(),
-    ProfileScreen(),
-    MapScreen(),
-  ];
+  /* final List<Widget> _pages = [
+      BuscadorUnEventoScreen(),
+      BuscadorScreen(),
+      ProfileScreen(),
+      MapScreen(events: events),
+    ];  */
 
   void _onItemTapped(int index) {
     setState(() {
@@ -75,7 +77,8 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => MapScreen()),
+                MaterialPageRoute(
+                    builder: (context) => MapScreen(events: events)),
               );
             },
             tooltip: 'Show Map',
@@ -91,5 +94,11 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _selectedIndex = 3;
+    _pages = [
+      BuscadorUnEventoScreen(),
+      BuscadorScreen(),
+      ProfileScreen(),
+      MapScreen(events: events), // Aquí es donde se inicializa con events
+    ];
   }
 }

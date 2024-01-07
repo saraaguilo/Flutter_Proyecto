@@ -1,13 +1,16 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:applogin/screens/buscadoreventos.dart'; // Asegúrate de que esta ruta sea correcta
+import 'buscadoreventos.dart'; // Asegúrate de que esta ruta sea correcta
 import 'package:applogin/config.dart';
 import 'package:applogin/models/event.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'mapa.dart';
+import 'package:latlong2/latlong.dart';
 
 class EventoEditScreen extends StatefulWidget {
   final Event event;
+  late MapScreen _mapScreen;
 
   EventoEditScreen({Key? key, required this.event}) : super(key: key);
 
@@ -16,6 +19,8 @@ class EventoEditScreen extends StatefulWidget {
 }
 
 class _EventoEditScreenState extends State<EventoEditScreen> {
+  late List<Event> events = [];
+  LatLng? selectedLocation;
   late TextEditingController _eventNameController;
   late TextEditingController _eventDescriptionController;
   late TextEditingController _eventLocationController;
@@ -28,7 +33,8 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
     'Rap',
     'Trap',
     'Jazz',
-    'Metal'
+    'Metal',
+    'Flamenco'
   ];
 
   @override
@@ -38,8 +44,9 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
     _eventNameController = TextEditingController(text: widget.event.eventName);
     _eventDescriptionController =
         TextEditingController(text: widget.event.description);
-    _eventLocationController =
-        TextEditingController(text: widget.event.coordinates.join(', '));
+    _eventLocationController = TextEditingController(
+        text: widget.event.coordinates.join(
+            '${selectedLocation?.latitude.toString()},${selectedLocation?.longitude.toString()} '));
     _selectedCategory =
         'Pop'; // Asumir categoría por defecto o añadir lógica para obtenerla
     _selectedDate = widget.event.date;
@@ -77,6 +84,15 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
       print(
           'Error al actualizar el evento. Código de estado: ${response.statusCode}');
     }
+  }
+
+  Future<LatLng?> goToMapScreen() async {
+    LatLng? selectedLocation = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MapScreen(events: events)),
+    );
+
+    return selectedLocation;
   }
 
   @override
@@ -137,9 +153,25 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
                 ],
               ),
             ),
-            TextField(
-              controller: _eventLocationController,
-              decoration: InputDecoration(labelText: 'Location'),
+            GestureDetector(
+              onTap: () async {
+                var selectedLocation = await goToMapScreen();
+                if (selectedLocation != null) {
+                  setState(() {
+                    _eventLocationController.text =
+                        '${selectedLocation.latitude}, ${selectedLocation.longitude}';
+                    print(
+                        '${selectedLocation.latitude}, ${selectedLocation.longitude}');
+                  });
+                }
+              },
+              child: Row(
+                children: <Widget>[
+                  Icon(Icons.map),
+                  SizedBox(width: 10),
+                  Text('Select Location on Map'),
+                ],
+              ),
             ),
             SizedBox(height: 20),
             ElevatedButton(

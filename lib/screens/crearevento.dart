@@ -5,13 +5,20 @@ import 'package:applogin/screens/signin_screen.dart'; // acceso a currentUserEma
 import 'package:applogin/config.dart';
 import 'package:applogin/models/event.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'mapa.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:applogin/models/event.dart';
 
 class CrearEventoScreen extends StatefulWidget {
+  late MapScreen _mapScreen;
+  late Event event;
+
   @override
   _CrearEventoScreenState createState() => _CrearEventoScreenState();
 }
 
 class _CrearEventoScreenState extends State<CrearEventoScreen> {
+  LatLng? selectedLocation;
   final TextEditingController _eventNameController = TextEditingController();
   final TextEditingController _eventDescriptionController =
       TextEditingController();
@@ -21,6 +28,7 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
   DateTime _selectedDate = DateTime.now();
   String token = '';
   String passedIdUser = '';
+  late List<Event> events = [];
 
   // categorías musicales
   final List<String> _categories = [
@@ -29,7 +37,8 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
     'Rap',
     'Trap',
     'Jazz',
-    'Metal'
+    'Metal',
+    'Flamenco'
   ];
 
   @override
@@ -53,9 +62,16 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
       print('No se pudo obtener el ID del usuario');
       return;
     }
+    List<double> coordinatesArray = [
+      selectedLocation?.latitude ?? 0.0,
+      selectedLocation?.longitude ?? 0.0,
+    ];
 
-    List<String> coordinatesArray =
-        _eventLocationController.text.split(',').map((s) => s.trim()).toList();
+    /*List<String> coordinatesArray = _eventLocationController.text
+        .split(
+            '${selectedLocation?.latitude.toString()},${selectedLocation?.longitude.toString()}')
+        .map((s) => s.trim())
+        .toList();*/
 
     var response = await http.post(
       Uri.parse('$uri/events'),
@@ -70,13 +86,22 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
     );
 
     if (response.statusCode == 201) {
-      print('Evento guardado correctamente');
+      print('Evento guardado correctamente: $coordinatesArray');
       Navigator.pop(context,
           true); // return a pantalla anterior e indica que se ha creado evento para refresh)
     } else {
       print(
           'Error al guardar el evento. Código de estado: ${response.statusCode}');
     }
+  }
+
+  Future<LatLng?> goToMapScreen() async {
+    LatLng? selectedLocation = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MapScreen(events: events)),
+    );
+    print('$selectedLocation');
+    return selectedLocation;
   }
 
   @override
@@ -137,9 +162,27 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
                 ],
               ),
             ),
-            TextField(
-              controller: _eventLocationController,
-              decoration: InputDecoration(labelText: 'Location (coordinates)'),
+            GestureDetector(
+              onTap: () async {
+                var selectedLocation = await goToMapScreen();
+                if (selectedLocation != null) {
+                  setState(() {
+                    _eventLocationController.text =
+                        '${selectedLocation!.latitude}, ${selectedLocation!.longitude}';
+                    selectedLocation = LatLng(selectedLocation!.latitude,
+                        selectedLocation!.longitude);
+                    this.selectedLocation =
+                        selectedLocation; // Guarda las coordenadas seleccionadas
+                  });
+                }
+              },
+              child: Row(
+                children: <Widget>[
+                  Icon(Icons.map),
+                  SizedBox(width: 10),
+                  Text('Select Location on Map'),
+                ],
+              ),
             ),
             SizedBox(height: 20),
             Container(

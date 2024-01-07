@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 class Event {
   final String id;
   final List<dynamic> coordinates;
@@ -20,7 +23,8 @@ class Event {
   factory Event.fromJson(Map<String, dynamic> json) {
     String? parsedUserId;
     if (json['idUser'] != null) {
-      parsedUserId = json['idUser'] is String ? json['idUser'] : json['idUser']['_id'];
+      parsedUserId =
+          json['idUser'] is String ? json['idUser'] : json['idUser']['_id'];
     }
     return Event(
       id: json['_id'] ?? '',

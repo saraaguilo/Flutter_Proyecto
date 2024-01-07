@@ -8,6 +8,7 @@ import 'package:applogin/config.dart';
 import 'package:applogin/models/event.dart';
 import 'package:intl/intl.dart';
 import 'package:applogin/screens/chat_home.dart';
+import 'mapa.dart';
 
 class BuscadorScreen extends StatefulWidget {
   const BuscadorScreen({Key? key}) : super(key: key);
@@ -43,6 +44,19 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
     }
   }
 
+  void navigateToCreateListEvents(Event event) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MapScreen(events: events)),
+    );
+
+    if (result != null && result is List<Event>) {
+      setState(() {
+        events = result;
+      });
+    }
+  }
+
   void navigateToCreateEventScreen() async {
     final result = await Navigator.push(
       context,
@@ -59,8 +73,6 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
       context,
       MaterialPageRoute(builder: (context) => ChatPrincipalScreen()),
     );
-
-    
   }
 
   void navigateToDetailEventScreen(Event event) async {
@@ -93,7 +105,6 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
         title: Text('Events list'),
         backgroundColor: Colors.orange,
       ),
-      
       body: Stack(
         children: [
           Container(

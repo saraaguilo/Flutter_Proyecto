@@ -46,7 +46,8 @@ class _MyWidgetState extends State<ProfileScreen> {
     'Rap',
     'Trap',
     'Jazz',
-    'Metal'
+    'Metal',
+    'Flamenco'
   ];
 
   void initState() {
@@ -198,14 +199,14 @@ class _MyWidgetState extends State<ProfileScreen> {
               ),
               initialValue: idCategories,
               onConfirm: (results) {
-  // Asegúrate de que results sea una lista de String
-  List<String> selectedCategories = results.cast<String>();
+                // Asegúrate de que results sea una lista de String
+                List<String> selectedCategories = results.cast<String>();
 
-  setState(() {
-    idCategories = selectedCategories;
-    updateCategories();
-  });
-},
+                setState(() {
+                  idCategories = selectedCategories;
+                  updateCategories();
+                });
+              },
             ),
           ),
         ],

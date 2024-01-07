@@ -50,10 +50,8 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
       MaterialPageRoute(builder: (context) => MapScreen(events: events)),
     );
 
-    if (result != null && result is List<Event>) {
-      setState(() {
-        events = result;
-      });
+    if (result == true) {
+      getEvents();
     }
   }
 

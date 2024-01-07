@@ -5,6 +5,8 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:applogin/config.dart';
 import 'package:applogin/models/event.dart';
 import 'package:applogin/screens/eventodetalles.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class BuscadorUnEventoScreen extends StatefulWidget {
   const BuscadorUnEventoScreen({Key? key});
@@ -22,7 +24,7 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Event details'),
+        title: Text(AppLocalizations.of(context)!.search),
         backgroundColor: Colors.orange,
         actions: [
           Padding(
@@ -56,7 +58,7 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
                     });
                   },
                   decoration: InputDecoration(
-                    hintText: 'Enter the event name',
+                    hintText: AppLocalizations.of(context)!.enterNameHint,
                   ),
                 ),
                 suggestionsCallback: (pattern) async {
@@ -104,13 +106,13 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
                     margin: EdgeInsets.symmetric(vertical: 8.0),
                     color: Colors.grey[200],
                     child: ListTile(
-                      title: Text('Event Name: ${foundEvent!.eventName}'),
+                      title: Text('${AppLocalizations.of(context)!.eventName}: ${foundEvent!.eventName}'),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Coordinates: ${foundEvent!.coordinates}'),
-                          Text('Date: ${foundEvent!.date}'),
-                          Text('Description: ${foundEvent!.description}'),
+                          Text('${AppLocalizations.of(context)!.coordinates}: ${foundEvent!.coordinates}'),
+                          Text('${AppLocalizations.of(context)!.date}: ${foundEvent!.date}'),
+                          Text('${AppLocalizations.of(context)!.description}: ${foundEvent!.description}'),
                         ],
                       ),
                     ),

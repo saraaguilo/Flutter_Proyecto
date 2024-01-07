@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:applogin/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ChatScreen extends StatefulWidget {
   final String chatName;
@@ -36,7 +37,8 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> setUpSocket() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      miUsuario = prefs.getString('userName') ?? "Usuario Desconocido";
+      miUsuario = prefs.getString('userName') ??
+          AppLocalizations.of(context)!.unknownUser;
       print('Nombre de usuario almacenado: $miUsuario');
 
       // Envía el nombre de usuario al servidor cuando se establece la conexión
@@ -45,7 +47,8 @@ class _ChatScreenState extends State<ChatScreen> {
       };
       socket.emit('username', usernameData);
     } catch (error) {
-      print('Error al obtener el nombre de usuario desde SharedPreferences: $error');
+      print(
+          'Error al obtener el nombre de usuario desde SharedPreferences: $error');
     }
 
     socket = IO.io(
@@ -71,7 +74,7 @@ class _ChatScreenState extends State<ChatScreen> {
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.white),
         title: Text(
-          "Chat Room: ${widget.chatName}",
+          "${AppLocalizations.of(context)!.chatRoom}: ${widget.chatName}",
           style: TextStyle(color: Colors.white),
         ),
         leading: IconButton(
@@ -90,7 +93,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 () => Container(
                   padding: EdgeInsets.all(10),
                   child: Text(
-                    "Connected Users: ${chatController.connectedUser}",
+                    "${AppLocalizations.of(context)!.connectedUsers}: ${chatController.connectedUser}",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 15.0,
@@ -169,9 +172,8 @@ class _ChatScreenState extends State<ChatScreen> {
     // Envía el mensaje al servidor
     socket.emit('message', messageJson);
     var username = messageJson['username'];
-  print('El valor de username es: $username');
+    print('El valor de username es: $username');
   }
-
 
   void setUpSocketListener() {
     socket.on('message-receive', (msg) {
@@ -186,7 +188,7 @@ class _ChatScreenState extends State<ChatScreen> {
       chatController.updateConnectedUser(count, socket.id!);
     });
 
-    socket.on('username-receive', (data){
+    socket.on('username-receive', (data) {
       var receivedUsername = data['username'];
       print('Nombre de usuario recibido: $receivedUsername');
     });
@@ -240,7 +242,9 @@ class MessageItem extends StatelessWidget {
           textBaseline: TextBaseline.alphabetic,
           children: [
             Text(
-              sentByMe ? "Me: $message" : "$username: $message",
+              sentByMe
+                  ? "${AppLocalizations.of(context)!.me}: $message"
+                  : "$username: $message",
               style: TextStyle(
                 color: sentByMe ? white : orange,
                 fontSize: 18,

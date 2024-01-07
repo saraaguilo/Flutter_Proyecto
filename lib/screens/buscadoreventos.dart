@@ -8,6 +8,7 @@ import 'package:applogin/config.dart';
 import 'package:applogin/models/event.dart';
 import 'package:intl/intl.dart';
 import 'package:applogin/screens/chat_home.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BuscadorScreen extends StatefulWidget {
   const BuscadorScreen({Key? key}) : super(key: key);
@@ -59,8 +60,6 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
       context,
       MaterialPageRoute(builder: (context) => ChatPrincipalScreen()),
     );
-
-    
   }
 
   void navigateToDetailEventScreen(Event event) async {
@@ -90,10 +89,9 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Events list'),
+        title: Text(AppLocalizations.of(context)!.eventsList),
         backgroundColor: Colors.orange,
       ),
-      
       body: Stack(
         children: [
           Container(
@@ -113,14 +111,17 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
                       );
                     },
                     child: ListTile(
-                      title: Text('Event Name: ${events[index].eventName}'),
+                      title: Text(
+                          '${AppLocalizations.of(context)!.eventName}: ${events[index].eventName}'),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Coordinates: ${events[index].coordinates}'),
                           Text(
-                              'Date: ${DateFormat('yyyy-MM-dd').format(events[index].date)}'),
-                          Text('Description: ${events[index].description}'),
+                              '${AppLocalizations.of(context)!.coordinates}: ${events[index].coordinates}'),
+                          Text(
+                              '${AppLocalizations.of(context)!.date}: ${DateFormat('yyyy-MM-dd').format(events[index].date)}'),
+                          Text(
+                              '${AppLocalizations.of(context)!.description}: ${events[index].description}'),
                         ],
                       ),
                     ),
@@ -134,7 +135,7 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
             right: 20.0,
             child: FloatingActionButton.extended(
               onPressed: navigateToCreateEventScreen,
-              label: Text('Create Event'),
+              label: Text(AppLocalizations.of(context)!.createEvent),
               icon: Icon(Icons.add),
               backgroundColor: Colors.orange,
             ),

@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:applogin/models/language.dart';
+import 'package:applogin/models/language_constants.dart';
+import 'package:applogin/main.dart';
 import 'package:applogin/screens/eventodetalles.dart';
 import 'package:applogin/screens/profile_edit.dart';
 import 'package:applogin/screens/signin_screen.dart';
@@ -15,7 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:applogin/config.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -62,15 +65,15 @@ class _MyWidgetState extends State<ProfileScreen> {
     loadData();
     setState(() {});
     cloudinary = Cloudinary.signedConfig(
-      apiKey: '663893452531627',
-      apiSecret: '0_DJghpiMZUtH4t9AX5O-967op8',
-      cloudName: 'dsivbpzlp');
+        apiKey: '663893452531627',
+        apiSecret: '0_DJghpiMZUtH4t9AX5O-967op8',
+        cloudName: 'dsivbpzlp');
 
     //Cloudinary grupo
     //cloudinary = Cloudinary.signedConfig(
-      //  apiKey: '851147581669956',
-      //  apiSecret: '_9JS7cS5HQTMYbTiB0jTAvDIkBQ',
-      //  cloudName: 'dkmpuejix');
+    //  apiKey: '851147581669956',
+    //  apiSecret: '_9JS7cS5HQTMYbTiB0jTAvDIkBQ',
+    //  cloudName: 'dkmpuejix');
   }
 
   void loadData() async {
@@ -100,11 +103,38 @@ class _MyWidgetState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Profile"),
+          title: Text(AppLocalizations.of(context)!.profile),
           backgroundColor: Colors.orange,
           actions: [
+            DropdownButton<Language>(
+              underline: const SizedBox(),
+              icon: const Icon(
+                Icons.language,
+                color: Colors.black,
+              ),
+              onChanged: (Language? language) async {
+                if (language != null) {
+                  Locale _locale = await setLocale(language.languageCode);
+                  MyApp.setLocale(context, _locale);
+                }
+              },
+              items: Language.languageList()
+                  .map<DropdownMenuItem<Language>>(
+                    (e) => DropdownMenuItem<Language>(
+                      value: e,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[Text(e.name)],
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(
+              width: 20,
+            ),
             Container(
-              margin: EdgeInsets.only(right: 10.0),
+              margin: EdgeInsets.only(right: 5.0), // Reducir el margen aquí
               child: popUpMenuButton(),
             ),
           ],
@@ -196,7 +226,7 @@ class _MyWidgetState extends State<ProfileScreen> {
                   .map(
                       (category) => MultiSelectItem<String>(category, category))
                   .toList(),
-              title: Text("Select Categories"),
+              title: Text(AppLocalizations.of(context)!.selectCategories),
               selectedColor: Colors.grey,
               selectedItemsTextStyle: const TextStyle(color: Colors.black),
               decoration: BoxDecoration(
@@ -212,7 +242,7 @@ class _MyWidgetState extends State<ProfileScreen> {
                 color: Colors.orange,
               ),
               buttonText: Text(
-                "Select categories",
+                AppLocalizations.of(context)!.selectCategories,
                 style: TextStyle(
                   color: Colors.orange[800],
                   fontSize: 14,
@@ -250,7 +280,7 @@ class _MyWidgetState extends State<ProfileScreen> {
               width: double.infinity,
               padding: EdgeInsets.all(10.0),
               child: Text(
-                "My events",
+                AppLocalizations.of(context)!.myEvents,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -307,12 +337,12 @@ class _MyWidgetState extends State<ProfileScreen> {
                                     ),
                                     const SizedBox(height: 5),
                                     Text(
-                                      'Coordinates: ${events[index].coordinates}',
+                                      '${AppLocalizations.of(context)!.coordinates}: ${events[index].coordinates}',
                                       style: TextStyle(
                                           fontSize: 12, color: Colors.grey),
                                     ),
                                     Text(
-                                      'Date: ${events[index].date}',
+                                      '${AppLocalizations.of(context)!.date}: ${events[index].date}',
                                       style: TextStyle(
                                           fontSize: 12, color: Colors.grey),
                                     ),
@@ -347,7 +377,7 @@ class _MyWidgetState extends State<ProfileScreen> {
               builder: (BuildContext context) {
                 return AlertDialog(
                   title: Text(
-                    'Delete Account',
+                    AppLocalizations.of(context)!.deleteAccount,
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 18.0,
@@ -355,7 +385,7 @@ class _MyWidgetState extends State<ProfileScreen> {
                     ),
                   ),
                   content: Text(
-                    'Are you sure you want to delete your account?',
+                    AppLocalizations.of(context)!.deleteAccountHint,
                     style: TextStyle(
                       fontSize: 16.0,
                     ),
@@ -371,7 +401,7 @@ class _MyWidgetState extends State<ProfileScreen> {
                         Navigator.of(context).pop();
                       },
                       child: Text(
-                        'Cancel',
+                        AppLocalizations.of(context)!.cancel,
                         style: TextStyle(
                           color: Colors.grey[700],
                           fontSize: 16.0,
@@ -389,7 +419,7 @@ class _MyWidgetState extends State<ProfileScreen> {
                         );
                       },
                       child: Text(
-                        'Delete',
+                        AppLocalizations.of(context)!.delete,
                         style: TextStyle(
                           color: Colors.red,
                           fontSize: 16.0,
@@ -407,26 +437,26 @@ class _MyWidgetState extends State<ProfileScreen> {
           }
         },
         itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'editProfile',
             child: ListTile(
               leading: Icon(Icons.edit_attributes),
-              title: Text('Edit profile'),
+              title: Text(AppLocalizations.of(context)!.editProfile),
             ),
           ),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'logOut',
             child: ListTile(
               leading: Icon(Icons.logout),
-              title: Text('Log out'),
+              title: Text(AppLocalizations.of(context)!.logOut),
             ),
           ),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'deleteUser',
             child: ListTile(
               leading: Icon(Icons.delete),
               title: Text(
-                'Delete account',
+                AppLocalizations.of(context)!.deleteAccount,
                 style: TextStyle(
                   color: Colors.red,
                 ),
@@ -454,7 +484,7 @@ class _MyWidgetState extends State<ProfileScreen> {
                   child: Column(
                     children: [
                       Text(
-                        "Events",
+                        AppLocalizations.of(context)!.events,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -483,7 +513,7 @@ class _MyWidgetState extends State<ProfileScreen> {
                   child: Column(
                     children: [
                       Text(
-                        "Categories",
+                        AppLocalizations.of(context)!.categories,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,

@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/config.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key});
 
@@ -37,8 +39,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         elevation: 0,
         iconTheme:
             IconThemeData(color: const Color.fromARGB(255, 255, 255, 255)),
-        title: const Text(
-          "SIGN UP",
+        title:  Text(
+          AppLocalizations.of(context)!.signUpTitle,
           style: TextStyle(
               color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
         ),
@@ -60,7 +62,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   TextFormField(
                     controller: usernameController,
                     decoration: InputDecoration(
-                      labelText: 'Username',
+                      labelText: AppLocalizations.of(context)!.username,
                       labelStyle: TextStyle(
                         color: Color.fromARGB(255, 255, 255, 255),
                       ),
@@ -84,7 +86,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   TextFormField(
                     controller: emailController,
                     decoration: InputDecoration(
-                      labelText: 'Email',
+                      labelText: AppLocalizations.of(context)!.email,
                       labelStyle: TextStyle(
                         color: Color.fromARGB(255, 255, 255, 255),
                       ),
@@ -108,7 +110,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   TextFormField(
                     controller: passwordController,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: AppLocalizations.of(context)!.password,
                       labelStyle: TextStyle(
                         color: Color.fromARGB(255, 255, 255, 255),
                       ),
@@ -133,7 +135,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   TextFormField(
                     controller: passwordController2,
                     decoration: InputDecoration(
-                      labelText: 'Introduce your password again',
+                      labelText: AppLocalizations.of(context)!.passwordAgain,
                       labelStyle: TextStyle(
                         color: Color.fromARGB(255, 255, 255, 255),
                       ),
@@ -172,7 +174,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        Text('Select your birthdate: ',
+                        Text(AppLocalizations.of(context)!.birthdateHint,
                             style:
                                 TextStyle(color: Colors.white, fontSize: 16)),
                         SizedBox(width: 15),
@@ -210,19 +212,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 } else {
                                   // Contraseña no cumple con los requisitos
                                   showErrorDialog(
-                                      context, 'Error', _passwordStrength.toString());
+                                      context, AppLocalizations.of(context)!.error, _passwordStrength.toString());
                                 }
                               }
                             } else {
                               showErrorDialog(
-                                  context, 'Error', 'Passwords do not match');
+                                  context, AppLocalizations.of(context)!.error, AppLocalizations.of(context)!.errorPass);
                             }
                           },
                           style: ElevatedButton.styleFrom(
                             primary: Color.fromARGB(255, 255, 255, 255),
                           ),
                           child: Text(
-                            'SIGN UP',
+                            AppLocalizations.of(context)!.signUp,
                             style: TextStyle(
                               color: Color.fromARGB(255, 255, 102, 0),
                             ),
@@ -242,27 +244,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   int? validatePasswordStrength(String password) {
   if (password.length < 8) {
-    showErrorToast('La contraseña debe tener al menos 8 caracteres.');
+    showErrorToast(AppLocalizations.of(context)!.passError8char);
     return 400;
   }
 
   if (!RegExp(r'[A-Z]').hasMatch(password)) {
-    showErrorToast('La contraseña debe contener al menos una letra mayúscula.');
+    showErrorToast(AppLocalizations.of(context)!.passErrorCapital);
     return 400;
   }
 
   if (!RegExp(r'[a-z]').hasMatch(password)) {
-    showErrorToast('La contraseña debe contener al menos una letra minúscula.');
+    showErrorToast(AppLocalizations.of(context)!.passErrorLowercase);
     return 400;
   }
 
   if (!RegExp(r'[0-9]').hasMatch(password)) {
-    showErrorToast('La contraseña debe contener al menos un número.');
+    showErrorToast(AppLocalizations.of(context)!.passErrorNumber);
     return 400;
   }
 
   if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) {
-    showErrorToast('La contraseña debe contener al menos un carácter especial.');
+    showErrorToast(AppLocalizations.of(context)!.passErrorSpecialChar);
     return 400;
   }
 
@@ -289,7 +291,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         context: context,
         builder: (BuildContext context) {
           return alert(
-              context, 'Success', 'User created successfully!', SignInScreen());
+              context,AppLocalizations.of(context)!.success, AppLocalizations.of(context)!.successRegister, SignInScreen());
         },
       );
     } else {
@@ -297,15 +299,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
           'Error al crear el usuario. Código de estado: ${response.statusCode}');
 
       if (response.statusCode == 404) {
-        showErrorDialog(context, 'Error', 'This email is already used!');
+        showErrorDialog(context, AppLocalizations.of(context)!.error, AppLocalizations.of(context)!.emailUsed);
       } else if (response.statusCode == 405) {
-        showErrorDialog(context, 'Error', 'This username is already used!');
+        showErrorDialog(context, AppLocalizations.of(context)!.error, AppLocalizations.of(context)!.usernameUsed);
       }else if (response.statusCode == 400) {
       
-      showErrorDialog(context, 'Error', response.body);
+      showErrorDialog(context, AppLocalizations.of(context)!.error, response.body);
       } else {
-        showErrorDialog(context, 'Error',
-            'An unexpected error occurred. Please try again later.');
+        showErrorDialog(context, AppLocalizations.of(context)!.error,
+           AppLocalizations.of(context)!.unexpectedError);
       }
     }
   }
@@ -324,7 +326,7 @@ Future<void> showErrorDialog(
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: Text('OK'),
+            child: Text(AppLocalizations.of(context)!.okUp),
           ),
         ],
       );

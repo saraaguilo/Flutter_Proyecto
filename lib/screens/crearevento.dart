@@ -5,6 +5,7 @@ import 'package:applogin/screens/signin_screen.dart'; // acceso a currentUserEma
 import 'package:applogin/config.dart';
 import 'package:applogin/models/event.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CrearEventoScreen extends StatefulWidget {
   @override
@@ -83,7 +84,7 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create a new event!'),
+        title: Text(AppLocalizations.of(context)!.createEventHint),
         backgroundColor: Colors.orange,
       ),
       body: Padding(
@@ -93,11 +94,13 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
           children: <Widget>[
             TextField(
               controller: _eventNameController,
-              decoration: InputDecoration(labelText: 'Name'),
+              decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.name),
             ),
             TextField(
               controller: _eventDescriptionController,
-              decoration: InputDecoration(labelText: 'Description'),
+              decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.description),
             ),
             DropdownButtonFormField<String>(
               value: _selectedCategory,
@@ -112,7 +115,8 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
                   child: Text(value),
                 );
               }).toList(),
-              decoration: InputDecoration(labelText: 'Musical category'),
+              decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.musicalCategory),
             ),
             GestureDetector(
               onTap: () async {
@@ -139,13 +143,14 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
             ),
             TextField(
               controller: _eventLocationController,
-              decoration: InputDecoration(labelText: 'Location (coordinates)'),
+              decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.locationHint),
             ),
             SizedBox(height: 20),
             Container(
               alignment: Alignment.center,
               child: ElevatedButton(
-                child: Text('Save Event'),
+                child: Text(AppLocalizations.of(context)!.saveEvent),
                 onPressed: saveEvent,
                 style: ElevatedButton.styleFrom(
                   primary: Colors.orange,

@@ -10,6 +10,7 @@ import 'package:applogin/config.dart';
 import 'package:intl/intl.dart';
 import 'package:applogin/screens/chat_home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EventoDetailScreen extends StatefulWidget {
   final Event event;
@@ -93,12 +94,12 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Error"),
+            title: Text(AppLocalizations.of(context)!.error),
             content: Text(
-                "Es necesario indicar una puntuación para dejar el comentario"),
+                AppLocalizations.of(context)!.errorComment),
             actions: <Widget>[
               TextButton(
-                child: Text("Cerrar"),
+                child: Text(AppLocalizations.of(context)!.close),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -196,17 +197,17 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                     ),
                     SizedBox(height: 10),
                     Text(
-                      'Description: ${widget.event.description}',
+                      '${AppLocalizations.of(context)!.description}: ${widget.event.description}',
                       style: TextStyle(fontSize: 16),
                     ),
                     SizedBox(height: 10),
                     Text(
-                      'Date: ${DateFormat('yyyy-MM-dd').format(widget.event.date)}',
+                      '${AppLocalizations.of(context)!.date}: ${DateFormat('yyyy-MM-dd').format(widget.event.date)}',
                       style: TextStyle(fontSize: 16),
                     ),
                     SizedBox(height: 10),
                     Text(
-                      'Location: ${widget.event.coordinates}',
+                      '${AppLocalizations.of(context)!.location}: ${widget.event.coordinates}',
                       style: TextStyle(fontSize: 16),
                     ),
                   ],
@@ -247,7 +248,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                   ),
                 ),
                 child: Text(
-                  'Join Event',
+                  AppLocalizations.of(context)!.joinEvent,
                   style: TextStyle(color: Colors.white),
                 ),
               ),
@@ -256,7 +257,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
             TextField(
               controller: commentController,
               decoration: InputDecoration(
-                labelText: 'Leave your comment here',
+                labelText: AppLocalizations.of(context)!.commentHint,
                 border: OutlineInputBorder(),
               ),
               maxLines: 3,
@@ -293,11 +294,11 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                child: Text('Leave Comment'),
+                child: Text(AppLocalizations.of(context)!.leaveComment),
               ),
             ),
             if (isLoading) Center(child: CircularProgressIndicator()),
-            if (!isLoading && comments.isEmpty) Text('There are no comments'),
+            if (!isLoading && comments.isEmpty) Text(AppLocalizations.of(context)!.noComments),
             ...comments
                 .map((comment) => Container(
                       margin: EdgeInsets.only(top: 10),
@@ -369,7 +370,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    child: Text('Edit Event'),
+                    child: Text(AppLocalizations.of(context)!.editEvent),
                   ),
                   ElevatedButton(
                     onPressed: _deleteEvent,
@@ -380,7 +381,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    child: Text('Delete Event'),
+                    child: Text(AppLocalizations.of(context)!.deleteEvent),
                   ),
                 ],
               ),

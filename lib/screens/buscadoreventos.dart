@@ -34,6 +34,7 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
           events = data.map((item) => Event.fromJson(item)).toList();
+          print('Número de eventos antes de navegar: ${events.length}');
         });
       } else {
         print(
@@ -52,6 +53,7 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
 
     if (result == true) {
       getEvents();
+      print('Número de eventos antes de navegar: ${events.length}');
     }
   }
 

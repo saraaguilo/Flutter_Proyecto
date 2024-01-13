@@ -38,14 +38,17 @@ class _MapScreen extends State<MapScreen> {
     super.initState();
     clickedLatlng = LatLng(51.509364, -0.128928);
     _markers = [];
+    print('initState is called');
+    print('Número de eventos antes de navegar: ${widget.events.length}');
     initMarkers(widget.events);
   }
 
   Future<void> initMarkers(List<Event> events) async {
-    print('$events');
+    print('Número de eventos antes de navegar: ${events.length}');
+    print('initMarkers is called');
     setState(() {
       _markers = _generateMarkers(events);
-      print('$events');
+      print('Número de eventos: ${events.length}');
     });
   }
 
@@ -55,7 +58,7 @@ class _MapScreen extends State<MapScreen> {
   }
 
   List<_PopupMarker> _generateMarkers(List<Event> events) {
-    print('$events');
+    print('Número de eventos: ${events.length}');
     return events.map((event) {
       LatLng eventLatLng = LatLng(
         event.coordinates[0], // Suponiendo que el primer valor es la latitud

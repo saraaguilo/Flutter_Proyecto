@@ -1,14 +1,13 @@
 import 'package:applogin/app_navigation.dart';
 import 'package:applogin/reusable_/reusable_widget.dart';
+import 'package:applogin/routes.dart';
 import 'package:applogin/screens/home_screen.dart';
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/screens/signup_screen.dart';
 import 'package:applogin/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:applogin/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:applogin/config.dart';
@@ -33,92 +32,91 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async {
-        // Disable back navigation when on the login page after logout
-        return false;
-      },
-      child: Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          "LOG IN",
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ),
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
-          gradient: gradientBackground(),
-        ),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: <Widget>[
-                  SizedBox(height: 30),
-                  logoWidget("images/logoOrange.png"),
-                  SizedBox(height: 20, width: double.infinity),
-                  //EMAIL TEXT FIELD
-                  TextFormField(
-                    controller: emailController,
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      labelStyle: TextStyle(
-                        color: Color.fromARGB(255, 255, 255, 255),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                    ),
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(height: 30),
-                  //PASSWORD TEXT FIELD
-                  TextFormField(
-                    controller: passwordController,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      labelStyle: TextStyle(
-                        color: Color.fromARGB(255, 255, 255, 255),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                    ),
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                    obscureText: true,
-                  ),
-                  SizedBox(height: 16),
-                  signInButton(),
-                  SizedBox(height: 20),
-                  signUpOption(),
-                ],
+        onWillPop: () async {
+          // Disable back navigation when on the login page after logout
+          return false;
+        },
+        child: Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            title: const Text(
+              "LOG IN",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
           ),
-        ),
-      ),
-    )
-      );
+          body: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            decoration: BoxDecoration(
+              gradient: gradientBackground(),
+            ),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(20, 120, 20, 0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(height: 30),
+                      logoWidget("images/logoOrange.png"),
+                      SizedBox(height: 20, width: double.infinity),
+                      //EMAIL TEXT FIELD
+                      TextFormField(
+                        controller: emailController,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          labelStyle: TextStyle(
+                            color: Color.fromARGB(255, 255, 255, 255),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                      //PASSWORD TEXT FIELD
+                      TextFormField(
+                        controller: passwordController,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          labelStyle: TextStyle(
+                            color: Color.fromARGB(255, 255, 255, 255),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                        obscureText: true,
+                      ),
+                      SizedBox(height: 16),
+                      signInButton(),
+                      SizedBox(height: 20),
+                      signUpOption(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ));
   }
 
   ElevatedButton signInButton() {
@@ -143,7 +141,6 @@ class _SignInScreenState extends State<SignInScreen> {
                 json.decode(response.body);
             final bool auth = jsonResponse['auth'];
             final String token = jsonResponse['token'];
-            // Ahora puedes extraer el usuario del cuerpo de la respuesta
             final Map<String, dynamic> userJson = jsonResponse['user'];
             final User user = User.fromJson(userJson);
 
@@ -169,8 +166,9 @@ class _SignInScreenState extends State<SignInScreen> {
             // almacenar el email del usuario en la variable global
             currentUserEmail = emailController.text;
 
-            GoRouter.of(context).go('/events');
-
+            //GoRouter.of(context).go('/');
+            Get.toNamed('/');
+            //RoutesClass.getnavbar(); //ve al home
           } else {
             showDialog(
               context: context,
@@ -202,8 +200,8 @@ class _SignInScreenState extends State<SignInScreen> {
         ),
         GestureDetector(
           onTap: () {
-
-            GoRouter.of(context).go('/events');
+            //GoRouter.of(context).go('/events');
+            Get.toNamed('/signup');
           },
           child: const Text(
             " Sign Up",

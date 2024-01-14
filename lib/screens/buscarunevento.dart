@@ -55,7 +55,7 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            EventoDetailScreen(event: foundEvent!)),
+                            EventoDetailScreen(eventId: foundEvent!.id)),
                   );
                 },
                 child: Card(

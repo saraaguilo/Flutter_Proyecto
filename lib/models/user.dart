@@ -40,9 +40,9 @@ class User {
       joinedEventsId: json['joinedEventsId'] != []
           ? List<String>.from(json['joinedEventsId'])
           : null,
-      idCategories: json['idCategories'] != []
-          ? List<String>.from(json['idCategories'])
-          : null,
+    //  idCategories: json['idCategories'] != []
+      //    ? List<String>.from(json['idCategories'])
+        //  : null,
       role: json['role'] ?? '',
       description: json['description'] ?? '',
     );

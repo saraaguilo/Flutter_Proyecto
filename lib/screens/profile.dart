@@ -12,7 +12,6 @@ import 'package:applogin/services/user_services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:applogin/config.dart';
 import 'package:http/http.dart' as http;
-import 'package:go_router/go_router.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key});
@@ -152,7 +151,7 @@ class _MyWidgetState extends State<ProfileScreen> {
             child: const Text('Edit Profile',
                 style: TextStyle(color: Colors.white)),
             onPressed: () {
-              GoRouter.of(context).go('/profile/edit');
+              //GoRouter.of(context).go('/profile/edit');
             },
           ),
         ],
@@ -205,7 +204,7 @@ class _MyWidgetState extends State<ProfileScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  EventoDetailScreen(event: events[index]),
+                                  EventoDetailScreen(eventId: events[index].id),
                             ),
                           );
                         },
@@ -233,10 +232,10 @@ class _MyWidgetState extends State<ProfileScreen> {
   Widget popUpMenuButton() => PopupMenuButton<String>(
         onSelected: (value) {
           if (value == 'logOut') {
-            GoRouter.of(context).go('/signin');
+            //routing signin
           } else if (value == 'deleteUser') {
             deleteUser(idUser);
-            GoRouter.of(context).go('/signin');
+            //routing signin
           }
         },
         itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[

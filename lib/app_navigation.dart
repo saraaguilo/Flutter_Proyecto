@@ -10,8 +10,9 @@ import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/screens/signup_screen.dart';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-
+//import 'package:go_router/go_router.dart';
+/*
+//ROUTING AMB GO ROUTER
 class AppNavigation {
   AppNavigation._();
 
@@ -58,7 +59,7 @@ class AppNavigation {
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return HomeScreen(
-            navigationShell: navigationShell,
+            //navigationShell: navigationShell,
           );
         },
         branches: <StatefulShellBranch>[
@@ -152,4 +153,4 @@ class AppNavigation {
       )
     ],
   );
-}
+} */

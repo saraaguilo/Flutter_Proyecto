@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:applogin/app_navigation.dart';
+import 'package:applogin/routes.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/screens/crearevento.dart';
 import 'package:applogin/screens/eventodetalles.dart';
@@ -62,7 +63,7 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
   void navigateToDetailEventScreen(Event event) async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => EventoDetailScreen(event: event)),
+      MaterialPageRoute(builder: (context) => EventoDetailScreen(eventId: event.id)),
     );
 
     if (result == true) {
@@ -98,8 +99,10 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
               color: Colors.grey[200],
               child: InkWell(
                 onTap: () {
-                  AppNavigation.eventArguments = events[index];
-                  GoRouter.of(context).go('/events/${events[index].id}');
+                  RoutesClass.settingEvent(events[index]);
+                  Get.toNamed('/events/${events[index].id}');
+                  //AppNavigation.eventArguments = events[index];
+                  //GoRouter.of(context).go('/events/${events[index].id}');
                 },
                 child: Row(
                   children: [

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/screens/buscadoreventos.dart';
 import 'package:applogin/screens/signin_screen.dart'; // acceso a currentUserEmail
@@ -12,9 +13,9 @@ import 'package:share_plus/share_plus.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
 class EventoDetailScreen extends StatefulWidget {
-  final Event event;
+  final String eventId;
 
-  EventoDetailScreen({Key? key, required this.event}) : super(key: key);
+  EventoDetailScreen({Key? key, required this.eventId}) : super(key: key);
 
   @override
   _EventoDetailScreenState createState() => _EventoDetailScreenState();
@@ -28,11 +29,21 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
   double currentRating = 0;
   String? url;
 
+  static Event event = Event(
+      id: '',
+      coordinates: [],
+      date: DateTime.now(),
+      eventName: '',
+      description: '');
+
   @override
   void initState() {
     super.initState();
-    _loadComments();
-    _getCurrentUserId();
+
+    _getEvent().then((result) {
+      _loadComments();
+      _getCurrentUserId();
+    });
   }
 
   Future<String?> _getCurrentUserId() async {
@@ -55,8 +66,28 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
     }
   }
 
+  Future<void> _getEvent() async {
+    String currentRoute = Get.currentRoute;
+    List<String> parts = currentRoute.split('/');
+    String id = parts.isNotEmpty ? parts.last : '';
+    var url = Uri.parse('$uri/events/$id');
+    var response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final body = json.decode(response.body);
+      Event currentEvent = Event.fromJson(body);
+      setState(() {
+        event = currentEvent;
+        print('HOLAAA');
+        print(event.id);
+      });
+    } else {
+      print('Error al obtener el evento: ${response.statusCode}');
+    }
+  }
+
   Future<void> _deleteEvent() async {
-    var url = Uri.parse('$uri/events/${widget.event.id}');
+    var url = Uri.parse('$uri/events/${event.id}');
     var response = await http.delete(url);
 
     if (response.statusCode == 201) {
@@ -73,7 +104,8 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
       isLoading = true;
     });
 
-    var eventUrl = Uri.parse('$uri/events/${widget.event.id}');
+    var eventUrl = Uri.parse('$uri/events/${event.id}');
+    print(eventUrl);
     var eventResponse = await http.get(eventUrl);
     List<Comment> loadedComments = [];
     if (eventResponse.statusCode == 200) {
@@ -125,6 +157,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
       await postComment(userId);
     } else {
       print('Error: No se pudo obtener el ID del usuario');
+      showCommentAlertDialog(Get.context!);
     }
   }
 
@@ -152,7 +185,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
   }
 
   Future<void> addCommentToEvent(String commentId) async {
-    var getEventUrl = Uri.parse('$uri/events/${widget.event.id}');
+    var getEventUrl = Uri.parse('$uri/events/${event.id}');
     var getEventResponse = await http.get(getEventUrl);
 
     if (getEventResponse.statusCode == 200) {
@@ -161,7 +194,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
           List<dynamic>.from(eventData['idComments'] ?? []);
       idComments.add(commentId);
 
-      var updateEventUrl = Uri.parse('$uri/events/${widget.event.id}');
+      var updateEventUrl = Uri.parse('$uri/events/${event.id}');
       var updateEventResponse = await http.put(
         updateEventUrl,
         headers: {'Content-Type': 'application/json'},
@@ -186,17 +219,16 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.event.eventName),
+        title: Text(event.eventName),
         backgroundColor: Colors.orange,
         actions: [
           Padding(
             padding: EdgeInsets.only(right: 40),
             child: IconButton(
                 onPressed: () {
-                  url = 'http://147.83.7.158:8080/#/events/${widget.event.id}';
-
+                  url = 'http://147.83.7.158:8080/#/events/${event.id}';
                   Share.share(
-                      'Take a look at this event in SocialGroove App! ${widget.event.eventName} will take place the ${widget.event.date.toLocal()} at location ${widget.event.coordinates} \n Click here for more information! $url');
+                      'Take a look at this event in SocialGroove App! ${event.eventName} will take place the ${event.date.toLocal()} at location ${event.coordinates} \n Click here for more information! $url');
                 },
                 icon: Icon(Icons.share_outlined)),
           ),
@@ -208,22 +240,22 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Name: ${widget.event.eventName}',
+              'Name: ${event.eventName}',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             ),
             SizedBox(height: 10),
             Text(
-              'Description: ${widget.event.description}',
+              'Description: ${event.description}',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 10),
             Text(
-              'Date: ${DateFormat('yyyy-MM-dd').format(widget.event.date)}',
+              'Date: ${DateFormat('yyyy-MM-dd').format(event.date)}',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 10),
             Text(
-              'Location: ${widget.event.coordinates}',
+              'Location: ${event.coordinates}',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 20),
@@ -336,7 +368,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                     ))
                 .toList(),
             SizedBox(height: 60),
-            if (currentUserId == widget.event.idUser)
+            if (currentUserId == event.idUser)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -345,8 +377,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              EventoEditScreen(event: widget.event),
+                          builder: (context) => EventoEditScreen(event: event),
                         ),
                       );
                     },
@@ -378,6 +409,32 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
       ),
     );
   }
+}
+
+void showCommentAlertDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Alert'),
+        content: const Text('To leave a comment you need to register'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.toNamed('/signin');
+            },
+            child: const Text('Sign In'),
+          ),
+        ],
+      );
+    },
+  );
 }
 
 class Comment {

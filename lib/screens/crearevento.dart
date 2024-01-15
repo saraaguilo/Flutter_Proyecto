@@ -98,7 +98,7 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
   Future<LatLng?> goToMapScreen() async {
     LatLng? selectedLocation = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => MapScreen(events: events)),
+      MaterialPageRoute(builder: (context) => MapScreen()),
     );
     print('$selectedLocation');
     return selectedLocation;

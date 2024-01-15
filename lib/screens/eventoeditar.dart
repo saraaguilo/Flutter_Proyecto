@@ -89,7 +89,7 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
   Future<LatLng?> goToMapScreen() async {
     LatLng? selectedLocation = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => MapScreen(events: events)),
+      MaterialPageRoute(builder: (context) => MapScreen()),
     );
 
     return selectedLocation;

@@ -8,6 +8,8 @@ import 'package:applogin/screens/signup_screen.dart';
 import 'package:applogin/models/event.dart';
 import 'package:applogin/screens/profile.dart';
 import 'package:applogin/models/user.dart';
+import 'package:provider/provider.dart';
+import 'package:applogin/reusable_/event_provider.dart';
 
 import 'mapa.dart';
 
@@ -24,7 +26,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  late List<Event> events = [];
+  late List<Event> events;
   late List<Widget> _pages;
 
   /* final List<Widget> _pages = [
@@ -42,6 +44,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    events = Provider.of<EventProvider>(context).events;
+    // Provider.of<EventProvider>(context, listen: false).getEvents();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -77,8 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => MapScreen(events: events)),
+                MaterialPageRoute(builder: (context) => MapScreen()),
               );
             },
             tooltip: 'Show Map',
@@ -98,7 +101,19 @@ class _HomeScreenState extends State<HomeScreen> {
       BuscadorUnEventoScreen(),
       BuscadorScreen(),
       ProfileScreen(),
-      MapScreen(events: events), // Aquí es donde se inicializa con events
+      MapScreen(), // Aquí es donde se inicializa con events
     ];
+
+    checkAndLoadEvents(context);
+  }
+
+  void checkAndLoadEvents(BuildContext context) {
+    final eventProvider = Provider.of<EventProvider>(context, listen: false);
+
+    eventProvider.initialized.then((bool isInitialized) {
+      if (!isInitialized) {
+        eventProvider.getEvents();
+      } else {}
+    });
   }
 }

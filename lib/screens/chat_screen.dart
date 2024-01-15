@@ -4,6 +4,7 @@ import 'package:applogin/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+// ignore: library_prefixes
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:applogin/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -45,7 +46,8 @@ class _ChatScreenState extends State<ChatScreen> {
       };
       socket.emit('username', usernameData);
     } catch (error) {
-      print('Error al obtener el nombre de usuario desde SharedPreferences: $error');
+      print(
+          'Error al obtener el nombre de usuario desde SharedPreferences: $error');
     }
 
     socket = IO.io(
@@ -169,9 +171,8 @@ class _ChatScreenState extends State<ChatScreen> {
     // Envía el mensaje al servidor
     socket.emit('message', messageJson);
     var username = messageJson['username'];
-  print('El valor de username es: $username');
+    print('El valor de username es: $username');
   }
-
 
   void setUpSocketListener() {
     socket.on('message-receive', (msg) {
@@ -186,7 +187,7 @@ class _ChatScreenState extends State<ChatScreen> {
       chatController.updateConnectedUser(count, socket.id!);
     });
 
-    socket.on('username-receive', (data){
+    socket.on('username-receive', (data) {
       var receivedUsername = data['username'];
       print('Nombre de usuario recibido: $receivedUsername');
     });

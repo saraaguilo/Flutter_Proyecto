@@ -7,6 +7,7 @@ import 'package:applogin/models/event.dart';
 import 'package:applogin/screens/eventodetalles.dart';
 
 class BuscadorUnEventoScreen extends StatefulWidget {
+  // ignore: use_key_in_widget_constructors
   const BuscadorUnEventoScreen({Key? key});
 
   @override
@@ -22,7 +23,7 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Event details'),
+        title: const Text('Event details'),
         backgroundColor: Colors.orange,
         actions: [
           Padding(
@@ -30,9 +31,10 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
             child: ElevatedButton(
               onPressed: searchEvent,
               style: ElevatedButton.styleFrom(
+                // ignore: deprecated_member_use
                 primary: Colors.orange,
               ),
-              child: Text(
+              child: const Text(
                 'Search',
                 style: TextStyle(
                   color: Colors.black,
@@ -44,7 +46,7 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
       ),
       body: SingleChildScrollView(
         child: Container(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
               TypeAheadFormField(
@@ -55,7 +57,7 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
                       searchText = value;
                     });
                   },
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter the event name',
                   ),
                 ),
@@ -65,10 +67,9 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
                     final List<dynamic> data = json.decode(response.body);
                     return data
                         .map((item) => Event.fromJson(item))
-                        .where((event) =>
-                            event.eventName
-                                .toLowerCase()
-                                .contains(pattern.toLowerCase()))
+                        .where((event) => event.eventName
+                            .toLowerCase()
+                            .contains(pattern.toLowerCase()))
                         .toList();
                   } else {
                     throw Exception('Error al cargar eventos');

@@ -10,6 +10,7 @@ import 'package:applogin/services/cloudinary_services.dart';
 import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloudinary/cloudinary.dart';
+import 'package:flutter/services.dart';
 
 class CrearEventoScreen extends StatefulWidget {
   @override
@@ -65,7 +66,7 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
               : CircleAvatar(
                   radius: 60,
                   backgroundColor: Colors.white,
-                  backgroundImage: AssetImage('path/to/default/image'),
+                  backgroundImage: AssetImage('images/default.png'),
                 ),
           Positioned(
             bottom: 0,
@@ -98,15 +99,24 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
 
   Future<void> saveEvent() async {
     var idUser = passedIdUser;
-    if (idUser == null || _imageBytes == null || cloudinary == null) {
+    if (idUser == null || cloudinary == null) {
       print('Datos faltantes');
       return;
     }
 
   try {
-    String? imageUrl = await uploadImageEvents(cloudinary!, _imageBytes!, token);
-    List<String> coordinatesArray = _eventLocationController.text.split(',').map((s) => s.trim()).toList();
+      String? imageUrl;
 
+      if (_imageBytes != null) {
+        imageUrl = await uploadImageEvents(cloudinary!, _imageBytes!, token);
+      } else {
+        ByteData data = await rootBundle.load('images/default.png');
+        List<int> defaultImageBytes = data.buffer.asUint8List();
+        imageUrl = await uploadImageEvents(cloudinary!, Uint8List.fromList(defaultImageBytes), token);
+      }
+
+      List<String> coordinatesArray =
+          _eventLocationController.text.split(',').map((s) => s.trim()).toList();
 
     if (imageUrl != null) {
       var eventResponse = await http.post(

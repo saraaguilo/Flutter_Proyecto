@@ -246,10 +246,19 @@ Future<void> deleteComment(String commentId) async {
                       border: Border.all(color: Colors.black),
                       borderRadius: BorderRadius.circular(10.0),
                     ),
-                    child: Icon(
-                      Icons.image,
-                      size: 100.0,
-                      color: Colors.black,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10.0),
+                      child: widget.event.photo != null
+                          ? Image.network(
+                              widget.event.photo!,
+                              width: 100,
+                              height: 100,
+                            )
+                          : Icon(
+                              Icons.image,
+                              size: 100.0,
+                              color: Colors.black,
+                            ),
                     ),
                   ),
                 ),
@@ -394,7 +403,7 @@ Future<void> deleteComment(String commentId) async {
                     ))
                 .toList(),
             SizedBox(height: 60),
-            if (currentUserId == widget.event.idUser)
+            if (passedIdUser == widget.event.idUser)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [

@@ -60,6 +60,15 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
     setState(() {
       token = prefs.getString('token') ?? '';
       passedIdUser = prefs.getString('idUser') ?? '';
+
+      // Añadir logs para depuración
+      if (token.isEmpty) {
+        print('Token not found');
+      } else {
+        print('Token found: $token');
+        // Aquí podrías añadir lógica adicional para verificar la caducidad del token
+        // si tu token incluye una marca de tiempo de expiración.
+      }
     });
   }
 
@@ -189,6 +198,22 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
     }
   }
 
+  bool isCommentByCurrentUser(String commentUserId) {
+  return commentUserId == passedIdUser;
+}
+
+Future<void> deleteComment(String commentId) async {
+  var url = Uri.parse('$uri/comments/$commentId');
+  var response = await http.delete(url, headers: {'x-access-token': token});
+
+  if (response.statusCode == 200) {
+    print('Comentario eliminado con éxito');
+    _loadComments();
+  } else {
+    print('Error al eliminar comentario: ${response.statusCode}');
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -238,10 +263,19 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                       border: Border.all(color: Colors.black),
                       borderRadius: BorderRadius.circular(10.0),
                     ),
-                    child: Icon(
-                      Icons.image,
-                      size: 100.0,
-                      color: Colors.black,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10.0),
+                      child: widget.event.photo != null
+                          ? Image.network(
+                              widget.event.photo!,
+                              width: 100,
+                              height: 100,
+                            )
+                          : Icon(
+                              Icons.image,
+                              size: 100.0,
+                              color: Colors.black,
+                            ),
                     ),
                   ),
                 ),
@@ -320,48 +354,70 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                         color: const Color.fromARGB(255, 255, 196, 107),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              comment.userName,
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
+                      child: Stack(
+                        children: [
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  comment.userName,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  comment.date.toLocal().toString(),
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  comment.text,
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                                RatingBarIndicator(
+                                  rating: comment.punctuation,
+                                  itemBuilder: (context, index) => Icon(
+                                    Icons.star,
+                                    color: Colors.amber,
+                                  ),
+                                  itemCount: 5,
+                                  itemSize: 20.0,
+                                  direction: Axis.horizontal,
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (isCommentByCurrentUser(comment.userId))
+                            Positioned(
+                              bottom: 8,
+                              right: 8,
+                              child: ElevatedButton(
+                                onPressed: () => deleteComment(comment.id),
+                                style: ElevatedButton.styleFrom(
+                                  primary: Colors.red,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: Text(
+                                  'Delete Comment',
+                                  style: TextStyle(color: Colors.white),
+                                ),
                               ),
                             ),
-                            SizedBox(height: 10),
-                            Text(
-                              comment.date.toLocal().toString(),
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 12,
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              comment.text,
-                              style: TextStyle(color: Colors.black),
-                            ),
-                            RatingBarIndicator(
-                              rating: comment.punctuation,
-                              itemBuilder: (context, index) => Icon(
-                                Icons.star,
-                                color: Colors.amber,
-                              ),
-                              itemCount: 5,
-                              itemSize: 20.0,
-                              direction: Axis.horizontal,
-                            ),
-                          ],
-                        ),
+                        ],
                       ),
                     ))
                 .toList(),
             SizedBox(height: 60),
-            if (currentUserId == widget.event.idUser)
+            if (passedIdUser == widget.event.idUser)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -416,6 +472,7 @@ void navigateToChatScreen(BuildContext context, String eventName) {
 
 //moure a una classe
 class Comment {
+  final String id; // Agregar esta línea
   final String userId;
   final String userName;
   final String text;
@@ -423,6 +480,7 @@ class Comment {
   final double punctuation;
 
   Comment({
+    required this.id, // Agregar esta línea
     required this.userId,
     required this.userName,
     required this.text,
@@ -443,6 +501,7 @@ class Comment {
     }
 
     return Comment(
+      id: json['_id'], // Agregar esta línea para obtener el ID del JSON
       userId: userId,
       userName: userName,
       text: json['text'],

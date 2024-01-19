@@ -9,6 +9,7 @@ class Event {
   final String description;
   final String? idUser;
   final List<String>? idComments;
+  final String? photo;
 
   Event({
     required this.id,
@@ -18,6 +19,7 @@ class Event {
     required this.description,
     this.idUser,
     this.idComments,
+    this.photo,
   });
 
   factory Event.fromJson(Map<String, dynamic> json) {
@@ -38,6 +40,7 @@ class Event {
       idComments: json['idComments'] != null
           ? List<String>.from(json['idComments'])
           : null,
+      photo: json['photo'] ?? '',
     );
   }
 }

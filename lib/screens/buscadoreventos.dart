@@ -87,66 +87,59 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
         title: Text(AppLocalizations.of(context)!.eventsList),
         backgroundColor: Colors.orange,
       ),
-      body: Stack(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            child: ListView.builder(
-              itemCount: events.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  color: Colors.grey[200],
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                EventoDetailScreen(event: events[index])),
-                      );
-                    },
-                    child: ListTile(
-                      title: Text(
-                          '${AppLocalizations.of(context)!.eventName}: ${events[index].eventName}'),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                              '${AppLocalizations.of(context)!.coordinates}: ${events[index].coordinates}'),
-                          Text(
-                              '${AppLocalizations.of(context)!.date}: ${DateFormat('yyyy-MM-dd').format(events[index].date)}'),
-                          Text(
-                              '${AppLocalizations.of(context)!.description}: ${events[index].description}'),
-                        ],
-                      ),
-                    ),
+      body: Container(
+        padding: EdgeInsets.all(16.0),
+        child: ListView.builder(
+        itemCount: events.length,
+        itemBuilder: (context, index) {
+          return Card(
+            color: Colors.grey[200],
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EventoDetailScreen(event: events[index]),
                   ),
                 );
               },
+              child: ListTile(
+                title: Text('Event Name: ${events[index].eventName}'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Coordinates: ${events[index].coordinates}'),
+                    Text(
+                      'Date: ${DateFormat('yyyy-MM-dd').format(events[index].date)}',
+                    ),
+                    Text('Description: ${events[index].description}'),
+                  ],
+                ),
+                // Show the image from the network
+                trailing: events[index].photo != null
+                    ? Image.network(
+                        events[index].photo!,
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                      )
+                    : Container(),
+              ),
             ),
-          ),
-          Positioned(
-            bottom: 75.0,
-            right: 20.0,
-            child: FloatingActionButton.extended(
-              onPressed: navigateToCreateEventScreen,
-              label: Text(AppLocalizations.of(context)!.createEvent),
-              icon: Icon(Icons.add),
-              backgroundColor: Colors.orange,
-            ),
-          ),
-          Positioned(
-            bottom: 140.0,
-            right: 20.0,
-            child: FloatingActionButton.extended(
-              onPressed: navigateToChatPrincipalScreen,
-              label: const Text('Join Chat Room'),
-              icon: const Icon(Icons.add),
-              backgroundColor: Colors.orange,
-            ),
-          ),
-        ],
+          );
+        },
       ),
+    ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 50.0, right: 10.0),
+        child: FloatingActionButton.extended(
+          onPressed: navigateToCreateEventScreen,
+          label: Text('Crear Evento'),
+          icon: Icon(Icons.add),
+          backgroundColor: Colors.orange,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
 }

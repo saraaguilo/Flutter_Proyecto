@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:applogin/config.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class ChatPrincipalScreen extends StatefulWidget {
   @override
@@ -36,7 +38,7 @@ class _ChatPrincipalScreenState extends State<ChatPrincipalScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat Home'),
+        title: Text(AppLocalizations.of(context)!.chatHome),
         backgroundColor: Color(0xFFFF7B00), // Color naranja personalizado
       ),
       body: ListView.builder(

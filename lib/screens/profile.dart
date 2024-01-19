@@ -1,10 +1,15 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
+import 'package:applogin/models/language.dart';
+import 'package:applogin/models/language_constants.dart';
+import 'package:applogin/main.dart';
 import 'package:applogin/screens/eventodetalles.dart';
 import 'package:applogin/screens/profile_edit.dart';
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/utils/utilsPictures.dart';
 import 'package:cloudinary/cloudinary.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:applogin/models/event.dart';
 import 'package:applogin/services/user_services.dart';
@@ -13,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:applogin/config.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -36,8 +42,13 @@ class _MyWidgetState extends State<ProfileScreen> {
   String role = '';
   String description = '';
   List<Event> events = [];
+  //image web
   XFile? _image;
   Uint8List? _imageBytes;
+  //image android
+  File? _imageAndroid;
+  final ImagePicker picker = ImagePicker();
+
   Cloudinary? cloudinary;
 
   final List<String> _categories = [
@@ -58,6 +69,12 @@ class _MyWidgetState extends State<ProfileScreen> {
         apiKey: '663893452531627',
         apiSecret: '0_DJghpiMZUtH4t9AX5O-967op8',
         cloudName: 'dsivbpzlp');
+
+    //Cloudinary grupo
+    //cloudinary = Cloudinary.signedConfig(
+    //  apiKey: '851147581669956',
+    //  apiSecret: '_9JS7cS5HQTMYbTiB0jTAvDIkBQ',
+    //  cloudName: 'dkmpuejix');
   }
 
   void loadData() async {
@@ -87,11 +104,38 @@ class _MyWidgetState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Profile"),
+          title: Text(AppLocalizations.of(context)!.profile),
           backgroundColor: Colors.orange,
           actions: [
+            DropdownButton<Language>(
+              underline: const SizedBox(),
+              icon: const Icon(
+                Icons.language,
+                color: Colors.black,
+              ),
+              onChanged: (Language? language) async {
+                if (language != null) {
+                  Locale _locale = await setLocale(language.languageCode);
+                  MyApp.setLocale(context, _locale);
+                }
+              },
+              items: Language.languageList()
+                  .map<DropdownMenuItem<Language>>(
+                    (e) => DropdownMenuItem<Language>(
+                      value: e,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[Text(e.name)],
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(
+              width: 20,
+            ),
             Container(
-              margin: EdgeInsets.only(right: 10.0),
+              margin: EdgeInsets.only(right: 5.0), // Reducir el margen aquí
               child: popUpMenuButton(),
             ),
           ],
@@ -139,43 +183,51 @@ class _MyWidgetState extends State<ProfileScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 30.0),
+            padding: const EdgeInsets.only(left: 10.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-                Text(
-                  userName,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
+                Container(
+                  constraints: const BoxConstraints(maxWidth: 140),
+                  child: Text(
+                    userName,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
-                Text(
-                  email,
-                  style: TextStyle(color: Colors.grey),
+                Container(
+                  constraints: const BoxConstraints(maxWidth: 140),
+                  child: Text(
+                    email,
+                    style: const TextStyle(color: Colors.grey),
+                  ),
                 ),
                 const SizedBox(height: 10),
-                Text(
-                  description,
-                  style:
-                      TextStyle(fontSize: 14, height: 1.4, color: Colors.grey),
+                Container(
+                  constraints: const BoxConstraints(maxWidth: 140),
+                  child: Text(
+                    description,
+                    style: const TextStyle(
+                        fontSize: 14, height: 1.4, color: Colors.grey),
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 60),
+          const SizedBox(width: 0),
           Container(
-            padding: EdgeInsets.all(16.0),
-            width: 250.0, // Establece el ancho deseado del contenedor
+            width: 215.0, // Establece el ancho deseado del contenedor
             child: MultiSelectDialogField(
               items: _categories
                   .map(
                       (category) => MultiSelectItem<String>(category, category))
                   .toList(),
-              title: Text("Select Categories"),
+              title: Text(AppLocalizations.of(context)!.selectCategories),
               selectedColor: Colors.grey,
               selectedItemsTextStyle: const TextStyle(color: Colors.black),
               decoration: BoxDecoration(
@@ -191,10 +243,10 @@ class _MyWidgetState extends State<ProfileScreen> {
                 color: Colors.orange,
               ),
               buttonText: Text(
-                "Select categories",
+                AppLocalizations.of(context)!.selectCategories,
                 style: TextStyle(
                   color: Colors.orange[800],
-                  fontSize: 16,
+                  fontSize: 14,
                 ),
               ),
               initialValue: idCategories,
@@ -229,7 +281,7 @@ class _MyWidgetState extends State<ProfileScreen> {
               width: double.infinity,
               padding: EdgeInsets.all(10.0),
               child: Text(
-                "My events",
+                AppLocalizations.of(context)!.myEvents,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -286,12 +338,12 @@ class _MyWidgetState extends State<ProfileScreen> {
                                     ),
                                     const SizedBox(height: 5),
                                     Text(
-                                      'Coordinates: ${events[index].coordinates}',
+                                      '${AppLocalizations.of(context)!.coordinates}: ${events[index].coordinates}',
                                       style: TextStyle(
                                           fontSize: 12, color: Colors.grey),
                                     ),
                                     Text(
-                                      'Date: ${events[index].date}',
+                                      '${AppLocalizations.of(context)!.date}: ${events[index].date}',
                                       style: TextStyle(
                                           fontSize: 12, color: Colors.grey),
                                     ),
@@ -326,7 +378,7 @@ class _MyWidgetState extends State<ProfileScreen> {
               builder: (BuildContext context) {
                 return AlertDialog(
                   title: Text(
-                    'Delete Account',
+                    AppLocalizations.of(context)!.deleteAccount,
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 18.0,
@@ -334,7 +386,7 @@ class _MyWidgetState extends State<ProfileScreen> {
                     ),
                   ),
                   content: Text(
-                    'Are you sure you want to delete your account?',
+                    AppLocalizations.of(context)!.deleteAccountHint,
                     style: TextStyle(
                       fontSize: 16.0,
                     ),
@@ -350,7 +402,7 @@ class _MyWidgetState extends State<ProfileScreen> {
                         Navigator.of(context).pop();
                       },
                       child: Text(
-                        'Cancel',
+                        AppLocalizations.of(context)!.cancel,
                         style: TextStyle(
                           color: Colors.grey[700],
                           fontSize: 16.0,
@@ -368,7 +420,7 @@ class _MyWidgetState extends State<ProfileScreen> {
                         );
                       },
                       child: Text(
-                        'Delete',
+                        AppLocalizations.of(context)!.delete,
                         style: TextStyle(
                           color: Colors.red,
                           fontSize: 16.0,
@@ -386,26 +438,26 @@ class _MyWidgetState extends State<ProfileScreen> {
           }
         },
         itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'editProfile',
             child: ListTile(
               leading: Icon(Icons.edit_attributes),
-              title: Text('Edit profile'),
+              title: Text(AppLocalizations.of(context)!.editProfile),
             ),
           ),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'logOut',
             child: ListTile(
               leading: Icon(Icons.logout),
-              title: Text('Log out'),
+              title: Text(AppLocalizations.of(context)!.logOut),
             ),
           ),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'deleteUser',
             child: ListTile(
               leading: Icon(Icons.delete),
               title: Text(
-                'Delete account',
+                AppLocalizations.of(context)!.deleteAccount,
                 style: TextStyle(
                   color: Colors.red,
                 ),
@@ -433,9 +485,9 @@ class _MyWidgetState extends State<ProfileScreen> {
                   child: Column(
                     children: [
                       Text(
-                        "Events",
+                        AppLocalizations.of(context)!.events,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -462,9 +514,9 @@ class _MyWidgetState extends State<ProfileScreen> {
                   child: Column(
                     children: [
                       Text(
-                        "Categories",
+                        AppLocalizations.of(context)!.categories,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -488,31 +540,53 @@ class _MyWidgetState extends State<ProfileScreen> {
       );
 
   void selectImage() async {
-    XFile? img = await pickImage(ImageSource.gallery);
-    if (img != null) {
-      var bytes = await img.readAsBytes();
-      setState(() {
-        _imageBytes = bytes;
-        _image = img;
-      });
+    if (kIsWeb) {
+      print('estas en web');
+      XFile? img = await pickImage(ImageSource.gallery);
+
+      if (img != null) {
+        var bytes = await img.readAsBytes();
+        setState(() {
+          _imageBytes = bytes;
+          _image = img;
+        });
+        uploadImage(cloudinary, _imageAndroid!.path, _imageBytes, userName,
+            email, password, idUser, token);
+      }
+    } else {
+      print('NO estas en web');
+      XFile? img = await picker.pickImage(source: ImageSource.gallery);
+      if (img != null) {
+        var pickedFile = File(img.path);
+        setState(() {
+          _imageAndroid = pickedFile;
+        });
+        //controlar si no ha triat foto
+        uploadImage(cloudinary, _imageAndroid!.path, _imageBytes, userName,
+            email, password, idUser, token);
+      }
     }
-    uploadImage(
-        cloudinary, _imageBytes, userName, email, password, idUser, token);
   }
 
   Widget profilePicture() => Stack(
         children: [
-          _imageBytes != null
+          _imageBytes == null && _imageAndroid == null
               ? CircleAvatar(
                   radius: 60,
                   backgroundColor: Colors.white,
-                  backgroundImage: MemoryImage(_imageBytes!),
-                )
-              : CircleAvatar(
-                  radius: 60,
-                  backgroundColor: Colors.white,
                   backgroundImage: NetworkImage(avatar),
-                ),
+                )
+              : kIsWeb
+                  ? CircleAvatar(
+                      radius: 60,
+                      backgroundColor: Colors.white,
+                      backgroundImage: MemoryImage(_imageBytes!),
+                    )
+                  : CircleAvatar(
+                      radius: 60,
+                      backgroundColor: Colors.white,
+                      backgroundImage: FileImage(_imageAndroid!),
+                    ),
           Positioned(
             bottom: 0,
             right: 4,

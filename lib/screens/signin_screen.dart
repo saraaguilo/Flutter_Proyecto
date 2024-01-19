@@ -1,3 +1,4 @@
+import 'package:applogin/models/language_constants.dart';
 import 'package:applogin/models/user.dart';
 import 'package:applogin/reusable_/reusable_widget.dart';
 import 'package:applogin/screens/home_screen.dart';
@@ -9,6 +10,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:applogin/config.dart';
 import 'package:applogin/utils/LoginGoogleUtils.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 String currentUserEmail = '';
 
@@ -32,13 +34,13 @@ class _SignInScreenState extends State<SignInScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          "LOG IN",
+        title:  Text(
+          translation(context).logIn, 
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.white,
-          ),
+           ),
         ),
       ),
       body: Container(
@@ -55,13 +57,20 @@ class _SignInScreenState extends State<SignInScreen> {
               child: Column(
                 children: <Widget>[
                   SizedBox(height: 30),
-                  logoWidget("images/logoOrange.png"),
+                  Container(
+                    width: double.infinity,
+                    height: 200, // Ajusta la altura según tus necesidades
+                    child: Image.network(
+                      'https://res.cloudinary.com/dsivbpzlp/image/upload/v1704492508/logoOrange_yemw9o.png',
+                      fit: BoxFit.fitHeight,
+                    ),
+                  ),
                   SizedBox(height: 20, width: double.infinity),
                   //EMAIL TEXT FIELD
                   TextFormField(
                     controller: emailController,
                     decoration: InputDecoration(
-                      labelText: 'Email',
+                      labelText: AppLocalizations.of(context)!.email,
                       labelStyle: TextStyle(
                         color: Color.fromARGB(255, 255, 255, 255),
                       ),
@@ -81,7 +90,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   TextFormField(
                     controller: passwordController,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: AppLocalizations.of(context)!.password,
                       labelStyle: TextStyle(
                         color: Color.fromARGB(255, 255, 255, 255),
                       ),
@@ -150,17 +159,16 @@ class _SignInScreenState extends State<SignInScreen> {
             await prefs.setString('password', user.password);
             await prefs.setString('avatar', jsonEncode(user.avatar));
             //await prefs.setString(
-               
-               // 'createdEventsId', jsonEncode(user.createdEventsId));
+
+            // 'createdEventsId', jsonEncode(user.createdEventsId));
             //await prefs.setString(
-                //'joinedEventsId', jsonEncode(user.joinedEventsId));
-            await prefs.setStringList(
-                'idCategories', user.idCategories ?? []);
+            //'joinedEventsId', jsonEncode(user.joinedEventsId));
+            await prefs.setStringList('idCategories', user.idCategories ?? []);
             await prefs.setString('role', user.role);
             await prefs.setString('description', user.description);
 
             print('Usuario loggeado con éxito.');
-             currentUserEmail = emailController.text;
+            currentUserEmail = emailController.text;
             emailController.text = '';
             passwordController.text = '';
             Navigator.push(
@@ -182,7 +190,7 @@ class _SignInScreenState extends State<SignInScreen> {
         primary: Color.fromARGB(255, 255, 255, 255),
       ),
       child: Text(
-        'LOG IN',
+        AppLocalizations.of(context)!.logIn,
         style: TextStyle(color: Color.fromARGB(255, 255, 102, 0)),
       ),
     );
@@ -192,8 +200,8 @@ class _SignInScreenState extends State<SignInScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text(
-          "Don't have an account?",
+         Text(
+          AppLocalizations.of(context)!.signUpHint,
           style: TextStyle(color: Colors.white70),
         ),
         GestureDetector(
@@ -205,8 +213,8 @@ class _SignInScreenState extends State<SignInScreen> {
           },
           child: Container(
             margin: const EdgeInsets.only(left: 5),
-            child: const Text(
-              " Sign Up",
+            child:  Text(
+              AppLocalizations.of(context)!.signUp,
               style:
                   TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
@@ -256,14 +264,14 @@ class _GoogleLoginButtonState extends State<GoogleLoginButton> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("Sign in with Google"),
+            Text(AppLocalizations.of(context)!.signInGoogle,),
             Container(
               margin: const EdgeInsets.only(left: 5),
-              child: Image.asset(
-                'images/google.png',
-                height: 30,
-                width: 30,
-              ),
+              child: Image.network(
+                      'https://res.cloudinary.com/dsivbpzlp/image/upload/v1704492805/Google__G__logo.svg_qyvf04.png',
+                      height: 25,
+                      width: 25,
+                    ),
             ),
           ],
         ),

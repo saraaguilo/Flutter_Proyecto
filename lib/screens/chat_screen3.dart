@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:applogin/config.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class ChatScreen3 extends StatefulWidget {
   final String chatName;
@@ -44,7 +46,7 @@ class _ChatScreenState3 extends State<ChatScreen3> {
           children: [
             Expanded(
             child: Obx( 
-          () => Container(padding: EdgeInsets.all(10),child: Text("Connected User ${chatController3.connectedUser}",
+          () => Container(padding: EdgeInsets.all(10),child: Text("${AppLocalizations.of(context)!.connectedUser}: ${chatController3.connectedUser}",
             style: TextStyle(
               color: Colors.white,
               fontSize: 15.0, ),

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:applogin/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:http/http.dart' as http;
@@ -29,12 +30,28 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
   double currentRating = 0;
   String token = '';
   String passedIdUser = '';
+  List<String> eventNames = [];
 
   @override
   void initState() {
     super.initState();
     _loadComments();
     loadData();
+    fetchEventNames();
+  }
+
+  Future<void> fetchEventNames() async {
+    final response = await http.get(Uri.parse('$uri/events'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      setState(() {
+        eventNames =
+            data.map((event) => event['eventName'].toString()).toList();
+      });
+    } else {
+      print('Error al cargar los eventos: ${response.statusCode}');
+    }
   }
 
   void loadData() async {
@@ -95,8 +112,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text(AppLocalizations.of(context)!.error),
-            content: Text(
-                AppLocalizations.of(context)!.errorComment),
+            content: Text(AppLocalizations.of(context)!.errorComment),
             actions: <Widget>[
               TextButton(
                 child: Text(AppLocalizations.of(context)!.close),
@@ -155,7 +171,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
       var updateEventUrl = Uri.parse('$uri/events/${widget.event.id}');
       var updateEventResponse = await http.put(
         updateEventUrl,
-        headers: {'Content-Type': 'application/json','x-access-token': token},
+        headers: {'Content-Type': 'application/json', 'x-access-token': token},
         body: json.encode({
           'idComments': idComments,
         }),
@@ -235,11 +251,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ChatPrincipalScreen()),
-                  );
+                  navigateToChatScreen(context, widget.event.eventName);
                 },
                 style: ElevatedButton.styleFrom(
                   primary: Colors.orange,
@@ -298,7 +310,8 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
               ),
             ),
             if (isLoading) Center(child: CircularProgressIndicator()),
-            if (!isLoading && comments.isEmpty) Text(AppLocalizations.of(context)!.noComments),
+            if (!isLoading && comments.isEmpty)
+              Text(AppLocalizations.of(context)!.noComments),
             ...comments
                 .map((comment) => Container(
                       margin: EdgeInsets.only(top: 10),
@@ -391,6 +404,16 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
     );
   }
 }
+
+void navigateToChatScreen(BuildContext context, String eventName) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => ChatScreen(chatName: eventName),
+    ),
+  );
+}
+
 //moure a una classe
 class Comment {
   final String userId;

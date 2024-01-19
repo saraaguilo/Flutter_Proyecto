@@ -34,44 +34,6 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
     events = _eventProvider.events;
   }
 
-  /* Future<void> getEvents() async {
-      try {
-        final response = await http.get(Uri.parse('$uri/events'));
-
-        if (response.statusCode == 200) {
-          final List<dynamic> data = json.decode(response.body);
-          setState(() {
-            events = data.map((item) => Event.fromJson(item)).toList();
-
-            if (kDebugMode) {
-              print('Número de eventos antes de navegar: ${_eventProvider.events.length}');
-            }
-          });
-        } else {
-          if (kDebugMode) {
-            print(
-                'Error al cargar eventos. Código de estado: ${response.statusCode}');
-          }
-        }
-      } catch (error) {
-        if (kDebugMode) {
-          print('Error de red al cargar eventos: $error');
-        }
-      }
-    } */
-
-  /*  void navigateToCreateListEvents(Event event) async {
-      final result = await Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => MapScreen()),
-      );
-
-      if (result == true) {
-        getEvents();
-        print('Número de eventos antes de navegar: ${events.length}');
-      }
-    } */
-
   void navigateToCreateEventScreen() async {
     final result = await Navigator.push(
       context,

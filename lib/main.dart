@@ -12,12 +12,26 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:applogin/theme/darkModeProvider.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:applogin/reusable_/event_provider.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:baseflow_plugin_template/baseflow_plugin_template.dart';
+
+/* Future<void> initGeocoding() async {
+  try {
+    await locationFromAddress('dummy_address');
+    await placemarkFromCoordinates(0.0, 0.0);
+    print('Geocodificación inicializada correctamente');
+  } catch (e) {
+    print('Error al inicializar la geocodificación: $e');
+  }
+} */
 
 void main() async {
   // Inicializa ProfileController utilizando Get.put
   Get.put(ProfileController());
   WidgetsFlutterBinding.ensureInitialized();
 
+// Inicializar geocodificación
+  //await initGeocoding();
   // Espera a que Firebase.initializeApp() se complete
   await Firebase.initializeApp(
     options: const FirebaseOptions(

@@ -68,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
               label: 'Profile',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.search),
+              icon: Icon(Icons.map),
               label: 'Map',
             ),
           ],
@@ -77,17 +77,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         floatingActionButton: Container(
           margin: EdgeInsets.only(top: 20.0),
-          child: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => MapScreen()),
-              );
-            },
-            tooltip: 'Show Map',
-            child: Icon(Icons.map),
-            backgroundColor: Colors.orange,
-          ),
         ),
       ),
     );

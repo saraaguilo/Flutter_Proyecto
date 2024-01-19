@@ -1,8 +1,10 @@
+import 'eventodetalles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:logger/logger.dart';
+import 'package:socket_io_client/socket_io_client.dart';
 import 'crearevento.dart';
 import 'package:applogin/models/event.dart';
 import 'buscadoreventos.dart';
@@ -31,13 +33,16 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreen extends State<MapScreen> {
   late LatLng clickedLatlng;
-  late List<_PopupMarker> _markers = [];
+  late List<PopupMarker> _markers = [];
   late TapPosition pointed;
   //late Event event;
   List<Event>? events;
   final BuscadorScreen buscadorScreen = BuscadorScreen();
   final PopupController _popupController = PopupController();
   final Logger logger = Logger();
+  late TextEditingController _searchController;
+  //late FloatingSearchBarController _floatingSearchBarController;
+  List<Event>? _searchResults;
 
   @override
   void initState() {
@@ -47,6 +52,9 @@ class _MapScreen extends State<MapScreen> {
     //initMarkers();
     // _markers = [];
     events = [];
+    _searchController = TextEditingController();
+    // _floatingSearchBarController = FloatingSearchBarController();
+    _searchResults = [];
     //buscadorScreen.createState().initState();
   }
 
@@ -79,7 +87,7 @@ class _MapScreen extends State<MapScreen> {
 
       // Inicializa _markers solo una vez
       if (_markers.isEmpty) {
-        _markers = _generateMarkers(eventsWithCoordinates);
+        _markers = await _generateMarkers(eventsWithCoordinates);
       }
     } else {
       print(
@@ -95,18 +103,25 @@ class _MapScreen extends State<MapScreen> {
     try {
       print('HandleMapTap, allá voy');
 
-      // Pasa las coordenadas seleccionadas de regreso a la pantalla de creación de eventos
-      Navigator.pop(context, selectedLatLng);
+      // Verificar si se está creando un evento nuevo antes de cerrar el mapa
+      if (Navigator.canPop(context)) {
+        // Pasa las coordenadas seleccionadas de regreso a la pantalla de creación de eventos
+        Navigator.pop(context, selectedLatLng);
 
-      // Obtiene eventos utilizando el EventProvider
-      await Provider.of<EventProvider>(context, listen: false).getEvents();
+        // Obtiene eventos utilizando el EventProvider
+        await Provider.of<EventProvider>(context, listen: false).getEvents();
+      } else {
+        // No se está creando un evento nuevo, puedes hacer algo diferente o simplemente ignorarlo.
+        print(
+            'No se está creando un evento nuevo, no se realiza ninguna acción.');
+      }
     } catch (error) {
       print('Error en handleMapTap: $error');
       // Manejar el error según tus necesidades
     }
   }
 
-  List<_PopupMarker> _generateMarkers(List<Event>? events) {
+  List<PopupMarker> _generateMarkers(List<Event>? events) {
     print(
         'Estoy en generate markers no os preocupeis si no salen los marker algo falla dentro');
     print('Número de eventos: ${events?.length}');
@@ -129,7 +144,7 @@ class _MapScreen extends State<MapScreen> {
           print('Advertencia: event.coordinates no es válido.');
         }
 
-        return _PopupMarker(
+        return PopupMarker(
           eventLatLng,
           marker: Marker(
             width: 40.0,
@@ -141,7 +156,11 @@ class _MapScreen extends State<MapScreen> {
             ),
           ),
           popupBuilder: (BuildContext context, Marker marker) {
-            return ExamplePopup(marker, eventLatLng);
+            return ExamplePopup(
+              marker,
+              eventLatLng,
+              event: event,
+            );
             // Puedes personalizar el contenido del popup
           },
         );
@@ -155,10 +174,262 @@ class _MapScreen extends State<MapScreen> {
   @override
   void dispose() {
     _popupController.dispose(); // Liberar recursos al cerrar la app
+    _searchController.dispose();
     super.dispose();
   }
 
   @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: Provider.of<EventProvider>(context).initialized,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          events = Provider.of<EventProvider>(context).events;
+
+          if (_markers.isEmpty && events != null && events!.isNotEmpty) {
+            initMarkers();
+          }
+
+          final List<Marker> mapMarkers =
+              _markers.map((PopupMarker pm) => pm.marker).toList();
+
+          return buildMap(mapMarkers);
+        } else {
+          return const CircularProgressIndicator();
+        }
+      },
+    );
+  }
+
+  Widget buildMap(List<Marker> mapMarkers) {
+    return Consumer<EventProvider>(
+      builder: (context, eventProvider, _) {
+        events = eventProvider.events;
+        return SizedBox(
+          width: double.infinity,
+          height: double.infinity,
+          child: Stack(
+            children: [
+              FlutterMap(
+                options: MapOptions(
+                  initialCenter: const LatLng(41.2741, 1.9922),
+                  initialZoom: 9.2,
+                  onTap: handleMapTap,
+                ),
+                children: [
+                  MapLayer(
+                    options: MapLayerOptions(
+                      stateBuilder: (_, __) => TileLayer(
+                        urlTemplate:
+                            'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=$MAPBOX_ACCESS_TOKEN',
+                        additionalOptions: const {'id': 'mapbox/streets-v12'},
+                      ),
+                    ),
+                  ),
+                  MarkerLayer(
+                    markers: mapMarkers,
+                  ),
+                  PopupMarkerLayer(
+                    options: PopupMarkerLayerOptions(
+                      markers:
+                          _markers.map((PopupMarker pm) => pm.marker).toList(),
+                      popupController: _popupController,
+                      popupDisplayOptions: PopupDisplayOptions(
+                        builder: (BuildContext context, Marker marker) {
+                          final pm = _markers.firstWhere(
+                            (PopupMarker pm) => pm.marker == marker,
+                          );
+                          return pm.popupBuilder(context, marker);
+                        },
+                        snap: PopupSnap.markerCenter,
+                        animation: const PopupAnimation.fade(
+                          duration: Duration(milliseconds: 200),
+                        ),
+                      ),
+                      selectedMarkerBuilder:
+                          (BuildContext context, Marker marker) {
+                        return MouseRegion(
+                          onEnter: (event) {
+                            _popupController.togglePopup(marker);
+                          },
+                          child: GestureDetector(
+                            onTap: () {
+                              _popupController.togglePopup(marker);
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/* Widget buildMap(List<Marker> mapMarkers) {
+    return Consumer<EventProvider>(
+      builder: (context, eventProvider, _) {
+        events = eventProvider.events;
+        return SizedBox(
+          width: double.infinity,
+          height: double.infinity,
+          child: Stack(
+            children: [
+              FlutterMap(
+                options: MapOptions(
+                  initialCenter: const LatLng(41.2741, 1.9922),
+                  initialZoom: 9.2,
+                  onTap: handleMapTap,
+                ),
+                children: [
+                  TileLayerOptions(
+                    urlTemplate:
+                        'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=$MAPBOX_ACCESS_TOKEN',
+                    additionalOptions: {'id': 'mapbox/streets-v12'},
+                  ),
+                  MarkerLayer(
+                    markers: mapMarkers,
+                  ),
+                  MarkerClusterLayerOptions(
+                    markers: mapMarkers, // Agrega tus marcadores aquí
+                    maxClusterRadius: 120,
+                    size: Size(40, 40),
+                    fitBoundsOptions: FitBoundsOptions(
+                      padding: EdgeInsets.all(50),
+                    ),
+                    builder: (context, markers) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            markers.length.toString(),
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  PopupMarkerLayer(
+                    options: PopupMarkerLayerOptions(
+                      markers:
+                          _markers.map((PopupMarker pm) => pm.marker).toList(),
+                      popupController: _popupController,
+                      popupDisplayOptions: PopupDisplayOptions(
+                        builder: (BuildContext context, Marker marker) {
+                          final pm = _markers.firstWhere(
+                            (PopupMarker pm) => pm.marker == marker,
+                          );
+                          return pm.popupBuilder(context, marker);
+                        },
+                        snap: PopupSnap.markerCenter,
+                        animation: const PopupAnimation.fade(
+                          duration: Duration(milliseconds: 200),
+                        ),
+                      ),
+                      selectedMarkerBuilder:
+                          (BuildContext context, Marker marker) {
+                        return MouseRegion(
+                          onEnter: (event) {
+                            _popupController.togglePopup(marker);
+                          },
+                          child: GestureDetector(
+                            onTap: () {
+                              _popupController.togglePopup(marker);
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+} */
+
+/* Widget buildMap(List<Marker> mapMarkers) {
+    return Consumer<EventProvider>(
+      builder: (context, eventProvider, _) {
+        events = eventProvider.events;
+        return SizedBox(
+          width: double.infinity,
+          height: double.infinity,
+          child: Stack(
+            children: [
+              FlutterMap(
+                options: MapOptions(
+                  initialCenter: const LatLng(41.2741, 1.9922),
+                  initialZoom: 9.2,
+                  onTap: handleMapTap,
+                ),
+                children: [
+                  MapLayer(
+                    options: MapLayerOptions(
+                      stateBuilder: (_, __) => TileLayer(
+                        urlTemplate:
+                            'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=$MAPBOX_ACCESS_TOKEN',
+                        additionalOptions: const {'id': 'mapbox/streets-v12'},
+                      ),
+                    ),
+                  ),
+                  MarkerLayer(
+                    markers: mapMarkers,
+                  ),
+                  PopupMarkerLayer(
+                    options: PopupMarkerLayerOptions(
+                      markers:
+                          _markers.map((PopupMarker pm) => pm.marker).toList(),
+                      popupController: _popupController,
+                      popupDisplayOptions: PopupDisplayOptions(
+                        builder: (BuildContext context, Marker marker) {
+                          final pm = _markers.firstWhere(
+                            (PopupMarker pm) => pm.marker == marker,
+                          );
+                          return pm.popupBuilder(context, marker);
+                        },
+                        snap: PopupSnap.markerCenter,
+                        animation: const PopupAnimation.fade(
+                          duration: Duration(milliseconds: 200),
+                        ),
+                      ),
+                      selectedMarkerBuilder:
+                          (BuildContext context, Marker marker) {
+                        return MouseRegion(
+                          onEnter: (event) {
+                            _popupController.togglePopup(marker);
+                          },
+                          child: GestureDetector(
+                            onTap: () {
+                              _popupController.togglePopup(marker);
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  } 
+}*/
+
+/*  @override
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: Provider.of<EventProvider>(context).initialized,
@@ -174,9 +445,103 @@ class _MapScreen extends State<MapScreen> {
 
           return MaterialApp(
             home: Scaffold(
-              appBar: AppBar(
-                title: const Text('Social Groove'),
+              appBar:buildAppBar() ,
+              body: Consumer<EventProvider>(
+                builder: (context, eventProvider, _) {
+                  events = eventProvider.events;
+                  return SizedBox(
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: Stack(
+                      children: [
+                        FlutterMap(
+                          options: MapOptions(
+                            initialCenter: const LatLng(41.2741, 1.9922),
+                            initialZoom: 9.2,
+                            onTap: handleMapTap,
+                          ),
+                          children: [
+                            MapLayer(
+                              options: MapLayerOptions(
+                                stateBuilder: (_, __) => TileLayer(
+                                  urlTemplate:
+                                      'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=$MAPBOX_ACCESS_TOKEN',
+                                  additionalOptions: const {
+                                    'id': 'mapbox/streets-v12'
+                                  },
+                                ),
+                              ),
+                            ),
+                            MarkerLayer(
+                              markers: mapMarkers,
+                            ),
+                            PopupMarkerLayer(
+                              options: PopupMarkerLayerOptions(
+                                markers: _markers
+                                    .map((_PopupMarker pm) => pm.marker)
+                                    .toList(),
+                                popupController: _popupController,
+                                popupDisplayOptions: PopupDisplayOptions(
+                                  builder:
+                                      (BuildContext context, Marker marker) {
+                                    final pm = _markers.firstWhere(
+                                      (_PopupMarker pm) => pm.marker == marker,
+                                    );
+                                    return pm.popupBuilder(context, marker);
+                                  },
+                                  snap: PopupSnap.markerCenter,
+                                  animation: const PopupAnimation.fade(
+                                    duration: Duration(milliseconds: 200),
+                                  ),
+                                ),
+                                selectedMarkerBuilder:
+                                    (BuildContext context, Marker marker) {
+                                  return MouseRegion(
+                                    onEnter: (event) {
+                                      _popupController.togglePopup(marker);
+                                    },
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        _popupController.togglePopup(marker);
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
+            ),
+          );
+        } else {
+          return const CircularProgressIndicator();
+        }
+      },
+    );
+  }
+} */
+
+/* @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: Provider.of<EventProvider>(context).initialized,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          events = Provider.of<EventProvider>(context).events;
+          if (_markers.isEmpty && events != null && events!.isNotEmpty) {
+            initMarkers();
+          }
+
+          final List<Marker> mapMarkers =
+              _markers.map((_PopupMarker pm) => pm.marker).toList();
+
+          return MaterialApp(
+            home: Scaffold(
               body: Consumer<EventProvider>(
                 builder: (context, eventProvider, _) {
                   events = eventProvider.events;
@@ -190,6 +555,7 @@ class _MapScreen extends State<MapScreen> {
                         onTap: handleMapTap,
                       ),
                       children: [
+                        buildAppBar(),
                         MapLayer(
                           options: MapLayerOptions(
                             stateBuilder: (_, __) => TileLayer(
@@ -219,7 +585,7 @@ class _MapScreen extends State<MapScreen> {
                                 },
                                 snap: PopupSnap.markerCenter,
                                 animation: const PopupAnimation.fade(
-                                    duration: Duration(milliseconds: 300))),
+                                    duration: Duration(milliseconds: 200))),
                             selectedMarkerBuilder:
                                 (BuildContext context, Marker marker) {
                               return MouseRegion(
@@ -240,12 +606,6 @@ class _MapScreen extends State<MapScreen> {
                   );
                 },
               ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  Navigator.pop(context, clickedLatlng);
-                },
-                child: const Icon(Icons.check),
-              ),
             ),
           );
         } else {
@@ -254,86 +614,7 @@ class _MapScreen extends State<MapScreen> {
       },
     );
   }
-  /* Widget build(BuildContext context) {
-    events = Provider.of<EventProvider>(context).events;
-    _markers = _generateMarkers(events);
-    final List<Marker> mapMarkers =
-        _markers.map((_PopupMarker pm) => pm.marker).toList();
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Social Groove'),
-        ),
-        body: Consumer<EventProvider>(
-          builder: (context, eventProvider, _) {
-            events = eventProvider.events;
-            return SizedBox(
-              width: double.infinity,
-              height: double.infinity,
-              child: FlutterMap(
-                options: MapOptions(
-                  initialCenter: const LatLng(41.2741, 1.9922),
-                  initialZoom: 9.2,
-                  onTap: handleMapTap,
-                ),
-                children: [
-                  MapLayer(
-                    options: MapLayerOptions(
-                      stateBuilder: (_, __) => TileLayer(
-                        urlTemplate:
-                            'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=$MAPBOX_ACCESS_TOKEN',
-                        additionalOptions: const {'id': 'mapbox/streets-v12'},
-                      ),
-                    ),
-                  ),
-                  MarkerLayer(
-                    markers: mapMarkers,
-                  ),
-                  PopupMarkerLayer(
-                    options: PopupMarkerLayerOptions(
-                      markers:
-                          _markers.map((_PopupMarker pm) => pm.marker).toList(),
-                      popupController: _popupController,
-                      popupDisplayOptions: PopupDisplayOptions(
-                          builder: (BuildContext context, Marker marker) {
-                            final pm = _markers.firstWhere(
-                              (_PopupMarker pm) => pm.marker == marker,
-                            );
-                            return pm.popupBuilder(context, marker);
-                          },
-                          snap: PopupSnap.markerCenter,
-                          animation: const PopupAnimation.fade(
-                              duration: Duration(milliseconds: 300))),
-                      selectedMarkerBuilder:
-                          (BuildContext context, Marker marker) {
-                        return MouseRegion(
-                          onEnter: (event) {
-                            _popupController.togglePopup(marker);
-                          },
-                          child: GestureDetector(
-                            onTap: () {
-                              _popupController.togglePopup(marker);
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.pop(context, clickedLatlng);
-          },
-          child: const Icon(Icons.check),
-        ),
-      ),
-    );
-  } */
-}
+} */
 
 class MapLayer extends StatelessWidget {
   final MapLayerOptions options;
@@ -354,27 +635,58 @@ class MapLayerOptions {
 
 class MapState {}
 
-class _PopupMarker {
+class PopupMarker {
   final Marker marker;
   final Widget Function(BuildContext, Marker) popupBuilder;
   final LatLng clickedLatlng;
 
-  _PopupMarker(this.clickedLatlng,
+  PopupMarker(this.clickedLatlng,
       {required this.marker, required this.popupBuilder});
 }
 
 class ExamplePopup extends StatelessWidget {
   final Marker marker;
   final LatLng clickedLatlng;
+  final Event event;
 
-  const ExamplePopup(this.marker, this.clickedLatlng, {super.key});
+  const ExamplePopup(this.marker, this.clickedLatlng,
+      {required this.event, Key? key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Text('Popup content for marker at ${marker.point}'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Evento: ${event.eventName}'),
+            Text('Fecha: ${event.date}'),
+            Text('Descripción: ${event.description}'),
+            const SizedBox(height: 8.0),
+            InkWell(
+              onTap: () {
+                // Navegar a EventoDetailScreen() cuando se presiona el enlace
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EventoDetailScreen(event: event),
+                  ),
+                );
+              },
+              child: Text(
+                'Detalles del Evento',
+                style: TextStyle(
+                  color: Theme.of(context)
+                      .primaryColor, // Usa el color primario del tema
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

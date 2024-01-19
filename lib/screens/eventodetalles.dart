@@ -199,20 +199,20 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
   }
 
   bool isCommentByCurrentUser(String commentUserId) {
-  return commentUserId == passedIdUser;
-}
-
-Future<void> deleteComment(String commentId) async {
-  var url = Uri.parse('$uri/comments/$commentId');
-  var response = await http.delete(url, headers: {'x-access-token': token});
-
-  if (response.statusCode == 200) {
-    print('Comentario eliminado con éxito');
-    _loadComments();
-  } else {
-    print('Error al eliminar comentario: ${response.statusCode}');
+    return commentUserId == passedIdUser;
   }
-}
+
+  Future<void> deleteComment(String commentId) async {
+    var url = Uri.parse('$uri/comments/$commentId');
+    var response = await http.delete(url, headers: {'x-access-token': token});
+
+    if (response.statusCode == 200) {
+      print('Comentario eliminado con éxito');
+      _loadComments();
+    } else {
+      print('Error al eliminar comentario: ${response.statusCode}');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -271,10 +271,9 @@ Future<void> deleteComment(String commentId) async {
                               width: 80,
                               height: 80,
                             )
-                          : Icon(
+                          : const Icon(
                               Icons.image,
-                              width: 80,
-                              height: 80,
+                              size: 80,
                               color: Colors.black,
                             ),
                     ),
@@ -282,7 +281,7 @@ Future<void> deleteComment(String commentId) async {
                 ),
               ],
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Center(
               child: ElevatedButton(
                 onPressed: () {

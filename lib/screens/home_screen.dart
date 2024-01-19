@@ -9,6 +9,9 @@ import 'package:applogin/screens/profile.dart';
 import 'package:applogin/models/user.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:applogin/reusable_/event_provider.dart';
+import 'package:applogin/models/event.dart';
 
 import 'mapa.dart';
 
@@ -25,6 +28,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  late List<Event> events;
 
   final List<Widget> _pages = [
     BuscadorUnEventoScreen(),
@@ -41,6 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    events = Provider.of<EventProvider>(context).events;
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -68,7 +73,6 @@ class _HomeScreenState extends State<HomeScreen> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
       ),
-      
       floatingActionButton: Container(
         margin: EdgeInsets.only(top: 20.0),
         child: FloatingActionButton(
@@ -90,5 +94,16 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _selectedIndex = 3;
+    checkAndLoadEvents(context);
+  }
+
+  void checkAndLoadEvents(BuildContext context) {
+    final eventProvider = Provider.of<EventProvider>(context, listen: false);
+
+    eventProvider.initialized.then((bool isInitialized) {
+      if (!isInitialized) {
+        eventProvider.getEvents();
+      } else {}
+    });
   }
 }

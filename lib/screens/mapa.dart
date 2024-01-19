@@ -55,7 +55,7 @@ class _MapScreen extends State<MapScreen> {
     // _markers = [];
     events = [];
     _searchController = TextEditingController();
-    // _floatingSearchBarController = FloatingSearchBarController();
+
     _searchResults = [];
     //buscadorScreen.createState().initState();
   }
@@ -88,7 +88,7 @@ class _MapScreen extends State<MapScreen> {
           'Coordenadas del primer evento: ${eventsWithCoordinates.first.coordinates[0]}, ${eventsWithCoordinates.first.coordinates[1]}');
 
       // Inicializa _markers solo una vez
-      if (_markers.isEmpty) {
+      if (_markers.isEmpty && events != null && events!.isNotEmpty) {
         _markers = await _generateMarkers(eventsWithCoordinates);
       }
     } else {
@@ -206,7 +206,7 @@ class _MapScreen extends State<MapScreen> {
   Widget buildMap(List<Marker> mapMarkers) {
     return Consumer<EventProvider>(
       builder: (context, eventProvider, _) {
-        events = eventProvider.events;
+        //events = eventProvider.events;
         return SizedBox(
           width: double.infinity,
           height: double.infinity,
@@ -245,7 +245,7 @@ class _MapScreen extends State<MapScreen> {
                         },
                         snap: PopupSnap.markerCenter,
                         animation: const PopupAnimation.fade(
-                          duration: Duration(milliseconds: 200),
+                          duration: Duration(milliseconds: 300),
                         ),
                       ),
                       selectedMarkerBuilder:

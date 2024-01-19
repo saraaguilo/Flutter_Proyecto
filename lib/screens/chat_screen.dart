@@ -1,12 +1,14 @@
+import 'dart:convert';
+
 import 'package:applogin/controller/chat_controller.dart';
 import 'package:applogin/model/message.dart';
-import 'package:applogin/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:applogin/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class ChatScreen extends StatefulWidget {
   final String chatName;
@@ -18,35 +20,41 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  late IO.Socket socket;
+  late String miUsuario;
   Color black = Color(0xFF191919);
   Color orange = Color(0xFFFF7B00);
   TextEditingController msgInputController = TextEditingController();
-  late IO.Socket socket;
+  final TextEditingController _textController = TextEditingController();
+  final TextEditingController _idController = TextEditingController();
   ChatController chatController = ChatController();
-  late String miUsuario; // Variable para almacenar el nombre de usuario
-  late String username;
-  late String miUsuario2;
+  late String token = '';
+  late String passedIdUser = '';
+  String chatName = '';
+  bool isLoading = true;
+  List<Message> messages = [];
+  late Message message;
+
+
+
+
 
   @override
   void initState() {
+    
+    initializeSocket();
     super.initState();
-    setUpSocket();
+    //print('El tipo del chat name es:' Type.chatName);
+    chatName = widget.chatName;
+    _loadMessages();
+    loadData();
+    
+    //loadOldMessages(chatName);
   }
 
-  Future<void> setUpSocket() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      miUsuario = prefs.getString('userName') ?? "Usuario Desconocido";
-      print('Nombre de usuario almacenado: $miUsuario');
 
-      // Envía el nombre de usuario al servidor cuando se establece la conexión
-      var usernameData = {
-        "username": miUsuario,
-      };
-      socket.emit('username', usernameData);
-    } catch (error) {
-      print('Error al obtener el nombre de usuario desde SharedPreferences: $error');
-    }
+  Future<void> initializeSocket() async {
+    
 
     socket = IO.io(
       '$uri',
@@ -56,11 +64,89 @@ class _ChatScreenState extends State<ChatScreen> {
           .build(),
     );
 
-    socket.connect();
+    await socket.connect();
     socket.emit('join-room', widget.chatName);
 
     setUpSocketListener();
+try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+  
+      miUsuario = prefs.getString('userName') ?? "Usuario Desconocido";
+      print('Nombre de usuario almacenado: $miUsuario');
+
+      // Envía el nombre de usuario al servidor cuando se establece la conexión
+      var usernameData = {
+        "username": miUsuario,
+      };
+      socket.emit('username', usernameData);
+      
+    } catch (error) {
+      print('Error al obtener el nombre de usuario desde SharedPreferences: $error');
+    }
+
   }
+
+  void loadData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      token = prefs.getString('token') ?? '';
+      passedIdUser = prefs.getString('idUser') ?? '';
+    });
+  }
+
+  Future<void> _loadMessages() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    var encodedChatName = Uri.encodeComponent(chatName.replaceAll(' ', '-'));
+    var messageUrl = Uri.parse('$uri/messages/${widget.chatName}');
+    var messageResponse = await http.get(messageUrl);
+    List<Message> loadedMessages = [];
+    if (messageResponse.statusCode == 200) {
+      var messageData = json.decode(messageResponse.body);
+      List<String> messageIds =
+          List<String>.from(messageData['idMessages'] ?? []);
+
+    }
+
+    setState(() {
+      messages = loadedMessages;
+      isLoading = false;
+    });
+  }
+
+  Future<void> saveMessage(Map<String, dynamic> messageJson) async {
+  try {
+    var response = await http.post(
+      Uri.parse('$uri/messages'),
+      headers: {'Content-Type': 'application/json', 'x-access-token': token},
+      body: json.encode({
+        'text': messageJson['message'],
+        //'id': messageJson['sentByMe'],
+        'idUser': passedIdUser,
+        'room': widget.chatName,
+        // Asegúrate de incluir otros campos necesarios en tu base de datos
+        // También, podrías enviar el room y el username si son necesarios
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      print('Mensaje guardado correctamente');
+    } else {
+      print('Error al guardar el mensaje. Código de estado: ${response.statusCode}');
+    }
+  } catch (error) {
+    print('Error al guardar el mensaje: $error');
+  }
+}
+
+
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -111,6 +197,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       message: currentItem.message,
                       sentByUserName: miUsuario,
                       username: miUsuario,
+                      room: chatName,
                     );
                   },
                 ),
@@ -159,19 +246,16 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void sendMessage(String text) {
-    // Mantén el nombre de usuario actualizado al enviar un mensaje
     var messageJson = {
-      "message": text,
-      "sentByMe": socket.id,
-      "room": widget.chatName,
-      "username": miUsuario,
-    };
-    // Envía el mensaje al servidor
-    socket.emit('message', messageJson);
-    var username = messageJson['username'];
-  print('El valor de username es: $username');
-  }
+    "message": text,
+    "sentByMe": socket.id,
+    "room": widget.chatName,
+    "username": miUsuario,
+  };
 
+  socket.emit('message', messageJson);
+  saveMessage(messageJson); 
+  }
 
   void setUpSocketListener() {
     socket.on('message-receive', (msg) {
@@ -186,7 +270,7 @@ class _ChatScreenState extends State<ChatScreen> {
       chatController.updateConnectedUser(count, socket.id!);
     });
 
-    socket.on('username-receive', (data){
+    socket.on('username-receive', (data) {
       var receivedUsername = data['username'];
       print('Nombre de usuario recibido: $receivedUsername');
     });
@@ -203,13 +287,15 @@ class MessageItem extends StatelessWidget {
     required this.sentByMe,
     required this.message,
     required this.sentByUserName,
-    required this.username,
+    required this.username, 
+    required this.room,
   }) : super(key: key);
 
   final bool sentByMe;
   final String message;
   final String sentByUserName;
   final String username;
+  final String room;
 
   Map<String, dynamic> toJson() {
     return {
@@ -217,6 +303,7 @@ class MessageItem extends StatelessWidget {
       'sentByMe': sentByMe,
       'username': username,
       'sentByUserName': sentByUserName,
+      'room': room,
     };
   }
 
@@ -240,12 +327,12 @@ class MessageItem extends StatelessWidget {
           textBaseline: TextBaseline.alphabetic,
           children: [
             Text(
-              sentByMe ? "Me: $message" : "$username: $message",
-              style: TextStyle(
-                color: sentByMe ? white : orange,
-                fontSize: 18,
-              ),
-            ),
+  sentByMe ? "Me: $message" : "$sentByUserName: $message",
+  style: TextStyle(
+    color: sentByMe ? white : orange,
+    fontSize: 18,
+  ),
+),
             SizedBox(width: 20),
             Text(
               "${DateFormat('h:mm a').format(DateTime.now())}",

@@ -9,6 +9,11 @@ import 'package:applogin/screens/profile.dart';
 import 'package:applogin/models/user.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:applogin/models/event.dart';
+import 'package:applogin/screens/profile.dart';
+import 'package:applogin/models/user.dart';
+import 'package:provider/provider.dart';
+import 'package:applogin/reusable_/event_provider.dart';
 
 import 'mapa.dart';
 
@@ -25,13 +30,15 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  late List<Event> events;
+  late List<Widget> _pages;
 
-  final List<Widget> _pages = [
-    BuscadorUnEventoScreen(),
-    BuscadorScreen(),
-    ProfileScreen(),
-    MapScreen(),
-  ];
+  /* final List<Widget> _pages = [
+      BuscadorUnEventoScreen(),
+      BuscadorScreen(),
+      ProfileScreen(),
+      MapScreen(events: events),
+    ];  */
 
   void _onItemTapped(int index) {
     setState(() {
@@ -41,53 +48,75 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        unselectedItemColor: Color.fromARGB(255, 183, 181, 181),
-        backgroundColor: Color.fromARGB(255, 255, 255, 255),
-        selectedItemColor: Color.fromARGB(255, 255, 123, 0),
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-              icon: Icon(Icons.search),
-              //label: 'Search one event',
-              label: AppLocalizations.of(context)!.search),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.list),
-              //label: 'Events list',
-              label: AppLocalizations.of(context)!.eventsList),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              //label: 'Profile',
-              label: AppLocalizations.of(context)!.profile),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.map),
-              //label: 'Map',
-              label: AppLocalizations.of(context)!.map),
-        ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-      ),
-      floatingActionButton: Container(
-        margin: EdgeInsets.only(top: 20.0),
-        child: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => MapScreen()),
-            );
-          },
-          tooltip: AppLocalizations.of(context)!.showMap,
-          child: Icon(Icons.map),
-          backgroundColor: Colors.orange,
-        ),
-      ),
-    );
+    events = Provider.of<EventProvider>(context).events;
+    // Provider.of<EventProvider>(context, listen: false).getEvents();
+    return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: _pages[_selectedIndex],
+          bottomNavigationBar: BottomNavigationBar(
+            unselectedItemColor: Color.fromARGB(255, 183, 181, 181),
+            backgroundColor: Color.fromARGB(255, 255, 255, 255),
+            selectedItemColor: Color.fromARGB(255, 255, 123, 0),
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.search),
+                  //label: 'Search one event',
+                  label: 'Search'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.list),
+                  //label: 'Events list',
+                  label: 'Events'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.person),
+                  //label: 'Profile',
+                  label: 'Profile'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.map),
+                  //label: 'Map',
+                  label: 'Map'),
+            ],
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+          ),
+          floatingActionButton: Container(
+            margin: EdgeInsets.only(top: 20.0),
+            child: FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MapScreen()),
+                );
+              },
+              tooltip: AppLocalizations.of(context)!.showMap,
+              child: Icon(Icons.map),
+              backgroundColor: Colors.orange,
+            ),
+          ),
+        ));
   }
 
   @override
   void initState() {
     super.initState();
     _selectedIndex = 3;
+    _pages = [
+      BuscadorUnEventoScreen(),
+      BuscadorScreen(),
+      ProfileScreen(),
+      MapScreen(), // Aquí es donde se inicializa con events
+    ];
+
+    checkAndLoadEvents(context);
+  }
+
+  void checkAndLoadEvents(BuildContext context) {
+    final eventProvider = Provider.of<EventProvider>(context, listen: false);
+
+    eventProvider.initialized.then((bool isInitialized) {
+      if (!isInitialized) {
+        eventProvider.getEvents();
+      } else {}
+    });
   }
 }

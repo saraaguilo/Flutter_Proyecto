@@ -57,7 +57,8 @@ class _MyWidgetState extends State<ProfileScreen> {
     'Rap',
     'Trap',
     'Jazz',
-    'Metal'
+    'Metal',
+    'Flamenco'
   ];
 
   void initState() {

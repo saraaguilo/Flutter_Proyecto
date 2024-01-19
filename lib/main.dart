@@ -5,23 +5,27 @@ import 'package:flutter/material.dart';
 import 'package:applogin/screens/profile.dart';
 import 'package:applogin/theme/dark_theme.dart';
 import 'package:applogin/theme/light_theme.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:applogin/models/language.dart';
 import 'package:applogin/models/language_constants.dart';
 import 'package:applogin/controller/profile_controller.dart';
-import 'package:applogin/screens/signin_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:applogin/theme/darkModeProvider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart' as provider;
+import 'package:applogin/reusable_/event_provider.dart';
+
+
 
 void main() async {
   // Inicializa ProfileController utilizando Get.put
   Get.put(ProfileController());
   WidgetsFlutterBinding.ensureInitialized();
 
+// Inicializar geocodificación
+  //await initGeocoding();
   // Espera a que Firebase.initializeApp() se complete
   await Firebase.initializeApp(
     options: const FirebaseOptions(
@@ -33,8 +37,14 @@ void main() async {
         appId: "1:627441200007:web:af58934c506c4a02dd4122"),
   );
 
-  runApp(const MyApp());
+runApp(
+    provider.ChangeNotifierProvider(
+      create: (context) => EventProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
+ 
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -61,9 +71,6 @@ class _MyAppState extends State<MyApp> {
     getLocale().then((locale) => {setLocale(locale)});
     super.didChangeDependencies();
   }
-
-
-  
 
   @override
   Widget build(BuildContext context) {

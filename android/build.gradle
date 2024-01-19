@@ -1,3 +1,6 @@
+group 'com.baseflow.geocoding'
+version '1.0'
+
 buildscript {
     ext.kotlin_version = '1.7.10'
     repositories {

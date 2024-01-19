@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/screens/crearevento.dart';
@@ -9,6 +10,9 @@ import 'package:applogin/models/event.dart';
 import 'package:intl/intl.dart';
 import 'package:applogin/screens/chat_home.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+//import 'mapa.dart';
+import 'package:provider/provider.dart';
+import 'package:applogin/reusable_/event_provider.dart';
 
 class BuscadorScreen extends StatefulWidget {
   const BuscadorScreen({Key? key}) : super(key: key);
@@ -18,30 +22,17 @@ class BuscadorScreen extends StatefulWidget {
 }
 
 class _BuscadorScreenState extends State<BuscadorScreen> {
-  List<Event> events = [];
+  late List<Event> events;
+  late EventProvider _eventProvider;
 
   @override
   void initState() {
     super.initState();
-    getEvents();
-  }
 
-  Future<void> getEvents() async {
-    try {
-      final response = await http.get(Uri.parse('$uri/events'));
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        setState(() {
-          events = data.map((item) => Event.fromJson(item)).toList();
-        });
-      } else {
-        print(
-            'Error al cargar eventos. Código de estado: ${response.statusCode}');
-      }
-    } catch (error) {
-      print('Error de red al cargar eventos: $error');
-    }
+    //getEvents();
+    _eventProvider = Provider.of<EventProvider>(context, listen: false);
+    _eventProvider.getEvents();
+    events = _eventProvider.events;
   }
 
   void navigateToCreateEventScreen() async {
@@ -51,11 +42,13 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
     );
 
     if (result == true) {
-      getEvents();
+      //getEvents();
+      _eventProvider.getEvents();
     }
   }
 
   void navigateToChatPrincipalScreen() async {
+    // ignore: unused_local_variable
     final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => ChatPrincipalScreen()),
@@ -69,7 +62,8 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
     );
 
     if (result == true) {
-      getEvents();
+      //getEvents();
+      _eventProvider.getEvents();
     }
   }
 
@@ -81,7 +75,8 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
     );
 
     if (result == true) {
-      getEvents();
+      //getEvents();
+      _eventProvider.getEvents();
     }
   }
 
@@ -95,7 +90,7 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
       body: Stack(
         children: [
           Container(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: ListView.builder(
               itemCount: events.length,
               itemBuilder: (context, index) {
@@ -145,8 +140,8 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
             right: 20.0,
             child: FloatingActionButton.extended(
               onPressed: navigateToChatPrincipalScreen,
-              label: Text('Join Chat Room'),
-              icon: Icon(Icons.add),
+              label: const Text('Join Chat Room'),
+              icon: const Icon(Icons.add),
               backgroundColor: Colors.orange,
             ),
           ),

@@ -12,7 +12,7 @@ Image logoWidget(String imageName) {
 }
 
 LinearGradient gradientBackground() {
-  return LinearGradient(
+  return const LinearGradient(
     colors: [
       Color.fromARGB(255, 255, 183, 77), // Naranja claro
       Color.fromARGB(255, 255, 155, 6), // Naranja medio
@@ -30,10 +30,10 @@ AlertDialog alert(
     content: Text(content),
     actions: <Widget>[
       TextButton(
-        child: Text(
+        child: const Text(
           'Accept',
           style: TextStyle(
-            color: const Color.fromARGB(
+            color: Color.fromARGB(
                 255, 255, 115, 0), // Cambia el color del texto aquí
           ),
         ),
@@ -41,6 +41,7 @@ AlertDialog alert(
           // Cierra el diálogo
           Navigator.of(context).pop();
           if (destination != null)
+            // ignore: curly_braces_in_flow_control_structures
             Navigator.push(
                 context, MaterialPageRoute(builder: (context) => destination));
         },

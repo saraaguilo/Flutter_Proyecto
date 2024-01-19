@@ -4,6 +4,7 @@ import 'package:applogin/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+// ignore: library_prefixes
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:applogin/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';

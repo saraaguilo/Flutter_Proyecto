@@ -23,13 +23,21 @@ if (flutterVersionName == null) {
 }
 
 android {
+
+if (project.android.hasProperty("namespace")) {
+        namespace("com.baseflow.geocoding")
+    }
+
     namespace "com.example.applogin"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
+    compileSdkVersion 33
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        
     }
 
     kotlinOptions {
@@ -66,3 +74,4 @@ flutter {
 }
 
 dependencies {}
+

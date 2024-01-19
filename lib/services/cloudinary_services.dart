@@ -76,3 +76,25 @@ Future<void> uploadImage(cloudinary, imageAndroidPath, imageBytes, userName,
     print('Error: $e');
   }
 }
+
+Future<String?> uploadImageEvents(Cloudinary cloudinary, Uint8List imageBytes, String token) async {
+  try {
+    if (imageBytes != null) {
+      CloudinaryResponse response = await cloudinary.upload(
+        fileBytes: imageBytes,
+        resourceType: CloudinaryResourceType.image,
+        folder: 'eventPics',
+      );
+
+      if (response.isSuccessful) {
+        print('Imagen subida con éxito: ${response.secureUrl}');
+        return response.secureUrl; // Devuelve la URL de la imagen
+      } else {
+        print('La imagen no se subió correctamente');
+      }
+    }
+  } catch (e) {
+    print('Error al subir la imagen: $e');
+  }
+  return null;
+}

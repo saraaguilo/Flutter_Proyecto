@@ -268,12 +268,13 @@ Future<void> deleteComment(String commentId) async {
                       child: widget.event.photo != null
                           ? Image.network(
                               widget.event.photo!,
-                              width: 100,
-                              height: 100,
+                              width: 80,
+                              height: 80,
                             )
                           : Icon(
                               Icons.image,
-                              size: 100.0,
+                              width: 80,
+                              height: 80,
                               color: Colors.black,
                             ),
                     ),

@@ -199,20 +199,20 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
   }
 
   bool isCommentByCurrentUser(String commentUserId) {
-  return commentUserId == passedIdUser;
-}
-
-Future<void> deleteComment(String commentId) async {
-  var url = Uri.parse('$uri/comments/$commentId');
-  var response = await http.delete(url, headers: {'x-access-token': token});
-
-  if (response.statusCode == 200) {
-    print('Comentario eliminado con éxito');
-    _loadComments();
-  } else {
-    print('Error al eliminar comentario: ${response.statusCode}');
+    return commentUserId == passedIdUser;
   }
-}
+
+  Future<void> deleteComment(String commentId) async {
+    var url = Uri.parse('$uri/comments/$commentId');
+    var response = await http.delete(url, headers: {'x-access-token': token});
+
+    if (response.statusCode == 200) {
+      print('Comentario eliminado con éxito');
+      _loadComments();
+    } else {
+      print('Error al eliminar comentario: ${response.statusCode}');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -226,8 +226,7 @@ Future<void> deleteComment(String commentId) async {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Row(
-              children: [
+            
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -255,33 +254,28 @@ Future<void> deleteComment(String commentId) async {
                 ),
                 SizedBox(width: 200),
                 Align(
-                  alignment: Alignment.centerRight,
+                  alignment: Alignment.centerLeft,
                   child: Container(
                     margin: EdgeInsets.all(16.0),
                     padding: EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10.0),
                       child: widget.event.photo != null
                           ? Image.network(
                               widget.event.photo!,
-                              width: 80,
-                              height: 80,
+                              width: 300,
+                              height: 200,
+                              fit: BoxFit.cover
                             )
                           : Icon(
                               Icons.image,
-                              width: 80,
-                              height: 80,
+                              size: 100,
                               color: Colors.black,
                             ),
                     ),
                   ),
                 ),
-              ],
-            ),
+             
             SizedBox(height: 20),
             Center(
               child: ElevatedButton(

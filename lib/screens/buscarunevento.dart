@@ -35,8 +35,8 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
                 // ignore: deprecated_member_use
                 primary: Colors.orange,
               ),
-              child: const Text(
-                'Search',
+              child: Text(
+                AppLocalizations.of(context)!.search,
                 style: TextStyle(
                   color: Colors.black,
                 ),

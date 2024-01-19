@@ -27,8 +27,10 @@ class CrearEventoScreen extends StatefulWidget {
 class _CrearEventoScreenState extends State<CrearEventoScreen> {
   LatLng? selectedLocation;
   final TextEditingController _eventNameController = TextEditingController();
-  final TextEditingController _eventDescriptionController = TextEditingController();
-  final TextEditingController _eventLocationController = TextEditingController();
+  final TextEditingController _eventDescriptionController =
+      TextEditingController();
+  final TextEditingController _eventLocationController =
+      TextEditingController();
   String _selectedCategory = 'Pop';
   DateTime _selectedDate = DateTime.now();
   String token = '';
@@ -128,7 +130,7 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
             '${selectedLocation?.latitude.toString()},${selectedLocation?.longitude.toString()}')
         .map((s) => s.trim())
         .toList();*/
-  try {
+    try {
       String? imageUrl;
 
       if (_imageBytes != null) {
@@ -136,39 +138,45 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
       } else {
         ByteData data = await rootBundle.load('images/default.png');
         List<int> defaultImageBytes = data.buffer.asUint8List();
-        imageUrl = await uploadImageEvents(cloudinary!, Uint8List.fromList(defaultImageBytes), token);
+        imageUrl = await uploadImageEvents(
+            cloudinary!, Uint8List.fromList(defaultImageBytes), token);
       }
 
-      List<String> coordinatesArray =
-          _eventLocationController.text.split(',').map((s) => s.trim()).toList();
+      List<String> coordinatesArray = _eventLocationController.text
+          .split(',')
+          .map((s) => s.trim())
+          .toList();
 
-    if (imageUrl != null) {
-      var eventResponse = await http.post(
-        Uri.parse('$uri/events'),
-        headers: {'Content-Type': 'application/json', 'x-access-token': token},
-        body: json.encode({
-          'eventName': _eventNameController.text,
-          'description': _eventDescriptionController.text,
-          'coordinates': coordinatesArray,
-          'date': _selectedDate.toIso8601String(),
-          'idUser': idUser,
-          'photo': imageUrl, // Agrega la URL de la imagen aquí
-        }),
-      );
+      if (imageUrl != null) {
+        var eventResponse = await http.post(
+          Uri.parse('$uri/events'),
+          headers: {
+            'Content-Type': 'application/json',
+            'x-access-token': token
+          },
+          body: json.encode({
+            'eventName': _eventNameController.text,
+            'description': _eventDescriptionController.text,
+            'coordinates': coordinatesArray,
+            'date': _selectedDate.toIso8601String(),
+            'idUser': idUser,
+            'photo': imageUrl, // Agrega la URL de la imagen aquí
+          }),
+        );
 
-      if (eventResponse.statusCode == 201) {
-        print('Evento guardado correctamente');
-        Navigator.pop(context, true);
+        if (eventResponse.statusCode == 201) {
+          print('Evento guardado correctamente');
+          Navigator.pop(context, true);
+        } else {
+          print('Error al guardar evento: ${eventResponse.statusCode}');
+        }
       } else {
-        print('Error al guardar evento: ${eventResponse.statusCode}');
+        print('Error al obtener la URL de la imagen');
       }
-    } else {
-      print('Error al obtener la URL de la imagen');
+    } catch (e) {
+      print('Error al subir imagen o guardar evento: $e');
     }
-  } catch (e) {
-    print('Error al subir imagen o guardar evento: $e');
   }
-}
 
   Future<LatLng?> goToMapScreen() async {
     LatLng? selectedLocation = await Navigator.push(
@@ -217,6 +225,7 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
               decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.musicalCategory),
             ),
+            SizedBox(height: 10),
             GestureDetector(
               onTap: () async {
                 final DateTime? picked = await showDatePicker(
@@ -237,9 +246,11 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
                   Icon(Icons.calendar_today),
                   SizedBox(width: 10),
                   Text('${_selectedDate.toLocal()}'.split(' ')[0]),
+                  SizedBox(height: 20),
                 ],
               ),
             ),
+            SizedBox(height: 10),
             GestureDetector(
               onTap: () async {
                 var selectedLocation = await goToMapScreen();
@@ -262,6 +273,7 @@ class _CrearEventoScreenState extends State<CrearEventoScreen> {
                 ],
               ),
             ),
+            SizedBox(height: 20),
             eventImageWidget(),
             SizedBox(height: 20),
             Container(

@@ -45,9 +45,9 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
     _eventNameController = TextEditingController(text: widget.event.eventName);
     _eventDescriptionController =
         TextEditingController(text: widget.event.description);
-    _eventLocationController = TextEditingController(
-        text: widget.event.coordinates.join(
-            '${selectedLocation?.latitude.toString()},${selectedLocation?.longitude.toString()} '));
+   _eventLocationController = TextEditingController(
+      text: widget.event.coordinates.join(', ') ?? '',
+    );
     _selectedCategory = 'Pop';
     _selectedDate = widget.event.date;
   }
@@ -61,29 +61,29 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
   }
 
   Future<void> updateEvent() async {
-    List<String> coordinatesArray =
-        _eventLocationController.text.split(',').map((s) => s.trim()).toList();
+    List<String> coordinatesArray = _eventLocationController.text.split(',').map((s) => s.trim()).toList();
 
-    var response = await http.put(
-      Uri.parse('$uri/events/${widget.event.id}'),
-      headers: {'Content-Type': 'application/json', 'x-access-token': token},
-      body: json.encode({
-        'eventName': _eventNameController.text,
-        'description': _eventDescriptionController.text,
-        'coordinates': coordinatesArray,
-        'date': _selectedDate.toIso8601String(),
-        // Aquí puedes añadir otros campos que quieras actualizar
-      }),
-    );
+      var response = await http.put(
+        Uri.parse('$uri/events/${widget.event.id}'),
+        headers: {'Content-Type': 'application/json', 'x-access-token': token},
+        body: json.encode({
+          'eventName': _eventNameController.text,
+          'description': _eventDescriptionController.text,
+          'coordinates': coordinatesArray,
+          'date': _selectedDate.toIso8601String(),
+          // Aquí puedes añadir otros campos que quieras actualizar
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      print('Evento actualizado correctamente');
-      Navigator.pop(context,
-          true); // Retorno a la pantalla anterior con indicador de actualización
-    } else {
-      print(
-          'Error al actualizar el evento. Código de estado: ${response.statusCode}');
-    }
+      if (response.statusCode == 200) {
+        print('Evento actualizado correctamente');
+        Navigator.pop(context,
+            true); // Retorno a la pantalla anterior con indicador de actualización
+      } else {
+        print(
+            'Error al actualizar el evento. Código de estado: ${response.statusCode}');
+      }
+
   }
 
   Future<LatLng?> goToMapScreen() async {

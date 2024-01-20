@@ -34,10 +34,7 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
-              onPressed: () async {
-                // Utiliza el método de búsqueda del _eventProvider
-                await eventProvider.searchEventByName(searchText);
-              },
+              onPressed: searchEvent,
               style: ElevatedButton.styleFrom(
                 // ignore: deprecated_member_use
                 primary: Colors.orange,

@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:cloudinary/cloudinary.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Future<void> uploadImage(cloudinary, imageAndroidPath, imageBytes, userName,
+Future<void> uploadImage(cloudinary, imageBytes, userName,
     email, password, idUser, token) async {
   try {
     CloudinaryResponse response;
@@ -39,7 +39,20 @@ Future<void> uploadImage(cloudinary, imageAndroidPath, imageBytes, userName,
       } else {
         print('Not uploaded correctly');
       }
-    } else if (imageAndroidPath != null && !kIsWeb) {
+    } else {
+      print('there is an error');
+    }
+  } catch (e) {
+    print('Error: $e');
+  }
+}
+
+Future<void> uploadImageAndroid(cloudinary, imageAndroidPath, userName,
+    email, password, idUser, token) async {
+  try {
+    CloudinaryResponse response;
+
+    if (imageAndroidPath != null && !kIsWeb) {
       response = await cloudinary!.upload(
         file: imageAndroidPath,
         resourceType: CloudinaryResourceType.image,

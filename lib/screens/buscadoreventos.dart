@@ -104,7 +104,7 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
                   );
                 },
                 child: ListTile(
-                  title: Text('Event Name: ${events[index].eventName}'),
+                  title: Text('${events[index].eventName}'),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -112,7 +112,7 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
                       Text(
                         'Date: ${DateFormat('yyyy-MM-dd').format(events[index].date)}',
                       ),
-                      Text('Description: ${events[index].description}'),
+                      Text('${events[index].description}'),
                     ],
                   ),
                   // Show the image from the network

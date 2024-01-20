@@ -550,7 +550,7 @@ class _MyWidgetState extends State<ProfileScreen> {
           _imageBytes = bytes;
           _image = img;
         });
-        uploadImage(cloudinary, _imageAndroid!.path, _imageBytes, userName,
+        uploadImage(cloudinary, _imageBytes, userName,
             email, password, idUser, token);
       }
     } else {
@@ -562,7 +562,7 @@ class _MyWidgetState extends State<ProfileScreen> {
           _imageAndroid = pickedFile;
         });
         //controlar si no ha triat foto
-        uploadImage(cloudinary, _imageAndroid!.path, _imageBytes, userName,
+        uploadImageAndroid(cloudinary, _imageAndroid!.path, userName,
             email, password, idUser, token);
       }
     }

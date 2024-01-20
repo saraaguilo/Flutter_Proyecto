@@ -226,62 +226,50 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Row(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${widget.event.eventName}',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      '${AppLocalizations.of(context)!.description}: ${widget.event.description}',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      '${AppLocalizations.of(context)!.date}: ${DateFormat('yyyy-MM-dd').format(widget.event.date)}',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      '${AppLocalizations.of(context)!.location}: ${widget.event.coordinates}',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ],
+                Text(
+                  '${widget.event.eventName}',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                 ),
-                SizedBox(width: 200),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Container(
-                    margin: EdgeInsets.all(16.0),
-                    padding: EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10.0),
-                      child: widget.event.photo != null
-                          ? Image.network(
-                              widget.event.photo!,
-                              width: 80,
-                              height: 80,
-                            )
-                          : const Icon(
-                              Icons.image,
-                              size: 80,
-                              color: Colors.black,
-                            ),
-                    ),
-                  ),
+                SizedBox(height: 10),
+                Text(
+                  '${AppLocalizations.of(context)!.description}: ${widget.event.description}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  '${AppLocalizations.of(context)!.date}: ${DateFormat('yyyy-MM-dd').format(widget.event.date)}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  '${AppLocalizations.of(context)!.location}: ${widget.event.coordinates}',
+                  style: TextStyle(fontSize: 16),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            SizedBox(width: 200),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                margin: EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(8.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10.0),
+                  child: widget.event.photo != null
+                      ? Image.network(widget.event.photo!,
+                          width: 300, height: 200, fit: BoxFit.cover)
+                      : const Icon(
+                          Icons.image,
+                          size: 100,
+                          color: Colors.black,
+                        ),
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
             Center(
               child: ElevatedButton(
                 onPressed: () {
@@ -299,7 +287,7 @@ class _EventoDetailScreenState extends State<EventoDetailScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             TextField(
               controller: commentController,
               decoration: InputDecoration(

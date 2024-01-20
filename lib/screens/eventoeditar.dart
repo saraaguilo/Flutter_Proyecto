@@ -48,8 +48,7 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
     _eventLocationController = TextEditingController(
         text: widget.event.coordinates.join(
             '${selectedLocation?.latitude.toString()},${selectedLocation?.longitude.toString()} '));
-    _selectedCategory =
-        'Pop'; 
+    _selectedCategory = 'Pop';
     _selectedDate = widget.event.date;
   }
 
@@ -90,7 +89,7 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
   Future<LatLng?> goToMapScreen() async {
     LatLng? selectedLocation = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => MapScreen()),
+      MaterialPageRoute(builder: (context) => MapScreen(creatingEvent: true)),
     );
 
     return selectedLocation;
@@ -110,11 +109,13 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
           children: <Widget>[
             TextField(
               controller: _eventNameController,
-              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.name),
+              decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.name),
             ),
             TextField(
               controller: _eventDescriptionController,
-              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.description),
+              decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.description),
             ),
             DropdownButtonFormField<String>(
               value: _selectedCategory,
@@ -129,7 +130,8 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
                   child: Text(value),
                 );
               }).toList(),
-              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.category),
+              decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.category),
             ),
             GestureDetector(
               onTap: () async {
@@ -160,13 +162,15 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
                 if (selectedLocation != null) {
                   setState(() {
                     _eventLocationController.text =
-                        '${selectedLocation.latitude}, ${selectedLocation.longitude}';
-                    print(
-                        '${selectedLocation.latitude}, ${selectedLocation.longitude}');
+                        '${selectedLocation!.latitude}, ${selectedLocation!.longitude}';
+                    selectedLocation = LatLng(selectedLocation!.latitude,
+                        selectedLocation!.longitude);
+                    this.selectedLocation =
+                        selectedLocation; // Guarda las coordenadas seleccionadas
                   });
                 }
               },
-              child: Row(
+              child: const Row(
                 children: <Widget>[
                   Icon(Icons.map),
                   SizedBox(width: 10),
@@ -174,7 +178,7 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               child: Text(AppLocalizations.of(context)!.saveChanges),
               onPressed: updateEvent,

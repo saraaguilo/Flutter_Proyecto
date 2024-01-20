@@ -7,7 +7,6 @@ import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/screens/signup_screen.dart';
 import 'package:applogin/screens/profile.dart';
 import 'package:applogin/models/user.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:applogin/reusable_/event_provider.dart';
@@ -34,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
     BuscadorUnEventoScreen(),
     BuscadorScreen(),
     ProfileScreen(),
-    MapScreen(),
+    MapScreen(creatingEvent: false),
   ];
 
   void _onItemTapped(int index) {
@@ -73,28 +72,14 @@ class _HomeScreenState extends State<HomeScreen> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
       ),
-      floatingActionButton: Container(
-        margin: EdgeInsets.only(top: 20.0),
-        child: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => MapScreen()),
-            );
-          },
-          tooltip: AppLocalizations.of(context)!.showMap,
-          child: Icon(Icons.map),
-          backgroundColor: Colors.orange,
-        ),
-      ),
     );
   }
 
   @override
   void initState() {
     super.initState();
-    _selectedIndex = 3;
     checkAndLoadEvents(context);
+    _selectedIndex = 3;
   }
 
   void checkAndLoadEvents(BuildContext context) {

@@ -19,15 +19,13 @@ const String MAPBOX_ACCESS_TOKEN =
     'pk.eyJ1IjoiYm9yamEyMDIzIiwiYSI6ImNscHd5Mmh0aDBoOXoya28yODB3dXNkNXUifQ.TLNdg-RLv0nuy5N9ihcoeg';
 
 void main() {
-  //List<Event>? events;
-  //navigateToCreateListEvents(events);
-  runApp(const MapScreen());
+  runApp(const MapScreen(creatingEvent: false));
 }
 
 class MapScreen extends StatefulWidget {
-  // ignore: use_key_in_widget_constructors
-  const MapScreen({Key? key});
+  final bool creatingEvent;
 
+  const MapScreen({Key? key, required this.creatingEvent}) : super(key: key);
   @override
   // ignore: library_private_types_in_public_api
   _MapScreen createState() => _MapScreen();
@@ -51,8 +49,7 @@ class _MapScreen extends State<MapScreen> {
     super.initState();
     clickedLatlng = const LatLng(51.509364, -0.128928);
     print('Me inicializo correctamente');
-    //initMarkers();
-    // _markers = [];
+
     events = [];
     _searchController = TextEditingController();
 
@@ -103,10 +100,11 @@ class _MapScreen extends State<MapScreen> {
 
   Future<void> handleMapTap(TapPosition position, LatLng selectedLatLng) async {
     try {
-      print('HandleMapTap, allá voy');
+      print('HandleMapTap, allá voy, ${context}, ${selectedLatLng}');
+      print('${widget.creatingEvent}');
 
       // Verificar si se está creando un evento nuevo antes de cerrar el mapa
-      if (Navigator.canPop(context)) {
+      if (Navigator.canPop(context) && widget.creatingEvent) {
         // Pasa las coordenadas seleccionadas de regreso a la pantalla de creación de eventos
         Navigator.pop(context, selectedLatLng);
 
@@ -206,7 +204,6 @@ class _MapScreen extends State<MapScreen> {
   Widget buildMap(List<Marker> mapMarkers) {
     return Consumer<EventProvider>(
       builder: (context, eventProvider, _) {
-        //events = eventProvider.events;
         return SizedBox(
           width: double.infinity,
           height: double.infinity,
@@ -322,7 +319,7 @@ class ExamplePopup extends StatelessWidget {
             Text('Evento: ${event.eventName}'),
             Text('Fecha: ${event.date}'),
             Text('Descripción: ${event.description}'),
-            const SizedBox(height: 8.0),
+            const SizedBox(height: 6.0),
             InkWell(
               onTap: () {
                 // Navegar a EventoDetailScreen() cuando se presiona el enlace

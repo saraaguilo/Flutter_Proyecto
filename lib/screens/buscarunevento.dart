@@ -6,6 +6,8 @@ import 'package:applogin/config.dart';
 import 'package:applogin/models/event.dart';
 import 'package:applogin/screens/eventodetalles.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:applogin/reusable_/event_provider.dart';
 
 class BuscadorUnEventoScreen extends StatefulWidget {
   // ignore: use_key_in_widget_constructors
@@ -22,6 +24,8 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final EventProvider eventProvider =
+        Provider.of<EventProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.search),
@@ -30,14 +34,17 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
-              onPressed: searchEvent,
+              onPressed: () async {
+                // Utiliza el método de búsqueda del _eventProvider
+                await eventProvider.searchEventByName(searchText);
+              },
               style: ElevatedButton.styleFrom(
                 // ignore: deprecated_member_use
                 primary: Colors.orange,
               ),
-              child: const Text(
-                'Search',
-                style: TextStyle(
+              child: Text(
+                AppLocalizations.of(context)!.search,
+                style: const TextStyle(
                   color: Colors.black,
                 ),
               ),
@@ -91,7 +98,7 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
                   searchController.text = (suggestion as Event).eventName;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               if (foundEvent != null)
                 InkWell(
                   onTap: () {
@@ -103,7 +110,7 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
                     );
                   },
                   child: Card(
-                    margin: EdgeInsets.symmetric(vertical: 8.0),
+                    margin: const EdgeInsets.symmetric(vertical: 8.0),
                     color: Colors.grey[200],
                     child: ListTile(
                       title: Text(

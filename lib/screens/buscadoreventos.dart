@@ -29,7 +29,6 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
   void initState() {
     super.initState();
 
-    //getEvents();
     _eventProvider = Provider.of<EventProvider>(context, listen: false);
     _eventProvider.getEvents();
     events = _eventProvider.events;
@@ -90,46 +89,47 @@ class _BuscadorScreenState extends State<BuscadorScreen> {
       body: Container(
         padding: EdgeInsets.all(16.0),
         child: ListView.builder(
-        itemCount: events.length,
-        itemBuilder: (context, index) {
-          return Card(
-            color: Colors.grey[200],
-            child: InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EventoDetailScreen(event: events[index]),
-                  ),
-                );
-              },
-              child: ListTile(
-                title: Text('Event Name: ${events[index].eventName}'),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Coordinates: ${events[index].coordinates}'),
-                    Text(
-                      'Date: ${DateFormat('yyyy-MM-dd').format(events[index].date)}',
+          itemCount: events.length,
+          itemBuilder: (context, index) {
+            return Card(
+              color: Colors.grey[200],
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          EventoDetailScreen(event: events[index]),
                     ),
-                    Text('Description: ${events[index].description}'),
-                  ],
+                  );
+                },
+                child: ListTile(
+                  title: Text('Event Name: ${events[index].eventName}'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Coordinates: ${events[index].coordinates}'),
+                      Text(
+                        'Date: ${DateFormat('yyyy-MM-dd').format(events[index].date)}',
+                      ),
+                      Text('Description: ${events[index].description}'),
+                    ],
+                  ),
+                  // Show the image from the network
+                  trailing: events[index].photo != null
+                      ? Image.network(
+                          events[index].photo!,
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                        )
+                      : Container(),
                 ),
-                // Show the image from the network
-                trailing: events[index].photo != null
-                    ? Image.network(
-                        events[index].photo!,
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                      )
-                    : Container(),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
-    ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 50.0, right: 10.0),
         child: FloatingActionButton.extended(

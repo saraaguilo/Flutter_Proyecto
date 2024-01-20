@@ -5,9 +5,10 @@ import 'package:applogin/screens/buscadoreventos.dart';
 import 'package:applogin/screens/buscarunevento.dart';
 import 'package:applogin/screens/signin_screen.dart';
 import 'package:applogin/screens/signup_screen.dart';
-
 import 'package:applogin/screens/profile.dart';
 import 'package:applogin/models/user.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'mapa.dart';
 
@@ -40,48 +41,46 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: _pages[_selectedIndex],
-        bottomNavigationBar: BottomNavigationBar(
-          unselectedItemColor: Color.fromARGB(255, 183, 181, 181),
-          backgroundColor: Color.fromARGB(255, 255, 255, 255),
-          selectedItemColor: Color.fromARGB(255, 255, 123, 0),
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
+    return Scaffold(
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        unselectedItemColor: Color.fromARGB(255, 183, 181, 181),
+        backgroundColor: Color.fromARGB(255, 255, 255, 255),
+        selectedItemColor: Color.fromARGB(255, 255, 123, 0),
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
               icon: Icon(Icons.search),
-              label: 'Search one event',
-            ),
-            BottomNavigationBarItem(
+              //label: 'Search one event',
+              label: AppLocalizations.of(context)!.search),
+          BottomNavigationBarItem(
               icon: Icon(Icons.list),
-              label: 'Events list',
-            ),
-            BottomNavigationBarItem(
+              //label: 'Events list',
+              label: AppLocalizations.of(context)!.eventsList),
+          BottomNavigationBarItem(
               icon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search),
-              label: 'Map',
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-        ),
-        floatingActionButton: Container(
-          margin: EdgeInsets.only(top: 20.0),
-          child: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => MapScreen()),
-              );
-            },
-            tooltip: 'Show Map',
-            child: Icon(Icons.map),
-            backgroundColor: Colors.orange,
-          ),
+              //label: 'Profile',
+              label: AppLocalizations.of(context)!.profile),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.map),
+              //label: 'Map',
+              label: AppLocalizations.of(context)!.map),
+        ],
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+      ),
+      
+      floatingActionButton: Container(
+        margin: EdgeInsets.only(top: 20.0),
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MapScreen()),
+            );
+          },
+          tooltip: AppLocalizations.of(context)!.showMap,
+          child: Icon(Icons.map),
+          backgroundColor: Colors.orange,
         ),
       ),
     );

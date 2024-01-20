@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:applogin/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ProfileEditScreen extends StatefulWidget {
   const ProfileEditScreen({Key? key}) : super(key: key);
@@ -70,7 +71,7 @@ class _MyWidgetState extends State<ProfileEditScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text("Edit Profile"),
+        title: Text(AppLocalizations.of(context)!.editProfile),
         backgroundColor: Colors.orange,
       ),
       body: Container(
@@ -86,7 +87,7 @@ class _MyWidgetState extends State<ProfileEditScreen> {
                 TextFormField(
                   controller: usernameController,
                   decoration: InputDecoration(
-                    labelText: 'Username',
+                    labelText: AppLocalizations.of(context)!.username,
                     labelStyle: TextStyle(
                       color: Colors.grey,
                     ),
@@ -110,7 +111,7 @@ class _MyWidgetState extends State<ProfileEditScreen> {
                 TextFormField(
                   controller: emailController,
                   decoration: InputDecoration(
-                    labelText: 'Email',
+                    labelText: AppLocalizations.of(context)!.email,
                     labelStyle: TextStyle(
                       color: Colors.grey,
                     ),
@@ -134,7 +135,7 @@ class _MyWidgetState extends State<ProfileEditScreen> {
                 TextFormField(
                   controller: descriptionController,
                   decoration: InputDecoration(
-                    labelText: 'Description',
+                    labelText: AppLocalizations.of(context)!.description,
                     labelStyle: TextStyle(
                       color: Colors.grey,
                     ),
@@ -158,7 +159,7 @@ class _MyWidgetState extends State<ProfileEditScreen> {
                 TextFormField(
                   controller: passwordController,
                   decoration: InputDecoration(
-                    labelText: 'Introduce a new password',
+                    labelText: AppLocalizations.of(context)!.newPass,
                     labelStyle: TextStyle(
                       color: Colors.grey,
                     ),
@@ -183,7 +184,7 @@ class _MyWidgetState extends State<ProfileEditScreen> {
                 TextFormField(
                   controller: passwordController2,
                   decoration: InputDecoration(
-                    labelText: 'Introduce your new password again',
+                    labelText: AppLocalizations.of(context)!.newPassAgain,
                     labelStyle: TextStyle(
                       color: Colors.grey,
                     ),
@@ -222,7 +223,7 @@ class _MyWidgetState extends State<ProfileEditScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      Text('Select your birthdate: ',
+                      Text('${AppLocalizations.of(context)!.birthdateHint}: ',
                           style: TextStyle(color: Colors.black, fontSize: 16)),
                       SizedBox(width: 15),
                       Icon(Icons.calendar_today,
@@ -302,8 +303,8 @@ class _MyWidgetState extends State<ProfileEditScreen> {
                                   builder: (BuildContext context) {
                                     return alert(
                                         context,
-                                        'Error',
-                                        'Try introducing your password again',
+                                        AppLocalizations.of(context)!.error,
+                                        AppLocalizations.of(context)!.errorNewPass,
                                         null);
                                   },
                                 );
@@ -313,7 +314,7 @@ class _MyWidgetState extends State<ProfileEditScreen> {
                               primary: Colors.orange,
                             ),
                             child: Text(
-                              'Save',
+                              AppLocalizations.of(context)!.save,
                               style: TextStyle(
                                 color: Colors.white,
                               ),
@@ -331,7 +332,7 @@ class _MyWidgetState extends State<ProfileEditScreen> {
                             style: ElevatedButton.styleFrom(
                                 primary: Colors.orange),
                             child: Text(
-                              'Cancel',
+                              AppLocalizations.of(context)!.cancel,
                               style: TextStyle(
                                 color: Colors.white,
                               ),

@@ -1,13 +1,17 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:applogin/screens/buscadoreventos.dart'; // Asegúrate de que esta ruta sea correcta
+import 'buscadoreventos.dart'; // Asegúrate de que esta ruta sea correcta
 import 'package:applogin/config.dart';
 import 'package:applogin/models/event.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'mapa.dart';
+import 'package:latlong2/latlong.dart';
 
 class EventoEditScreen extends StatefulWidget {
   final Event event;
+  late MapScreen _mapScreen;
 
   EventoEditScreen({Key? key, required this.event}) : super(key: key);
 
@@ -16,6 +20,8 @@ class EventoEditScreen extends StatefulWidget {
 }
 
 class _EventoEditScreenState extends State<EventoEditScreen> {
+  late List<Event> events = [];
+  LatLng? selectedLocation;
   late TextEditingController _eventNameController;
   late TextEditingController _eventDescriptionController;
   late TextEditingController _eventLocationController;
@@ -28,7 +34,8 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
     'Rap',
     'Trap',
     'Jazz',
-    'Metal'
+    'Metal',
+    'Flamenco'
   ];
 
   @override
@@ -38,10 +45,11 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
     _eventNameController = TextEditingController(text: widget.event.eventName);
     _eventDescriptionController =
         TextEditingController(text: widget.event.description);
-    _eventLocationController =
-        TextEditingController(text: widget.event.coordinates.join(', '));
+    _eventLocationController = TextEditingController(
+        text: widget.event.coordinates.join(
+            '${selectedLocation?.latitude.toString()},${selectedLocation?.longitude.toString()} '));
     _selectedCategory =
-        'Pop'; // Asumir categoría por defecto o añadir lógica para obtenerla
+        'Pop'; 
     _selectedDate = widget.event.date;
   }
 
@@ -79,11 +87,20 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
     }
   }
 
+  Future<LatLng?> goToMapScreen() async {
+    LatLng? selectedLocation = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MapScreen()),
+    );
+
+    return selectedLocation;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Event'),
+        title: Text(AppLocalizations.of(context)!.editEvent),
         backgroundColor: Colors.orange,
       ),
       body: Padding(
@@ -93,11 +110,11 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
           children: <Widget>[
             TextField(
               controller: _eventNameController,
-              decoration: InputDecoration(labelText: 'Name'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.name),
             ),
             TextField(
               controller: _eventDescriptionController,
-              decoration: InputDecoration(labelText: 'Description'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.description),
             ),
             DropdownButtonFormField<String>(
               value: _selectedCategory,
@@ -112,7 +129,7 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
                   child: Text(value),
                 );
               }).toList(),
-              decoration: InputDecoration(labelText: 'Category'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.category),
             ),
             GestureDetector(
               onTap: () async {
@@ -137,13 +154,29 @@ class _EventoEditScreenState extends State<EventoEditScreen> {
                 ],
               ),
             ),
-            TextField(
-              controller: _eventLocationController,
-              decoration: InputDecoration(labelText: 'Location'),
+            GestureDetector(
+              onTap: () async {
+                var selectedLocation = await goToMapScreen();
+                if (selectedLocation != null) {
+                  setState(() {
+                    _eventLocationController.text =
+                        '${selectedLocation.latitude}, ${selectedLocation.longitude}';
+                    print(
+                        '${selectedLocation.latitude}, ${selectedLocation.longitude}');
+                  });
+                }
+              },
+              child: Row(
+                children: <Widget>[
+                  Icon(Icons.map),
+                  SizedBox(width: 10),
+                  Text('Select Location on Map'),
+                ],
+              ),
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              child: Text('Save changes'),
+              child: Text(AppLocalizations.of(context)!.saveChanges),
               onPressed: updateEvent,
               style: ElevatedButton.styleFrom(primary: Colors.orange),
             ),

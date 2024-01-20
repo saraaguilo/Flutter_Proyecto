@@ -5,8 +5,10 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:applogin/config.dart';
 import 'package:applogin/models/event.dart';
 import 'package:applogin/screens/eventodetalles.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BuscadorUnEventoScreen extends StatefulWidget {
+  // ignore: use_key_in_widget_constructors
   const BuscadorUnEventoScreen({Key? key});
 
   @override
@@ -22,7 +24,7 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Event details'),
+        title: Text(AppLocalizations.of(context)!.search),
         backgroundColor: Colors.orange,
         actions: [
           Padding(
@@ -30,9 +32,10 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
             child: ElevatedButton(
               onPressed: searchEvent,
               style: ElevatedButton.styleFrom(
+                // ignore: deprecated_member_use
                 primary: Colors.orange,
               ),
-              child: Text(
+              child: const Text(
                 'Search',
                 style: TextStyle(
                   color: Colors.black,
@@ -44,7 +47,7 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
       ),
       body: SingleChildScrollView(
         child: Container(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
               TypeAheadFormField(
@@ -56,7 +59,7 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
                     });
                   },
                   decoration: InputDecoration(
-                    hintText: 'Enter the event name',
+                    hintText: AppLocalizations.of(context)!.enterNameHint,
                   ),
                 ),
                 suggestionsCallback: (pattern) async {
@@ -65,10 +68,9 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
                     final List<dynamic> data = json.decode(response.body);
                     return data
                         .map((item) => Event.fromJson(item))
-                        .where((event) =>
-                            event.eventName
-                                .toLowerCase()
-                                .contains(pattern.toLowerCase()))
+                        .where((event) => event.eventName
+                            .toLowerCase()
+                            .contains(pattern.toLowerCase()))
                         .toList();
                   } else {
                     throw Exception('Error al cargar eventos');
@@ -104,13 +106,17 @@ class _MyWidgetState extends State<BuscadorUnEventoScreen> {
                     margin: EdgeInsets.symmetric(vertical: 8.0),
                     color: Colors.grey[200],
                     child: ListTile(
-                      title: Text('Event Name: ${foundEvent!.eventName}'),
+                      title: Text(
+                          '${AppLocalizations.of(context)!.eventName}: ${foundEvent!.eventName}'),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Coordinates: ${foundEvent!.coordinates}'),
-                          Text('Date: ${foundEvent!.date}'),
-                          Text('Description: ${foundEvent!.description}'),
+                          Text(
+                              '${AppLocalizations.of(context)!.coordinates}: ${foundEvent!.coordinates}'),
+                          Text(
+                              '${AppLocalizations.of(context)!.date}: ${foundEvent!.date}'),
+                          Text(
+                              '${AppLocalizations.of(context)!.description}: ${foundEvent!.description}'),
                         ],
                       ),
                     ),
